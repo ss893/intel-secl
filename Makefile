@@ -9,7 +9,7 @@ ifeq ($(PROXY_EXISTS),1)
 	DOCKER_PROXY_FLAGS = --build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy}
 endif
 
-TARGETS = cms kbs ihub hvs aas
+TARGETS = cms kbs ihub hvs aas wpm
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct \
@@ -43,7 +43,7 @@ endif
 	swagger generate spec -w ./docs/shared/$* -o ./docs/swagger/$*-openapi.yml
 	swagger validate ./docs/swagger/$*-openapi.yml
 
-installer: $(patsubst %, %-installer, $(TARGETS)) authservice-installer aas-manager
+installer: $(patsubst %, %-installer, $(TARGETS)) authservice-installer aas-manager wpm-docker-installer
 
 docker: $(patsubst %, %-docker, $(TARGETS))
 
@@ -74,6 +74,20 @@ aas-manager:
 	chmod +x deployments/installer/install_pgdb.sh
 	chmod +x deployments/installer/create_db.sh
 
+
+wpm-docker-installer: wpm
+	mkdir -p installer
+	cp build/linux/wpm/* installer/
+	chmod +x installer/install.sh
+	chmod +x installer/build-secure-docker-daemon.sh
+	chmod +x installer/uninstall-secure-docker-daemon.sh
+	installer/build-secure-docker-daemon.sh
+	cp -rf secure-docker-daemon/out installer/docker-daemon
+	rm -rf secure-docker-daemon
+	cp cmd/wpm/wpm installer/wpm
+	makeself installer deployments/installer/wpm-$(VERSION).bin "wpm $(VERSION)" ./install.sh
+	rm -rf installer
+
 test:
 	CGO_LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" CGO_CFLAGS_ALLOW="-f.*" go test ./... -coverprofile cover.out
 	go tool cover -func cover.out
@@ -92,4 +106,4 @@ clean:
 	rm -rf deployments/container-archive/docker/*.tar
 	rm -rf deployments/container-archive/oci/*.tar
 
-.PHONY: installer test all clean kbs-docker aas-manager kbs authservice authservice-installer
+.PHONY: installer test all clean kbs-docker aas-manager kbs authservice authservice-installer wpm-docker-installer
