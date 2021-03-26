@@ -238,7 +238,8 @@ func (r *ReportStore) FindHostIdsFromExpiredReports(fromTime time.Time, toTime t
 
 	var tx *gorm.DB
 	tx = r.Store.Db.Table("host h").Select("h.id")
-	tx = tx.Joins("INNER JOIN report r on h.id = r.host_id")
+	tx = tx.Where("h.id NOT IN (SELECT CAST(params ->> 'host_id' AS uuid) from queue)")
+	tx = tx.Joins("INNER JOIN report r ON h.id = r.host_id")
 	tx = tx.Where("CAST(expiration AS TIMESTAMP) > CAST(? AS TIMESTAMP)", fromTime)
 	tx = tx.Where("CAST(expiration AS TIMESTAMP) <= CAST(? AS TIMESTAMP)", toTime)
 

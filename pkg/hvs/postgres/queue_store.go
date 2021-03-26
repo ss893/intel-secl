@@ -113,7 +113,7 @@ func (qr *QueueStore) Update(q *models.Queue) error {
 		UpdatedAt: time.Now().UTC(),
 	}
 	if q.Params != nil {
-		dbq.Params = PGJsonStrMap(q.Params)
+		dbq.Params = q.Params
 	}
 	if db := qr.store.Db.Model(&dbq).Updates(&dbq); db.Error != nil || db.RowsAffected != 1 {
 		if db.Error != nil {
