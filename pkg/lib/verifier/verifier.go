@@ -5,7 +5,7 @@
 package verifier
 
 //
-// Contains 'public' structures, inerfaces and factory methods available to external
+// Contains 'public' structures, interfaces and factory methods available to external
 // packages.
 //
 

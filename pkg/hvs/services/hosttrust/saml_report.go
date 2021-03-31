@@ -119,7 +119,7 @@ func getHardwareFeaturesMap(features model.HardwareFeatures) map[string]string {
 
 	hwFeaturesMap := make(map[string]string)
 	featurePrefix := "FEATURE_"
-	if features.CBNT != nil && features.CBNT.Enabled {
+	if features.CBNT != nil && features.CBNT.Meta.Profile != "" {
 		hwFeaturesMap[featurePrefix+constants.Cbnt] = strconv.FormatBool(features.CBNT.Enabled)
 		hwFeaturesMap["FEATURE_cbntProfile"] = features.CBNT.Meta.Profile
 	}

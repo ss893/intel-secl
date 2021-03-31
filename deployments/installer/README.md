@@ -1,6 +1,6 @@
 # Installers
 
-All installers of various of components are in this directory
+All installers of various components are in this directory
 
 ## Documents
 

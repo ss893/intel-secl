@@ -296,7 +296,8 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 					})
 				}
 				if !reflect.DeepEqual(hostInfo.HardwareFeatures, taModel.HardwareFeatures{}) {
-					if hostInfo.HardwareFeatures.CBNT != nil {
+					if hostInfo.HardwareFeatures.CBNT != nil &&
+						hostInfo.HardwareFeatures.CBNT.Meta.Profile != "BTGP0" {
 						pfQueryAttrs = append(pfQueryAttrs, models.FlavorMetaKv{
 							Key:   "hardware.feature.CBNT.enabled",
 							Value: hostInfo.HardwareFeatures.CBNT.Enabled,
