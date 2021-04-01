@@ -10,6 +10,7 @@ ifeq ($(PROXY_EXISTS),1)
 endif
 
 TARGETS = cms kbs ihub hvs authservice wpm
+K8S_TARGETS = cms kbs ihub hvs authservice
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct \
@@ -36,7 +37,6 @@ ifeq ($(PROXY_EXISTS),1)
 else
 	docker build -f build/image/Dockerfile-$* -t isecl/$*:$(VERSION) .
 endif
-	docker save isecl/$*:$(VERSION) > deployments/container-archive/docker/docker-$*-$(VERSION)-$(GITCOMMIT).tar
 
 %-swagger:
 	mkdir -p docs/swagger
@@ -45,7 +45,7 @@ endif
 
 installer: $(patsubst %, %-installer, $(TARGETS)) authservice-installer aas-manager wpm-docker-installer
 
-docker: $(patsubst %, %-docker, $(TARGETS))
+docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 
 %-oci-archive: %-docker
 	skopeo copy docker-daemon:isecl/$*:$(VERSION) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
@@ -82,10 +82,15 @@ test:
 	go tool cover -func cover.out
 	go tool cover -html=cover.out -o cover.html
 
-k8s: cms-oci-archive aas-oci-archive ihub-oci-archive kbs-oci-archive aas-manager
-	cp -r build/k8s/* deployments/k8s/
+authservice-k8s: authservice-oci-archive aas-manager
+	cp -r build/k8s/aas deployments/k8s/
 	cp tools/aas-manager/populate-users deployments/k8s/aas/populate-users
 	cp tools/aas-manager/populate-users.env deployments/k8s/aas/populate-users.env
+	 
+k8s: $(patsubst %, %-k8s, $(K8S_TARGETS))
+
+%-k8s:  %-oci-archive
+	cp -r build/k8s/$* deployments/k8s/
 
 all: clean installer test k8s
 
