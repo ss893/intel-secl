@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/ihub"
 
@@ -35,7 +36,7 @@ func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
 	}
 
 	// Containers are always run as non root users, does not require changing ownership of log directories
-	if _, err := os.Stat("/.container-env"); err == nil {
+	if utils.IsContainerEnv() {
 		return logFile, secLogFile, nil
 	}
 

@@ -15,9 +15,9 @@ import (
 	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
 	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-	"os"
 
 	"strings"
 )
@@ -99,7 +99,7 @@ func (a *App) setup(args []string) error {
 		return errors.Wrap(err, "Failed to save configuration")
 	}
 	// Containers are always run as non root users, does not require changing ownership of config directories
-	if _, err := os.Stat("/.container-env"); err == nil {
+	if utils.IsContainerEnv() {
 		return nil
 	}
 	return cos.ChownDirForUser(constants.ServiceUserName, a.configDir())
