@@ -9,11 +9,11 @@ git pull
 
 #Build secure docker daemon
 
-make > /dev/null
+make >/dev/null
 
 if [ $? -ne 0 ]; then
   echo "could not build secure docker daemon"
   exit 1
 fi
- 
-echo "Successfully build secure docker daemon" 
+
+echo "Successfully built secure docker daemon"

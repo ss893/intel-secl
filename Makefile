@@ -43,7 +43,7 @@ endif
 	swagger generate spec -w ./docs/shared/$* -o ./docs/swagger/$*-openapi.yml
 	swagger validate ./docs/swagger/$*-openapi.yml
 
-installer: $(patsubst %, %-installer, $(TARGETS)) authservice-installer aas-manager wpm-docker-installer
+installer: clean $(patsubst %, %-installer, $(TARGETS)) aas-manager
 
 docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 
@@ -58,11 +58,10 @@ kbs-docker: kbs
 aas-manager:
 	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
 	cp tools/aas-manager/populate-users deployments/installer/populate-users.sh
-	cp build/linux/aas/install_pgdb.sh deployments/installer/install_pgdb.sh
-	cp build/linux/aas/create_db.sh deployments/installer/create_db.sh
+	cp build/linux/authservice/install_pgdb.sh deployments/installer/install_pgdb.sh
+	cp build/linux/authservice/create_db.sh deployments/installer/create_db.sh
 	chmod +x deployments/installer/install_pgdb.sh
 	chmod +x deployments/installer/create_db.sh
-
 
 wpm-docker-installer: wpm
 	mkdir -p installer
@@ -100,4 +99,4 @@ clean:
 	rm -rf deployments/container-archive/docker/*.tar
 	rm -rf deployments/container-archive/oci/*.tar
 
-.PHONY: installer test all clean kbs-docker aas-manager kbs authservice authservice-installer wpm-docker-installer
+.PHONY: installer test all clean kbs-docker aas-manager kbs wpm-docker-installer
