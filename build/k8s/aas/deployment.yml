@@ -23,7 +23,7 @@ spec:
       securityContext:
         fsGroup: 1001
       containers:
-        - image: isecl/aas:v3.3.1
+        - image: <image-name>:<image-tag>
           name: aas
           imagePullPolicy: Always
           securityContext:

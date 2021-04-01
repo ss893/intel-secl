@@ -3,7 +3,7 @@
 
 FROM centos:8
 
-COPY cmd/aas/aas /usr/bin/aas
+COPY cmd/authservice/authservice /usr/bin/authservice
 
 COPY build/image/entrypoint-aas.sh /entrypoint.sh
 

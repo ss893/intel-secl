@@ -9,7 +9,7 @@ ifeq ($(PROXY_EXISTS),1)
 	DOCKER_PROXY_FLAGS = --build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy}
 endif
 
-TARGETS = cms kbs ihub hvs aas wpm
+TARGETS = cms kbs ihub hvs authservice wpm
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct \
@@ -54,17 +54,6 @@ kbs-docker: kbs
 	cp /usr/local/lib/libkmip.so.0.2 build/image/
 	docker build . -f build/image/Dockerfile-kbs -t isecl/kbs:$(VERSION)
 	docker save isecl/kbs:$(VERSION) > deployments/container-archive/docker/docker-kbs-$(VERSION)-$(GITCOMMIT).tar
-
-authservice: aas
-	mv cmd/aas/aas cmd/aas/authservice
-
-authservice-installer: authservice
-	mkdir -p installer
-	cp build/linux/aas/* installer/
-	chmod +x installer/install.sh
-	cp cmd/aas/authservice installer/authservice
-	makeself installer deployments/installer/authservice-$(VERSION).bin "authservice $(VERSION)" ./install.sh
-	rm -rf installer
 
 aas-manager:
 	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users

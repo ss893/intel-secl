@@ -18,7 +18,7 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
     chown -R $USER_ID:$USER_ID $directory
     chmod 700 $directory
   done
-  aas setup all --force
+  authservice setup all --force
   if [ $? -ne 0 ]; then
     exit 1
   fi
@@ -26,13 +26,13 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
 fi
 
 if [ ! -z $SETUP_TASK ]; then
-  IFS=',' read -ra ADDR <<< "$SETUP_TASK"
+  IFS=',' read -ra ADDR <<<"$SETUP_TASK"
   for task in "${ADDR[@]}"; do
-    aas setup $task --force
+    authservice setup $task --force
     if [ $? -ne 0 ]; then
       exit 1
     fi
   done
 fi
 
-aas run
+authservice run
