@@ -236,7 +236,7 @@ func (certifyHostAiksController *CertifyHostAiksController) isEkCertificateVerif
 
 	err := cert.CheckSignatureFrom(authority)
 	if err != nil {
-		defaultLog.Errorf("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAuthority() %v", err)
+		defaultLog.Debugf("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAuthority() %v", err)
 		return false
 	}
 

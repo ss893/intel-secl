@@ -21,7 +21,7 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
     chown -R $USER_ID:$USER_ID $directory
     chmod 700 $directory
   done
-  mv /tmp/EndorsementCA-external.pem $ENDORSEMENTS_CA_DIR/
+  mv /tmp/*.pem $ENDORSEMENTS_CA_DIR/
   hvs setup all --force
   if [ $? -ne 0 ]; then
     exit 1

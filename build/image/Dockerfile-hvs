@@ -5,7 +5,7 @@ FROM centos:8
 
 COPY cmd/hvs/hvs /usr/bin/hvs
 
-COPY build/linux/hvs/EndorsementCA-external.pem /tmp/EndorsementCA-external.pem
+COPY build/linux/hvs/*.pem /tmp/
 
 COPY build/image/entrypoint-hvs.sh /entrypoint.sh
 

@@ -76,6 +76,14 @@ wpm-docker-installer: wpm
 	makeself installer deployments/installer/wpm-$(VERSION).bin "wpm $(VERSION)" ./install.sh
 	rm -rf installer
 
+download-eca:
+	rm -rf build/linux/hvs/external-eca.pem
+	mkdir -p certs/
+	wget https://download.microsoft.com/download/D/6/5/D65270B2-EAFD-43FD-B9BA-F65CA00B153E/TrustedTpm.cab -O certs/TrustedTpm.cab
+	cabextract certs/TrustedTpm.cab -d certs
+	find certs/ \( -name '*.der' -or -name '*.crt' -or -name '*.cer' \) | sed 's| |\\ |g' | xargs -L1 openssl x509 -inform DER -outform PEM -in >> build/linux/hvs/external-eca.pem 2> /dev/null || true
+	rm -rf certs
+
 test:
 	CGO_LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" CGO_CFLAGS_ALLOW="-f.*" go test ./... -coverprofile cover.out
 	go tool cover -func cover.out

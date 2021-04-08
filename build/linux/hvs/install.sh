@@ -45,7 +45,7 @@ chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 # Copy Endorsement CA cert
-cp EndorsementCA-external.pem $CERTDIR_ENDORSEMENTCA/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $CERTDIR_ENDORSEMENTCA/EndorsementCA-external.pem
+cp *.pem $CERTDIR_ENDORSEMENTCA/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $CERTDIR_ENDORSEMENTCA/*.pem
 
 # make log files world readable
 chmod 744 $LOG_PATH
