@@ -19,8 +19,8 @@ func init() {
 	viper.SetDefault("poll-interval-minutes", constants.PollingIntervalMinutes)
 
 	//Set default values for TLS
-	viper.SetDefault("tls-cert-file", constants.DefaultTLSCertFile)
-	viper.SetDefault("tls-key-file", constants.DefaultTLSKeyFile)
+	viper.SetDefault("tls-cert-file", constants.ConfigDir+constants.DefaultTLSCertFile)
+	viper.SetDefault("tls-key-file", constants.ConfigDir+constants.DefaultTLSKeyFile)
 	viper.SetDefault("tls-common-name", constants.DefaultIHUBTlsCn)
 	viper.SetDefault("tls-san-list", constants.DefaultTLSSan)
 

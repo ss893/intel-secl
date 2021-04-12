@@ -73,25 +73,25 @@ func (app *App) startDaemon() error {
 		}
 		o.OpenstackClient = openstackClient
 
-		o.TrustedCAsStoreDir = constants.TrustedCAsStoreDir
+		o.TrustedCAsStoreDir = app.configDir() + constants.TrustedCAsStoreDir
 		if _, err := os.Stat(o.TrustedCAsStoreDir); err != nil {
 			return errors.Wrap(err, "startService:startDaemon() Error in initializing the OpenStack client")
 		}
 
-		o.SamlCertFilePath = constants.SamlCertFilePath
+		o.SamlCertFilePath = app.configDir() + constants.SamlCertFilePath
 		if _, err := os.Stat(o.SamlCertFilePath); err != nil && configuration.AttestationService.AttestationType == constants.DefaultAttestationType {
 			return errors.Wrap(err, "startService:startDaemon() Error in initializing the OpenStack client")
 		}
 
 	} else if configuration.Endpoint.Type == constants.K8sTenant {
 
-		privateKey, err := crypt.GetPrivateKeyFromPKCS8File(constants.PrivatekeyLocation)
+		privateKey, err := crypt.GetPrivateKeyFromPKCS8File(app.configDir() + constants.PrivatekeyLocation)
 		if err != nil {
 			return errors.Wrap(err, "startService:startDaemon() Error in reading the ihub private key from file")
 		}
 		k.PrivateKey = privateKey
 
-		publicKeyBytes, err := ioutil.ReadFile(constants.PublickeyLocation)
+		publicKeyBytes, err := ioutil.ReadFile(app.configDir() + constants.PublickeyLocation)
 		if err != nil {
 			return errors.Wrap(err, "startService:startDaemon() : Error in reading the ihub public key from file")
 		}
@@ -118,12 +118,12 @@ func (app *App) startDaemon() error {
 		}
 		k.K8sClient = k8sClient
 
-		k.TrustedCAsStoreDir = constants.TrustedCAsStoreDir
+		k.TrustedCAsStoreDir = app.configDir() + constants.TrustedCAsStoreDir
 		if _, err := os.Stat(k.TrustedCAsStoreDir); err != nil {
 			return errors.Wrap(err, "startService:startDaemon() Error in initializing the Kubernetes client")
 		}
 
-		k.SamlCertFilePath = constants.SamlCertFilePath
+		k.SamlCertFilePath = app.configDir() + constants.SamlCertFilePath
 		if _, err := os.Stat(k.SamlCertFilePath); err != nil && configuration.AttestationService.AttestationType == constants.DefaultAttestationType {
 			return errors.Wrap(err, "startService:startDaemon() Error in initializing the Kubernetes client")
 		}

@@ -126,7 +126,7 @@ func filterHostReportsForOpenstack(hostDetails *openstackHostDetails, openstackD
 		}
 
 	case constants.AttestationTypeSGX:
-		platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostName, openstackDetails.Config, constants.TrustedCAsStoreDir)
+		platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostName, openstackDetails.Config, openstackDetails.TrustedCAsStoreDir)
 		if err != nil {
 			return errors.Wrap(err, "openstackplugin/openstack_plugin:FilterHostReportsForOpenstack() : Error in getting the SGX Platform Data")
 		}

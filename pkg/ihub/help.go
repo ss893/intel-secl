@@ -14,20 +14,26 @@ const helpStr = `Usage:
 	ihub <command> [arguments]
 	
 Available Commands:
-	-h|--help              Show this help message
-	-v|--version           Show the version of current ihub build
-	setup <task>           Run setup task
-	start                  Start ihub
-	status                 Show the status of ihub
-	stop                   Stop ihub
-	uninstall [--purge]    Uninstall ihub
-		--purge            all configuration and data files will be removed if this flag is set
+	-h|--help                    Show this help message
+	-v|--version                 Show the version of current ihub build
+	setup <task>                 Run setup task
+	start [-i <instance-name>]   Start ihub
+		-i|--instance <instance-name>      the instance name to execute command against specific instance
+	status [-i <instance-name>]  Show the status of ihub
+		-i|--instance <instance-name>      the instance name to execute command against specific instance
+	stop [-i <instance-name>]    Stop ihub
+		-i|--instance <instance-name>      the instance name to execute command against specific instance
+	uninstall [--purge] [--exec] [-i <instance-name>] Uninstall ihub
+		-i|--instance <instance-name>      the instance name to execute command against specific instance
+		--purge                            all configuration and data files will be removed for instance if this flag is set
+		--exec                             executable will be removed which is common for all instances if this flag is set
 
 Usage of ihub setup:
-	ihub setup <task> [--help] [--force] [-f <answer-file>]
-		--help                      show help message for setup task
-		--force                     existing configuration will e overwritten if this flag is set
-		-f|--file <answer-file>     the answer file with required arguments
+	ihub setup <task> [--help] [--force] [-f <answer-file>] [-i <instance-name>]
+		-i|--instance <instance-name>      the instance name to execute command against specific instance
+		--help                             show help message for setup task
+		--force                            existing configuration will e overwritten if this flag is set
+		-f|--file <answer-file>            the answer file with required arguments
 
 Available Tasks for setup:
 	all                                 Runs all setup tasks

@@ -29,6 +29,7 @@ var errInvalidCmd = errors.New("Invalid input after command")
 
 type App struct {
 	HomeDir        string
+	InstanceName   string
 	ConfigDir      string
 	LogDir         string
 	ExecutablePath string
@@ -50,7 +51,7 @@ func (app *App) Run(args []string) error {
 	cmd := args[1]
 	switch cmd {
 	case "run":
-		if len(args) != 2 {
+		if len(args) >= constants.MaxArguments {
 			return errInvalidCmd
 		}
 		if err := app.startDaemon(); err != nil {
@@ -63,32 +64,36 @@ func (app *App) Run(args []string) error {
 		app.printUsage()
 		return nil
 	case "start":
-		if len(args) != 2 {
+		if len(args) >= constants.MaxArguments {
 			return errInvalidCmd
 		}
 		return app.start()
 	case "stop":
-		if len(args) != 2 {
+		if len(args) >= constants.MaxArguments {
 			return errInvalidCmd
 		}
 		return app.stop()
 	case "status":
-		if len(args) != 2 {
+		if len(args) >= constants.MaxArguments {
 			return errInvalidCmd
 		}
 		return app.status()
 	case "uninstall":
-		// the only allowed flag is --purge
 		purge := false
-		if len(args) == 3 {
-			if args[2] != "--purge" {
-				return errors.New("Invalid flag: " + args[2])
-			}
-			purge = true
-		} else if len(args) != 2 {
+		exec := false
+		if len(args) >= constants.MaxArguments+2 { //For additional purge and all
 			return errInvalidCmd
 		}
-		app.uninstall(purge)
+
+		for _, flag := range args {
+			if flag == "--purge" {
+				purge = true
+			} else if flag == "--exec" {
+				exec = true
+			}
+		}
+
+		app.uninstall(purge, exec)
 		return nil
 	case "version", "-v", "--version":
 		app.printVersion()
@@ -178,13 +183,13 @@ func (app *App) configureLogs(isStdOut bool, isFileOut bool) {
 }
 
 func (app *App) start() error {
-
-	fmt.Fprintln(app.consoleWriter(), `Forwarding to "systemctl start ihub"`)
+	serviceName := constants.InstancePrefix + app.InstanceName
+	fmt.Fprintln(app.consoleWriter(), `Forwarding to "systemctl start `+serviceName+`"`)
 	systemctl, err := exec.LookPath("systemctl")
 	if err != nil {
 		return errors.Wrap(err, "Could not locate systemctl to start service")
 	}
-	cmd := exec.Command(systemctl, "start", "ihub")
+	cmd := exec.Command(systemctl, "start", serviceName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Env = os.Environ()
@@ -192,13 +197,13 @@ func (app *App) start() error {
 }
 
 func (app *App) stop() error {
-
-	fmt.Fprintln(app.consoleWriter(), `Forwarding to "systemctl stop ihub"`)
+	serviceName := constants.InstancePrefix + app.InstanceName
+	fmt.Fprintln(app.consoleWriter(), `Forwarding to "systemctl stop `+serviceName+`"`)
 	systemctl, err := exec.LookPath("systemctl")
 	if err != nil {
 		return errors.Wrap(err, "Could not locate systemctl to stop service")
 	}
-	cmd := exec.Command(systemctl, "stop", "ihub")
+	cmd := exec.Command(systemctl, "stop", serviceName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Env = os.Environ()
@@ -206,13 +211,13 @@ func (app *App) stop() error {
 }
 
 func (app *App) status() error {
-
-	fmt.Fprintln(app.consoleWriter(), `Forwarding to "systemctl status ihub"`)
+	serviceName := constants.InstancePrefix + app.InstanceName
+	fmt.Fprintln(app.consoleWriter(), `Forwarding to "systemctl status `+serviceName+`"`)
 	systemctl, err := exec.LookPath("systemctl")
 	if err != nil {
 		return errors.Wrap(err, "Could not locate systemctl to check status of service")
 	}
-	cmd := exec.Command(systemctl, "status", "ihub")
+	cmd := exec.Command(systemctl, "status", serviceName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Env = os.Environ()

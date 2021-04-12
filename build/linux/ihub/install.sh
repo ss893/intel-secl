@@ -42,8 +42,10 @@ echo "Installing Integration Hub Service..."
 COMPONENT_NAME=$SERVICE_USERNAME
 PRODUCT_HOME=/opt/$COMPONENT_NAME
 BIN_PATH=$PRODUCT_HOME/bin
-LOG_PATH=/var/log/$COMPONENT_NAME/
-CONFIG_PATH=/etc/$COMPONENT_NAME/
+INSTANCE_NAME=${INSTANCE_NAME:-$COMPONENT_NAME}
+LOG_PATH=/var/log/$INSTANCE_NAME/
+CONFIG_PATH=/etc/$INSTANCE_NAME/
+SERVICE_NAME=$SERVICE_USERNAME@$INSTANCE_NAME
 CERTS_PATH=$CONFIG_PATH/certs
 CERTDIR_TRUSTEDJWTCAS=$CERTS_PATH/trustedca
 SAML_CERT_DIR_PATH=$CERTS_PATH/saml
@@ -66,11 +68,12 @@ ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 chmod 744 $LOG_PATH
 
 # Install systemd script
-cp $SERVICE_USERNAME.service $PRODUCT_HOME && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/$SERVICE_USERNAME.service && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME
+SERVICE_FILE=$SERVICE_USERNAME@.service
+cp $SERVICE_USERNAME.service $PRODUCT_HOME/$SERVICE_FILE && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/$SERVICE_FILE && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME
 
 # Enable systemd service
-systemctl disable $SERVICE_USERNAME.service >/dev/null 2>&1
-systemctl enable $PRODUCT_HOME/$SERVICE_USERNAME.service
+systemctl disable $PRODUCT_HOME/$SERVICE_FILE >/dev/null 2>&1
+systemctl enable $PRODUCT_HOME/$SERVICE_FILE
 systemctl daemon-reload
 
 auto_install() {
@@ -125,8 +128,8 @@ export LOG_OLD=${LOG_OLD:-12}
 
 mkdir -p /etc/logrotate.d
 
-if [ ! -a /etc/logrotate.d/${COMPONENT_NAME} ]; then
- echo "/var/log/${COMPONENT_NAME}/*.log {
+if [ ! -a /etc/logrotate.d/${INSTANCE_NAME} ]; then
+ echo "/var/log/${INSTANCE_NAME}/*.log {
     missingok
     notifempty
     rotate $LOG_OLD
@@ -136,7 +139,7 @@ if [ ! -a /etc/logrotate.d/${COMPONENT_NAME} ]; then
     $LOG_COMPRESS
     $LOG_DELAYCOMPRESS
     $LOG_COPYTRUNCATE
-}" > /etc/logrotate.d/${COMPONENT_NAME}
+}" > /etc/logrotate.d/${INSTANCE_NAME}
 fi
 
 
@@ -146,20 +149,20 @@ if [ "${IHUB_NOSETUP,,}" == "true" ]; then
     echo "Run \"$COMPONENT_NAME setup all\" for manual setup"
     echo "Installation completed successfully!"
 else    
-    $COMPONENT_NAME setup all --force
+    $COMPONENT_NAME setup all --force -i $INSTANCE_NAME
     SETUPRESULT=$?
     chown -R $SERVICE_USERNAME:$SERVICE_USERNAME $CONFIG_PATH
     if [ ${SETUPRESULT} == 0 ]; then
-        systemctl start $COMPONENT_NAME
+        systemctl start $SERVICE_NAME
         echo "Waiting for daemon to settle down before checking status"
         sleep 3
-        systemctl status $COMPONENT_NAME 2>&1 >/dev/null
+        systemctl status $SERVICE_NAME 2>&1 >/dev/null
         if [ $? != 0 ]; then
-          echo "Installation completed with Errors - $COMPONENT_NAME daemon not started."
-          echo "Please check errors in syslog using \`journalctl -u $COMPONENT_NAME\`"
+          echo "Installation completed with Errors - $SERVICE_NAME daemon not started."
+          echo "Please check errors in syslog using \`journalctl -u $SERVICE_NAME\`"
           exit 1
         fi
-        echo "$COMPONENT_NAME daemon is running"
+        echo "$SERVICE_NAME daemon is running"
         echo "Installation completed successfully!"
     else
         echo "Installation completed with errors"
