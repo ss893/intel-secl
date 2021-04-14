@@ -60,6 +60,7 @@ func (app *App) runDirPath() string {
 }
 
 func (app *App) uninstall(purge, exec bool) {
+	fmt.Println("Stopping Integration Hub - " + app.InstanceName)
 	err := app.stop()
 	if err != nil {
 		log.WithError(err).Error("error stopping service")
@@ -85,6 +86,8 @@ func (app *App) uninstall(purge, exec bool) {
 		if err != nil {
 			log.WithError(err).Error("Error removing home dir")
 		}
+		// Remove\Disable multi instance service file
+		removeService("")
 	}
 	if purge {
 		fmt.Println("Removing : ", app.configDir())
@@ -103,7 +106,7 @@ func (app *App) uninstall(purge, exec bool) {
 }
 
 func removeService(instanceName string) {
-	serviceName := constants.InstancePrefix + instanceName
+	serviceName := constants.InstancePrefix + instanceName + ".service"
 	_, _, err := commonExec.RunCommandWithTimeout(constants.ServiceRemoveCmd+serviceName, 5)
 	if err != nil {
 		fmt.Println("Could not remove Integration Hub Service")
