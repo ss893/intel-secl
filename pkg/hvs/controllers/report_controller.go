@@ -97,6 +97,8 @@ func (controller ReportController) createReport(rsCriteria hvs.ReportCreateReque
 	hvsReport, err := controller.HTManager.VerifyHost(hostId, true, false)
 	if err != nil {
 		defaultLog.WithError(err).Errorf("controllers/report_controller:createReport() Failed to create a trust report, flavor verification failed")
+	} else if hvsReport == nil {
+		return nil, errors.New("Error while creating a report, no rules to be applied")
 	}
 	hostStatusCollection, err := controller.HostStatusStore.Search(&models.HostStatusFilterCriteria{
 		HostId:        hostId,

@@ -187,6 +187,9 @@ func (v *Verifier) Verify(hostId uuid.UUID, hostData *types.HostManifest, newDat
 		v.HostTrustCache.Add(hostId, newCacheEntry)
 		hvsReport = v.storeTrustReport(hostId, &finalTrustReport, &samlReport)
 	}
+	if hvsReport == nil {
+		log.Infof("hosttrust/verifier:Verify() Unable to generate report for the host : %v as no rules found to be applied", hostId)
+	}
 	return hvsReport, nil
 }
 
