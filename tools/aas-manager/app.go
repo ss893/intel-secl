@@ -303,6 +303,8 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.ScsCN, a.ScsSanList))
 		case "SQVS":
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.SqvsCN, a.SqvsSanList))
+			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=SQVS QVL Response "+
+				"Signing Certificate;certType=Signing", nil))
 		case "SHVS":
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.ShvsCN, a.ShvsSanList))
 		case "SKC-LIBRARY":
