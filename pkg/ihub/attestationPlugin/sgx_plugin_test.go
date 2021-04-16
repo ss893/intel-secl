@@ -51,7 +51,7 @@ func TestGetHostReportsSGX(t *testing.T) {
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						AttestationURL: "http://localhost" + port + "/sgx-hvs/v2",
+						AttestationURL: "http://localhost" + port + "/sgx-hvs/v2/",
 					},
 				},
 			},

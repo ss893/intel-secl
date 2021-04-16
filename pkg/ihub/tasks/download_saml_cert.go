@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/clients/vs"
 	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
@@ -44,6 +45,9 @@ func (samlCert DownloadSamlCert) Run() error {
 		return errors.New("tasks/download_saml_cert:Run() Missing attestation service endpoint url in environment")
 	}
 
+	if !strings.HasSuffix(attestationURL, "/") {
+		attestationURL = attestationURL + "/"
+	}
 	baseURL, err := url.Parse(attestationURL)
 	if err != nil {
 		return errors.Wrap(err, "tasks/download_saml_cert:Run() Error in parsing attestation service URL")

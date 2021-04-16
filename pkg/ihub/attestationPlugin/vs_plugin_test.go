@@ -90,7 +90,7 @@ func TestGetHostReports(t *testing.T) {
 				c: &config.Configuration{
 					AASApiUrl: "http://localhost" + portString + "/aas",
 					AttestationService: config.AttestationConfig{
-						AttestationType: "HVS", AttestationURL: "http://localhost" + portString + "/mtwilson/v2",
+						AttestationType: "HVS", AttestationURL: "http://localhost" + portString + "/mtwilson/v2/",
 					},
 					Endpoint: config.Endpoint{
 						Type:     "OPENSTACK",
@@ -197,7 +197,7 @@ func TestGetCaCerts(t *testing.T) {
 					},
 					AttestationService: config.AttestationConfig{
 						AttestationType: "HVS",
-						AttestationURL:  "http://localhost" + portString + "/mtwilson/v2",
+						AttestationURL:  "http://localhost" + portString + "/mtwilson/v2/",
 					},
 				},
 			},

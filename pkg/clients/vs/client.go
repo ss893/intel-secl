@@ -49,7 +49,7 @@ func (c Client) GetCaCerts(domain string) ([]byte, error) {
 	log.Trace("vs/client:GetCaCerts() Entering")
 	defer log.Trace("vs/client:GetCaCerts() Leaving")
 
-	requestURL, err := url.Parse(c.BaseURL.String() + "/ca-certificates?domain=" + domain)
+	requestURL, err := url.Parse(c.BaseURL.String() + "ca-certificates?domain=" + domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "vs/client:GetCaCerts() Error parsing URL")
 	}

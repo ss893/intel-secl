@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strings"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/clients/skchvsclient"
 	"github.com/intel-secl/intel-secl/v3/pkg/clients/vs"
@@ -39,6 +40,10 @@ func (attestationService AttestationServiceConnection) Run() error {
 	if attestationType == "" {
 		attestationType = constants.DefaultAttestationType
 		fmt.Fprintln(attestationService.ConsoleWriter, "Attestation type is not defined in environment, default attestation type set")
+	}
+
+	if !strings.HasSuffix(attestationURL, "/") {
+		attestationURL = attestationURL + "/"
 	}
 
 	attestationService.AttestationConfig.AttestationType = attestationType
@@ -80,7 +85,7 @@ func (attestationService AttestationServiceConnection) validateService() error {
 		}
 
 	} else if attestationService.AttestationConfig.AttestationType == "SGX" {
-		versionURL := attestationService.AttestationConfig.AttestationURL + "/" + "version"
+		versionURL := attestationService.AttestationConfig.AttestationURL + "version"
 		shvsClient := &skchvsclient.Client{}
 
 		_, err := shvsClient.GetSHVSVersion(versionURL)

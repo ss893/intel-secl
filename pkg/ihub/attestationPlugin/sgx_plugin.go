@@ -31,7 +31,7 @@ func GetHostPlatformData(hostName string, config *config.Configuration, certDire
 	log.Trace("attestationPlugin/sgx_plugin:GetHostPlatformData() Entering")
 	defer log.Trace("attestationPlugin/sgx_plugin:GetHostPlatformData() Leaving")
 
-	url := config.AttestationService.AttestationURL + "/platform-data" + "?HostName=%s"
+	url := config.AttestationService.AttestationURL + "platform-data" + "?HostName=%s"
 
 	url = fmt.Sprintf(url, strings.ToLower(hostName))
 

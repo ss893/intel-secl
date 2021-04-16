@@ -89,7 +89,7 @@ func GetHostReports(h string, conf *config.Configuration, certDirectory, samlCer
 	log.Trace("attestationPlugin/vs_plugin:GetHostReports() Entering")
 	defer log.Trace("attestationPlugin/vs_plugin:GetHostReports() Leaving")
 
-	reportUrl := conf.AttestationService.AttestationURL + "/reports?latestPerHost=true&"
+	reportUrl := conf.AttestationService.AttestationURL + "reports?latestPerHost=true&"
 
 	var filterType string
 	if conf.Endpoint.Type == constants.OpenStackTenant {

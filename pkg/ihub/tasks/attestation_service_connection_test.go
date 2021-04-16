@@ -132,7 +132,7 @@ func TestAttestationServiceConnectionValidate(t *testing.T) {
 			name: "attestation-service-connection-validate valid test",
 			attestationService: AttestationServiceConnection{
 				AttestationConfig: &config.AttestationConfig{
-					AttestationType: "HVS", AttestationURL: "http://localhost" + port + "/mtwilson/v2",
+					AttestationType: "HVS", AttestationURL: "http://localhost" + port + "/mtwilson/v2/",
 				},
 				ConsoleWriter: os.Stdout,
 			},
