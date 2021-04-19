@@ -1,5 +1,10 @@
 #!/bin/bash
 
+source /etc/secret-volume/secrets.txt
+export KBS_SERVICE_USERNAME
+export KBS_SERVICE_PASSWORD
+export BEARER_TOKEN
+
 USER_ID=$(id -u)
 COMPONENT_NAME=kbs
 PRODUCT_HOME=/opt/$COMPONENT_NAME

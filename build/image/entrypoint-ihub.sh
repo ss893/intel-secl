@@ -1,5 +1,10 @@
 #!/bin/bash
 
+source /etc/secret-volume/secrets.txt
+export IHUB_SERVICE_USERNAME
+export IHUB_SERVICE_PASSWORD
+export BEARER_TOKEN
+
 USER_ID=$(id -u)
 SERVICE=ihub
 CONFIG_PATH=/etc/ihub

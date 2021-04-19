@@ -1,5 +1,12 @@
 #!/bin/bash
 
+source /etc/secret-volume/secrets.txt
+export AAS_ADMIN_USERNAME
+export AAS_ADMIN_PASSWORD 
+export BEARER_TOKEN
+export AAS_DB_USERNAME
+export AAS_DB_PASSWORD
+
 USER_ID=$(id -u)
 COMPONENT_NAME=authservice
 LOG_PATH=/var/log/$COMPONENT_NAME/
