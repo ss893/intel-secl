@@ -88,7 +88,7 @@ func (a *App) configuration() *config.Configuration {
 	return nil
 }
 
-func (a *App) configureLogs(isStdOut bool, isFileOut bool) error {
+func (a *App) configureLogs(isStdOut, isFileOut bool) error {
 	var ioWriterDefault io.Writer
 	ioWriterDefault = a.LogWriter
 	if isStdOut {
@@ -357,18 +357,41 @@ func (a *App) Run(args []string) error {
 			return err
 		}
 	case "get-container-image-id":
+		configuration := a.configuration()
+		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
+			return err
+		}
+
 		if len(os.Args[1:]) < 1 {
 			a.printGetContainerImageIdUsage()
 			return errors.New("Invalid number of parameters")
 		}
 		return a.getContainerImageId(os.Args[1:])
 	case "unwrap-key":
+		// logs cannot be output to stdout as it will be mixed with the
+		// unwrapped key output
+		_ = a.configuration()
+		if err := a.configureLogs(false, true); err != nil {
+			return err
+		}
 		return a.unwrapKey(os.Args[:])
 	case "create-container-image-flavor":
+		configuration := a.configuration()
+		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
+			return err
+		}
 		return a.createContainerImageFlavor(os.Args[:])
 	case "fetch-key":
+		configuration := a.configuration()
+		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
+			return err
+		}
 		return a.fetchKey(os.Args[:])
 	case "create-image-flavor":
+		configuration := a.configuration()
+		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
+			return err
+		}
 		return a.createImageFlavor(os.Args[:])
 	}
 	return nil

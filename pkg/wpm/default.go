@@ -17,7 +17,7 @@ import (
 func init() {
 	// set default values for log
 	viper.SetDefault("log-max-length", constants.DefaultLogMaxlength)
-	viper.SetDefault("log-enable-stdout", true)
+	viper.SetDefault("log-enable-stdout", false)
 	viper.SetDefault("log-level", constants.DefaultLogLevel)
 	viper.SetDefault("flavor-signing-cert-file", constants.FlavorSigningCertFile)
 	viper.SetDefault("flavor-signing-key-file", constants.FlavorSigningKeyFile)
