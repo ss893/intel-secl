@@ -6,6 +6,7 @@ require (
 	github.com/antchfx/jsonquery v1.1.4
 	github.com/beevik/etree v1.1.0
 	github.com/davecgh/go-spew v1.1.1
+	github.com/gemalto/kmip-go v0.0.5
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
@@ -33,3 +34,6 @@ require (
 )
 
 replace github.com/vmware/govmomi => github.com/arijit8972/govmomi fix-tpm-attestation-output
+
+// Commit ID has been used as consistent code is not yet released. Once released add a tag.
+replace github.com/gemalto/kmip-go => github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d

@@ -8,17 +8,9 @@
     - git config --global http."https://${GITLAB_SERVER}".proxy ""
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@${GITLAB_SERVER}".insteadOf "https://${GITLAB_SERVER}"
 
-    - apt-get update -y -o Acquire::Max-FutureTime=31536000
-    - apt-get install -yq libssl-dev
-    - git clone https://github.com/openkmip/libkmip.git
-    - cd libkmip
-    - make
-    - make install
-    - ldconfig
-    - cd $CI_PROJECT_DIR
   script:
     - echo "This is the CI job that runs all unit tests"
-    - CGO_LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" CGO_CFLAGS_ALLOW="-f.*" go test ./... -coverprofile=cover.out
+    - go test ./... -coverprofile=cover.out
     - go tool cover -func cover.out
 
 test:go-1.14:

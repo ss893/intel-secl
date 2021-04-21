@@ -60,15 +60,6 @@ var _ = Describe("KeyController", func() {
 	}
 	validEnvelopeKey := pem.EncodeToMemory(publicKeyInPem)
 
-	keyPair15360, _ := rsa.GenerateKey(rand.Reader, 15360)
-	publicKey15360 := &keyPair15360.PublicKey
-	pubKeyBytes15360, _ := x509.MarshalPKIXPublicKey(publicKey15360)
-	var publicKeyInPem15360 = &pem.Block{
-		Type:  "PUBLIC KEY",
-		Bytes: pubKeyBytes15360,
-	}
-	validEnvelopeKey15360 := pem.EncodeToMemory(publicKeyInPem15360)
-
 	invalidEnvelopeKey := strings.Replace(strings.Replace(string(validEnvelopeKey), "-----BEGIN PUBLIC KEY-----\n", "", 1), "-----END PUBLIC KEY-----", "", 1)
 	validSamlReport, _ := ioutil.ReadFile(validSamlReportPath)
 	invalidSamlReport, _ := ioutil.ReadFile(invalidSamlReportPath)
@@ -369,7 +360,7 @@ var _ = Describe("KeyController", func() {
 		Context("Provide a valid public key", func() {
 			It("Should transfer an existing Private Key", func() {
 				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods("POST")
-				envelopeKey := string(validEnvelopeKey15360)
+				envelopeKey := string(validEnvelopeKey)
 
 				req, err := http.NewRequest(
 					"POST",

@@ -5,6 +5,9 @@
 package kmipclient
 
 import (
+	kmip "github.com/gemalto/kmip-go"
+	"github.com/gemalto/kmip-go/kmip14"
+	"github.com/gemalto/kmip-go/ttlv"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -19,14 +22,20 @@ func NewMockKmipClient() *MockKmipClient {
 }
 
 // InitializeClient mocks base method
-func (m *MockKmipClient) InitializeClient(version, serverIP, serverPort, clientKey, clientCert, rootCert string) error {
-	args := m.Called(version, serverIP, serverPort, clientKey, clientCert, rootCert)
+func (m *MockKmipClient) InitializeClient(version, serverIP, serverPort, hostname, username, password, clientKey, clientCert, rootCert string) error {
+	args := m.Called(version, serverIP, serverPort, clientKey, clientCert, rootCert, username, password)
 	return args.Error(0)
 }
 
 // CreateSymmetricKey mocks base method
-func (m *MockKmipClient) CreateSymmetricKey(alg, length int) (string, error) {
-	args := m.Called(alg, length)
+func (m *MockKmipClient) CreateSymmetricKey(length int) (string, error) {
+	args := m.Called(length)
+	return args.Get(0).(string), args.Error(1)
+}
+
+// CreateAsymmetricKeyPair mocks base method
+func (m *MockKmipClient) CreateAsymmetricKeyPair(algorithm, curveType string, length int) (string, error) {
+	args := m.Called(length)
 	return args.Get(0).(string), args.Error(1)
 }
 
@@ -37,7 +46,13 @@ func (m *MockKmipClient) DeleteKey(id string) error {
 }
 
 // GetSymmetricKey mocks base method
-func (m *MockKmipClient) GetKey(id string, algorithm string, keyLength int) ([]byte, error) {
+func (m *MockKmipClient) GetKey(id string, algorithm string) ([]byte, error) {
 	args := m.Called(id)
 	return args.Get(0).([]byte), args.Error(1)
+}
+
+// SendRequest mocks base method
+func (m *MockKmipClient) SendRequest(requestPayload interface{}, Operation kmip14.Operation) (*kmip.ResponseBatchItem, *ttlv.Decoder, error) {
+	args := m.Called(requestPayload, Operation)
+	return args.Get(0).(*kmip.ResponseBatchItem), args.Get(1).(*ttlv.Decoder), args.Error(2)
 }

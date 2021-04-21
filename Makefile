@@ -17,13 +17,6 @@ $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v4/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v4/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v4/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
-kbs:
-	mkdir -p installer
-	cp /usr/local/lib/libkmip.so.0.2 installer/libkmip.so.0.2
-	cd cmd/kbs && env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct \
-		go build -gcflags=all="-N -l" \
-		-ldflags "-X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.GitHash=$(GITCOMMIT)" -o kbs
-
 %-pre-installer: %
 	mkdir -p installer
 	cp -r build/linux/$*/* installer/
@@ -64,12 +57,7 @@ docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 	    docker build ${DOCKER_PROXY_FLAGS} -f build/image/Dockerfile-upgrade-$* -t isecl/$*-upgrade:$(VERSION) . ; \
 	    skopeo copy docker-daemon:isecl/$*-upgrade:$(VERSION) oci-archive:deployments/container-archive/oci/$*-upgrade-$(VERSION)-$(GITCOMMIT).tar:$(VERSION) ; \
 	fi
-
-kbs-docker: kbs
-	cp /usr/local/lib/libkmip.so.0.2 build/image/
-	docker build . -f build/image/Dockerfile-kbs -t isecl/kbs:$(VERSION)
-	docker save isecl/kbs:$(VERSION) > deployments/container-archive/docker/docker-kbs-$(VERSION)-$(GITCOMMIT).tar
-
+	
 aas-manager:
 	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
 	cp tools/aas-manager/populate-users deployments/installer/populate-users.sh
@@ -88,7 +76,7 @@ download-eca:
 	rm -rf certs
 
 test:
-	CGO_LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" CGO_CFLAGS_ALLOW="-f.*" go test ./... -coverprofile cover.out
+	go test ./... -coverprofile cover.out
 	go tool cover -func cover.out
 	go tool cover -html=cover.out -o cover.html
 
