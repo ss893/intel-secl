@@ -40,6 +40,9 @@ var envHelp = map[string]string{
 	"AAS_BASE_URL":               "AAS Base URL",
 	"KMIP_SERVER_IP":             "IP of KMIP server",
 	"KMIP_SERVER_PORT":           "PORT of KMIP server",
+	"KMIP_HOSTNAME":              "HOSTNAME of KMIP server",
+	"KMIP_USERNAME":              "USERNAME of KMIP server",
+	"KMIP_PASSWORD":              "PASSWORD of KMIP server",
 	"KMIP_CLIENT_CERT_PATH":      "KMIP Client certificate path",
 	"KMIP_CLIENT_KEY_PATH":       "KMIP Client key path",
 	"KMIP_ROOT_CERT_PATH":        "KMIP Root Certificate path",
@@ -78,12 +81,15 @@ func (uc UpdateServiceConfig) Run() error {
 	}
 	(*uc.AppConfig).EndpointURL = viper.GetString("endpoint-url")
 	(*uc.AppConfig).Kmip = config.KmipConfig{
-		Version:    viper.GetString("kmip-version"),
-		ServerIP:   viper.GetString("kmip-server-ip"),
-		ServerPort: viper.GetString("kmip-server-port"),
-		ClientCert: viper.GetString("kmip-client-cert-path"),
-		ClientKey:  viper.GetString("kmip-client-key-path"),
-		RootCert:   viper.GetString("kmip-root-cert-path"),
+		Version:                   viper.GetString("kmip-version"),
+		ServerIP:                  viper.GetString("kmip-server-ip"),
+		ServerPort:                viper.GetString("kmip-server-port"),
+		Hostname:                  viper.GetString("kmip-hostname"),
+		Username:                  viper.GetString("kmip-username"),
+		Password:                  viper.GetString("kmip-password"),
+		ClientKeyFilePath:         viper.GetString("kmip-client-key-path"),
+		ClientCertificateFilePath: viper.GetString("kmip-client-cert-path"),
+		RootCertificateFilePath:   viper.GetString("kmip-root-cert-path"),
 	}
 	(*uc.AppConfig).Skc = config.SKCConfig{
 		StmLabel:          viper.GetString("skc-challenge-type"),
