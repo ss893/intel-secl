@@ -6,8 +6,8 @@
 package hosttrust
 
 import (
-	"github.com/golang/groupcache/lru"
 	"github.com/google/uuid"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/utils"
@@ -19,7 +19,6 @@ import (
 	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"sync"
 )
 
 var ErrInvalidHostManiFest = errors.New("invalid host data")
@@ -35,7 +34,6 @@ type Verifier struct {
 	SamlIssuer                      saml.IssuerConfiguration
 	SkipFlavorSignatureVerification bool
 	hostQuoteReportCache            map[uuid.UUID]*models.QuoteReportCache
-	pcrCacheLock                    sync.RWMutex
 	HostTrustCache                  *lru.Cache
 }
 
@@ -79,12 +77,16 @@ func getTrustPcrListReport(hostInfo taModel.HostInfo, report *hvs.TrustReport) [
 func (v *Verifier) Verify(hostId uuid.UUID, hostData *types.HostManifest, newData bool, preferHashMatch bool) (*models.HVSReport, error) {
 	defaultLog.Trace("hosttrust/verifier:Verify() Entering")
 	defer defaultLog.Trace("hosttrust/verifier:Verify() Leaving")
+
+	defaultLog.Debugf("hosttrust/verifier:Verify() host - %s", hostId.String())
+
 	if hostData == nil {
 		return nil, ErrInvalidHostManiFest
 	}
 
 	hwUuid, err := uuid.Parse(hostData.HostInfo.HardwareUUID)
 	if err != nil || hwUuid == uuid.Nil {
+		defaultLog.Errorf("hosttrust/verifier:Verify() host - %s, %s", hostId.String(), ErrManifestMissingHwUUID)
 		return nil, ErrManifestMissingHwUUID
 	}
 
@@ -96,12 +98,12 @@ func (v *Verifier) Verify(hostId uuid.UUID, hostData *types.HostManifest, newDat
 			cachedQuote := cacheEntry.(*models.QuoteReportCache)
 			if cachedQuote.QuoteDigest != "" && hostData.QuoteDigest != cachedQuote.QuoteDigest {
 				// retrieve the stored report
-				log.Debug("hosttrust/verifier:Verify() Quote values matches cached value - skipping flavor verification")
+				log.Debugf("hosttrust/verifier:Verify() Quote values matches cached value for host %s - skipping flavor verification", hostId.String())
 				if report, err := v.refreshTrustReport(hostId, cachedQuote); err == nil {
 					return report, err
 				} else {
 					// log warning message here - continue as normal and create a report from newly fetched data
-					log.Warn("hosttrust/verifier:Verify() - error encountered while refreshing report - err : ", err)
+					log.Warnf("hosttrust/verifier:Verify() - error encountered while refreshing report for host %s - err : %s", hostId.String(), err.Error())
 				}
 			}
 		}

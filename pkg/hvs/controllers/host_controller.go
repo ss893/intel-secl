@@ -357,11 +357,12 @@ func (hc *HostController) CreateHost(reqHost hvs.HostCreateRequest) (interface{}
 	defaultLog.Debugf("Adding host %s to flavor-verify queue", reqHost.HostName)
 	// Since we are adding a new host, the forceUpdate flag should be set to true so that
 	// we connect to the host and get the latest host manifest to verify against.
-	err = hc.HTManager.VerifyHostsAsync([]uuid.UUID{createdHost.Id}, true, false)
-	if err != nil {
-		defaultLog.WithError(err).Error("controllers/host_controller:CreateHost() Host to Flavor Verify Queue addition failed")
-		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to add Host to Flavor Verify Queue"}
-	}
+	defer func() {
+		verr := hc.HTManager.VerifyHostsAsync([]uuid.UUID{createdHost.Id}, true, false)
+		if verr != nil {
+			defaultLog.WithError(verr).Error("controllers/host_controller:CreateHost() Host to Flavor Verify Queue addition failed")
+		}
+	}()
 
 	return createdHost, http.StatusCreated, nil
 }

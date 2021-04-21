@@ -37,16 +37,17 @@ var envHelp = map[string]string{
 	"LOG_ENABLE_STDOUT":                      "Enable console log",
 	"AAS_BASE_URL":                           "AAS Base URL",
 	"HRRS_REFRESH_PERIOD":                    "Host report refresh service period",
-	"VCSS_REFRESH_PERIOD":                    "VCenter refresh service perion ",
+	"VCSS_REFRESH_PERIOD":                    "VCenter refresh service period",
 	"FVS_NUMBER_OF_VERIFIERS":                "NUmber of Flavor verification verifier threads",
 	"FVS_NUMBER_OF_DATA_FETCHERS":            "Number of Flavor verification data fetcher threads",
 	"FVS_SKIP_FLAVOR_SIGNATURE_VERIFICATION": "Skips flavor signature verification when set to true",
+	"HOST_TRUST_CACHE_THRESHOLD":             "Maximum number of entries to be cached in the Trust/Flavor caches",
 	"SERVER_PORT":                            "The Port on which Server Listens to",
 	"SERVER_READ_TIMEOUT":                    "Request Read Timeout Duration in Seconds",
 	"SERVER_READ_HEADER_TIMEOUT":             "Request Read Header Timeout Duration in Seconds",
 	"SERVER_WRITE_TIMEOUT":                   "Request Write Timeout Duration in Seconds",
 	"SERVER_IDLE_TIMEOUT":                    "Request Idle Timeout in Seconds",
-	"SERVER_MAX_HEADER_BYTES":                "Max Length Of Request Header in Bytes ",
+	"SERVER_MAX_HEADER_BYTES":                "Max Length Of Request Header in Bytes",
 }
 
 func (uc UpdateServiceConfig) Run() error {
@@ -84,6 +85,7 @@ func (uc UpdateServiceConfig) Run() error {
 		NumberOfVerifiers:               viper.GetInt(constants.FvsNumberOfVerifiers),
 		NumberOfDataFetchers:            viper.GetInt(constants.FvsNumberOfDataFetchers),
 		SkipFlavorSignatureVerification: viper.GetBool(constants.FvsSkipFlavorSignatureVerification),
+		HostTrustCacheThreshold:         viper.GetInt(constants.FvsHostTrustCacheThreshold),
 	}
 
 	return nil

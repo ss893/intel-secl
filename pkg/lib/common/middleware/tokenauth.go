@@ -10,6 +10,7 @@ import (
 	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
 	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
 	"net/http"
+	"sync"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/context"
 	clog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
@@ -24,6 +25,7 @@ var jwtVerifier jwtauth.Verifier
 var jwtCertDownloadAttempted bool
 var log = clog.GetDefaultLogger()
 var slog = clog.GetSecurityLogger()
+var jwtMtx sync.Mutex
 
 func initJwtVerifier(signingCertsDir, trustedCAsDir string, cacheTime time.Duration) error {
 
@@ -74,9 +76,10 @@ func NewTokenAuth(signingCertsDir, trustedCAsDir string, fnGetJwtCerts RetriveJw
 			//        or the time has reached when we want to look at the CRL list to make sure the certificate is still
 			//        valid.
 			//        Error : VerifierExpiredError
-			//     2. There are no valid certificates (maybe all are expired) and we need to call the function that retrives
+			//     2. There are no valid certificates (maybe all are expired) and we need to call the function that retrieves
 			//        a new certificate. initJwtVerifier takes care of this scenario.
-
+			jwtMtx.Lock()
+			defer jwtMtx.Unlock()
 			for needInit, retryNeeded, looped := jwtVerifier == nil, false, false; retryNeeded || !looped; looped = true {
 
 				if needInit || retryNeeded {

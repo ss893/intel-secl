@@ -282,6 +282,7 @@ func (hs *HostStore) AddFlavorgroups(hId uuid.UUID, fgIds []uuid.UUID) error {
 	defaultLog.Trace("postgres/host_store:AddFlavorgroups() Entering")
 	defer defaultLog.Trace("postgres/host_store:AddFlavorgroups() Leaving")
 
+	defaultLog.Debugf("postgres/host_store:AddFlavorgroups() Linking host %v with flavorgroups %+q", hId, fgIds)
 	var hfgValues []string
 	var hfgValueArgs []interface{}
 	for _, fgId := range fgIds {
@@ -291,10 +292,12 @@ func (hs *HostStore) AddFlavorgroups(hId uuid.UUID, fgIds []uuid.UUID) error {
 	}
 
 	insertQuery := fmt.Sprintf("INSERT INTO host_flavorgroup VALUES %s", strings.Join(hfgValues, ","))
+	defaultLog.Debugf("postgres/host_store:AddFlavorgroups() insert query - %v", insertQuery)
 	err := hs.Store.Db.Model(hostFlavorgroup{}).Exec(insertQuery, hfgValueArgs...).Error
 	if err != nil {
 		return errors.Wrap(err, "postgres/host_store:AddFlavorgroups() failed to create Host Flavorgroup associations")
 	}
+	defaultLog.Debugf("postgres/host_store:AddFlavorgroups() Linking host completed for %v ", hId)
 	return nil
 }
 

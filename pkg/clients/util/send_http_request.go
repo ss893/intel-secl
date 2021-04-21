@@ -18,14 +18,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-var aasClient = aas.NewJWTClient("")
-var aasRWLock = sync.RWMutex{}
+var jwtTokenMap = sync.Map{}
 
 var log = commLog.GetDefaultLogger()
 var secLog = commLog.GetSecurityLogger()
 
-func addJWTToken(req *http.Request, aasURL, serviceUsername, servicePassword string,
-	trustedCaCerts []x509.Certificate) error {
+func addJWTToken(aasClient *aas.JwtClient, req *http.Request, aasURL, serviceUsername, servicePassword string,
+	trustedCaCerts []x509.Certificate, forceFetch bool) error {
 	log.Trace("clients/send_http_request:addJWTToken() Entering")
 	defer log.Trace("clients/send_http_request:addJWTToken() Leaving")
 
@@ -43,27 +42,36 @@ func addJWTToken(req *http.Request, aasURL, serviceUsername, servicePassword str
 			}
 		}
 	}
-	aasRWLock.RLock()
-	jwtToken, err := aasClient.GetUserToken(serviceUsername)
-	secLog.Debug("clients/send_http_request:addJWTToken() Getting user token from AAS...")
-	aasRWLock.RUnlock()
-
-	if err != nil {
-		aasRWLock.Lock()
-		aasClient.AddUser(serviceUsername, servicePassword)
-		err = aasClient.FetchAllTokens()
+	var jwtToken []byte
+	token, ok := jwtTokenMap.Load(serviceUsername)
+	if forceFetch || !ok {
+		jwtToken, err = fetchJwtToken(aasClient, serviceUsername, servicePassword)
 		if err != nil {
 			return errors.Wrap(err, "clients/send_http_request.go:addJWTToken() Could not fetch token")
 		}
-		jwtToken, err = aasClient.GetUserToken(serviceUsername)
-		if err != nil {
-			return errors.Wrap(err, "clients/send_http_request.go:addJWTToken() Error retrieving token from cache")
-		}
-		aasRWLock.Unlock()
+		jwtTokenMap.Store(serviceUsername, jwtToken)
+	} else {
+		jwtToken = token.([]byte)
 	}
 	secLog.Debug("clients/send_http_request:addJWTToken() successfully added jwt bearer token")
 	req.Header.Set("Authorization", "Bearer "+string(jwtToken))
 	return nil
+}
+
+func fetchJwtToken(aasClient *aas.JwtClient, serviceUsername string, servicePassword string) ([]byte, error) {
+	log.Trace("clients/send_http_request:fetchJwtToken() Entering")
+	defer log.Trace("clients/send_http_request:fetchJwtToken() Leaving")
+
+	aasClient.AddUser(serviceUsername, servicePassword)
+	err := aasClient.FetchAllTokens()
+	if err != nil {
+		return nil, errors.Wrap(err, "clients/send_http_request.go:fetchJwtToken() Could not fetch token")
+	}
+	jwtToken, err := aasClient.GetUserToken(serviceUsername)
+	if err != nil {
+		return nil, errors.Wrap(err, "clients/send_http_request.go:fetchJwtToken() Error retrieving token from cache")
+	}
+	return jwtToken, nil
 }
 
 //SendRequest method is used to create an http client object and send the request to the server
@@ -74,6 +82,7 @@ func SendRequest(req *http.Request, aasURL, serviceUsername, servicePassword str
 
 	var err error
 	//This has to be done for dynamic loading or unloading of certificates
+	var aasClient = aas.NewJWTClient("")
 	if len(trustedCaCerts) == 0 {
 		aasClient.HTTPClient = clients.HTTPClientTLSNoVerify()
 	} else {
@@ -82,13 +91,12 @@ func SendRequest(req *http.Request, aasURL, serviceUsername, servicePassword str
 			return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Failed to create http client")
 		}
 	}
-	err = addJWTToken(req, aasURL, serviceUsername, servicePassword, trustedCaCerts)
+	err = addJWTToken(aasClient, req, aasURL, serviceUsername, servicePassword, trustedCaCerts, false)
 	if err != nil {
 		return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Failed to add JWT token")
 	}
 
 	log.Debug("clients/send_http_request:SendRequest() AAS client successfully created")
-
 	response, err := aasClient.HTTPClient.Do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Error from response")
@@ -101,13 +109,7 @@ func SendRequest(req *http.Request, aasURL, serviceUsername, servicePassword str
 	}()
 	if response.StatusCode == http.StatusUnauthorized {
 		// fetch token and try again
-		aasRWLock.Lock()
-		err = aasClient.FetchAllTokens()
-		if err != nil {
-			log.WithError(err).Error("clients/send_http_request.go:SendRequest() Failed to fetch all JWT token")
-		}
-		aasRWLock.Unlock()
-		err = addJWTToken(req, aasURL, serviceUsername, servicePassword, trustedCaCerts)
+		err = addJWTToken(aasClient, req, aasURL, serviceUsername, servicePassword, trustedCaCerts, true)
 		if err != nil {
 			return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Failed to add JWT token")
 		}

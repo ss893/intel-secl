@@ -18,14 +18,13 @@ import (
 
 type FlavorGroupStore struct {
 	Store            *DataStore
-	flavorPartsCache map[uuid.UUID]map[fc.FlavorPart]bool
-	cacheLock        sync.RWMutex
+	flavorPartsCache sync.Map
 }
 
 func NewFlavorGroupStore(store *DataStore) *FlavorGroupStore {
 	return &FlavorGroupStore{
 		Store:            store,
-		flavorPartsCache: make(map[uuid.UUID]map[fc.FlavorPart]bool),
+		flavorPartsCache: sync.Map{},
 	}
 }
 
@@ -165,11 +164,9 @@ func buildFlavorGroupSearchQuery(tx *gorm.DB, fgFilter *models.FlavorGroupFilter
 }
 
 func (f *FlavorGroupStore) removeFlavorTypesCacheEntry(fgId uuid.UUID) {
-	f.cacheLock.Lock()
-	if _, exists := f.flavorPartsCache[fgId]; exists {
-		delete(f.flavorPartsCache, fgId)
+	if _, exists := f.flavorPartsCache.Load(fgId); exists {
+		f.flavorPartsCache.Delete(fgId)
 	}
-	f.cacheLock.Unlock()
 }
 
 // AddFlavors creates a FlavorGroup-Flavor link
@@ -347,15 +344,10 @@ func (f *FlavorGroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[fc.F
 
 	// obtain a read lock before we check if an entry exists in the cache. Release the lock after reading in either
 	// path. Cannot use defer RUnlock since we will have to modify the cache if an entry is not found.
-	f.cacheLock.RLock()
-	if flavorParts, exists := f.flavorPartsCache[fgId]; exists {
-		f.cacheLock.RUnlock()
-		return flavorParts, nil
+	if flavorParts, exists := f.flavorPartsCache.Load(fgId); exists {
+		return flavorParts.(map[fc.FlavorPart]bool), nil
 	} else {
-		// remove the read lock first.
-		f.cacheLock.RUnlock()
 		// create the map first.. the map itself might be empty if there are flavors in the flavorgroup
-
 		var flavorParts []string
 		err := f.Store.Db.Model(&flavor{}).Where("id in (select flavor_id from flavorgroup_flavor where flavorgroup_id = ?)", fgId).Pluck(("DISTINCT(flavor_part)"), &flavorParts).Error
 		if err != nil {
@@ -366,10 +358,7 @@ func (f *FlavorGroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[fc.F
 			fpMap[fc.FlavorPart(fp)] = true
 		}
 
-		// take exclusive lock before making the cache entry
-		f.cacheLock.Lock()
-		f.flavorPartsCache[fgId] = fpMap
-		f.cacheLock.Unlock()
+		f.flavorPartsCache.Store(fgId, fpMap)
 		return fpMap, nil
 	}
 

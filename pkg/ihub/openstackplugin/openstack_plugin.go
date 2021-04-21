@@ -44,7 +44,11 @@ type OpenstackDetails struct {
 	SamlCertFilePath   string
 }
 
-var log = commonLog.GetDefaultLogger()
+var (
+	log            = commonLog.GetDefaultLogger()
+	osRegexEpcSize = regexp.MustCompile(constants.RegexEpcSize)
+	rgx            = regexp.MustCompile(constants.RegexNonStandardChar)
+)
 
 //getHostsFromOpenstack Get Hosts from Openstack
 func getHostsFromOpenstack(openstackDetails *OpenstackDetails) error {
@@ -139,7 +143,7 @@ func filterHostReportsForOpenstack(hostDetails *openstackHostDetails, openstackD
 		}
 		if len(sgxData) == 1 {
 			// need to validate contents of EpcSize
-			if !regexp.MustCompile(constants.RegexEpcSize).MatchString(sgxData[0].EpcSize) {
+			if !osRegexEpcSize.MatchString(sgxData[0].EpcSize) {
 				log.Errorf("openstackplugin/openstack_plugin:SendDataToEndPoint() Invalid EPC Size value")
 				hostDetails.EpcSize = constants.SgxTraitEpcSizeNotAvailable
 			} else {
@@ -246,8 +250,6 @@ func getFormattedCustomTraits(prefix string, tagKey string, tagValue string) str
 
 	log.Debug("openstackplugin/openstack_plugin:GetFormattedCustomTraits() getting the formatted custom traits")
 	delimiter := constants.TraitDelimiter
-
-	rgx := regexp.MustCompile(constants.RegexNonStandardChar)
 
 	newTagKey := rgx.ReplaceAllString(tagKey, delimiter)
 	newTagValue := rgx.ReplaceAllString(tagValue, delimiter)

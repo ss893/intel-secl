@@ -42,6 +42,7 @@ func InitRoutes(cfg *config.Configuration, dataStore *postgres.DataStore, fgs *p
 
 	// ISECL-8715 - Prevent potential open redirects to external URLs
 	router.SkipClean(true)
+
 	err := defineSubRoutes(router, constants.OldServiceName, cfg, dataStore, fgs, certStore, hostTrustManager, hostControllerConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not define sub routes")

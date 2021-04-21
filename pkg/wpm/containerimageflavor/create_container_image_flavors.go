@@ -33,8 +33,9 @@ const (
 )
 
 var (
-	log    = cLog.GetDefaultLogger()
-	secLog = cLog.GetSecurityLogger()
+	log        = cLog.GetDefaultLogger()
+	secLog     = cLog.GetSecurityLogger()
+	keyIDRegex = regexp.MustCompile("(?i)([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})")
 )
 
 //CreateContainerImageFlavor is used to create flavor of a container image
@@ -86,8 +87,7 @@ func CreateContainerImageFlavor(imageName, tag, dockerFilePath, buildDir,
 			// We infer the keyID from the keyUrlString
 			if keyID == "" {
 				keyUrl, _ := url.Parse(keyUrlString)
-				re := regexp.MustCompile("(?i)([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})")
-				keyID = re.FindString(keyUrl.Path)
+				keyID = keyIDRegex.FindString(keyUrl.Path)
 			}
 
 			wrappedKeyFileName := "wrappedKey_" + keyID + "_"

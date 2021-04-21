@@ -18,6 +18,10 @@ import (
 type JwtCertificateController struct {
 }
 
+var (
+	re = regexp.MustCompile(`\r?\n`)
+)
+
 func (controller JwtCertificateController) GetJwtCertificate(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 
 	defaultLog.Trace("call to getJwtCertificate")
@@ -28,7 +32,6 @@ func (controller JwtCertificateController) GetJwtCertificate(w http.ResponseWrit
 		return nil, http.StatusInternalServerError, err
 	}
 
-	re := regexp.MustCompile(`\r?\n`)
 	err = validation.ValidatePemEncodedKey(re.ReplaceAllString(string(tokenCertificate), ""))
 
 	if err != nil {

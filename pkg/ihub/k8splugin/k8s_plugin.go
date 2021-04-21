@@ -47,7 +47,11 @@ type KubernetesDetails struct {
 	SamlCertFilePath   string
 }
 
-var log = commonLog.GetDefaultLogger()
+var (
+	log            = commonLog.GetDefaultLogger()
+	osRegexEpcSize = regexp.MustCompile(constants.RegexEpcSize)
+	rgx            = regexp.MustCompile(constants.RegexNonStandardChar)
+)
 
 //GetHosts Getting Hosts From Kubernetes
 func GetHosts(k8sDetails *KubernetesDetails) error {
@@ -443,7 +447,7 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 			}
 
 			// need to validate contents of EpcSize
-			if !regexp.MustCompile(constants.RegexEpcSize).MatchString(sgxData[0].EpcSize) {
+			if !osRegexEpcSize.MatchString(sgxData[0].EpcSize) {
 				log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
 				continue
 			}

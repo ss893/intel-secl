@@ -8,8 +8,8 @@ package hosttrust_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang/groupcache/lru"
 	"github.com/google/uuid"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
@@ -61,6 +61,8 @@ func SetupManagerTests() {
 		Id:               hostId,
 	})
 
+	flavorCache, _ := lru.New(5)
+
 	cfg = domain.HostDataFetcherConfig{
 		HostConnectorProvider: mocks2.MockHostConnectorFactory{},
 		HostConnectionConfig: domain.HostConnectionConfig{
@@ -73,7 +75,7 @@ func SetupManagerTests() {
 		HostStore:        hs,
 		FlavorGroupStore: fgs,
 		FlavorStore:      fs,
-		HostTrustCache:   lru.New(5),
+		HostTrustCache:   flavorCache,
 	}
 
 	_, f, _ = hostfetcher.NewService(cfg, 5)
@@ -113,6 +115,7 @@ func SetupManagerTests() {
 		"../../../lib/verifier/test_data/intel20/tag-cacerts.pem")
 
 	flvrVerifier, _ := libVerifier.NewVerifier(*verifierCertificates)
+	htvTrustCache, _ := lru.New(5)
 
 	htv := domain.HostTrustVerifierConfig{
 		FlavorStore:                     flavorStore,
@@ -122,7 +125,7 @@ func SetupManagerTests() {
 		FlavorVerifier:                  flvrVerifier,
 		SamlIssuerConfig:                *getIssuer(),
 		SkipFlavorSignatureVerification: true,
-		HostTrustCache:                  lru.New(5),
+		HostTrustCache:                  htvTrustCache,
 	}
 	v = hosttrust.NewVerifier(htv)
 
@@ -158,7 +161,7 @@ func TestHostTrustManagerNewService(t *testing.T) {
 
 	err = ht.VerifyHostsAsync([]uuid.UUID{newHost.Id}, true, false)
 	assert.NoError(t, err)
-	time.Sleep(time.Duration(5 * time.Second))
+	time.Sleep(5 * time.Second)
 
 	qrecs, err := qs.Search(&models.QueueFilterCriteria{})
 	assert.NoError(t, err)

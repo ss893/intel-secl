@@ -42,7 +42,7 @@ var (
 	}
 )
 
-type jwtClient struct {
+type JwtClient struct {
 	BaseURL    string
 	HTTPClient *http.Client
 
@@ -50,23 +50,22 @@ type jwtClient struct {
 	tokens map[string][]byte
 }
 
-func NewJWTClient(url string) *jwtClient {
+func NewJWTClient(url string) *JwtClient {
 
-	ret := jwtClient{BaseURL: url}
+	ret := JwtClient{BaseURL: url}
 	ret.users = make(map[string]*types.UserCred)
 	ret.tokens = make(map[string][]byte)
 	return &ret
 }
 
-func (c *jwtClient) AddUser(username, password string) {
+func (c *JwtClient) AddUser(username, password string) {
 	c.users[username] = &types.UserCred{
 		UserName: username,
 		Password: password,
 	}
 }
 
-func (c *jwtClient) GetUserToken(username string) ([]byte, error) {
-
+func (c *JwtClient) GetUserToken(username string) ([]byte, error) {
 	if _, ok := c.users[username]; !ok {
 		ErrUserNotFound.ErrInfo = username
 		return nil, ErrUserNotFound
@@ -79,7 +78,7 @@ func (c *jwtClient) GetUserToken(username string) ([]byte, error) {
 	return nil, ErrJWTNotYetFetched
 }
 
-func (c *jwtClient) FetchAllTokens() error {
+func (c *JwtClient) FetchAllTokens() error {
 
 	for user, userCred := range c.users {
 		token, err := c.fetchToken(userCred)
@@ -91,7 +90,7 @@ func (c *jwtClient) FetchAllTokens() error {
 	return nil
 }
 
-func (c *jwtClient) FetchTokenForUser(username string) ([]byte, error) {
+func (c *JwtClient) FetchTokenForUser(username string) ([]byte, error) {
 
 	userCred, ok := c.users[username]
 	if !ok {
@@ -105,7 +104,7 @@ func (c *jwtClient) FetchTokenForUser(username string) ([]byte, error) {
 	return token, nil
 }
 
-func (c *jwtClient) fetchToken(userCred *types.UserCred) ([]byte, error) {
+func (c *JwtClient) fetchToken(userCred *types.UserCred) ([]byte, error) {
 
 	var err error
 
