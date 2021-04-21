@@ -34,15 +34,22 @@ func (km *KmipManager) CreateKey(request *kbs.KeyRequest) (*models.KeyAttributes
 		Usage:            request.Usage,
 	}
 
-	if request.KeyInformation.Algorithm == constants.CRYPTOALG_AES {
-		kmipId, err := km.client.CreateSymmetricKey(constants.KMIP_CRYPTOALG_AES, request.KeyInformation.KeyLength)
+	switch request.KeyInformation.Algorithm {
+	case constants.CRYPTOALG_AES:
+		kmipId, err := km.client.CreateSymmetricKey(request.KeyInformation.KeyLength)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to create AES key")
 		}
-
 		keyAttributes.KeyLength = request.KeyInformation.KeyLength
 		keyAttributes.KmipKeyID = kmipId
-	} else {
+	case constants.CRYPTOALG_RSA:
+		kmipId, err := km.client.CreateAsymmetricKeyPair(constants.CRYPTOALG_RSA, "", request.KeyInformation.KeyLength)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to create RSA key pair")
+		}
+		keyAttributes.KeyLength = request.KeyInformation.KeyLength
+		keyAttributes.KmipKeyID = kmipId
+	default:
 		return nil, errors.Errorf("%s algorithm is not supported", request.KeyInformation.Algorithm)
 	}
 
@@ -102,7 +109,7 @@ func (km *KmipManager) TransferKey(attributes *models.KeyAttributes) ([]byte, er
 	}
 
 	if attributes.Algorithm == constants.CRYPTOALG_AES || attributes.Algorithm == constants.CRYPTOALG_RSA {
-		return km.client.GetKey(attributes.KmipKeyID, attributes.Algorithm, attributes.KeyLength)
+		return km.client.GetKey(attributes.KmipKeyID, attributes.Algorithm)
 	} else {
 		return nil, errors.Errorf("%s algorithm is not supported", attributes.Algorithm)
 	}

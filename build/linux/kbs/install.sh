@@ -63,7 +63,6 @@ echo "Installing Key Broker Service..."
 
 PRODUCT_HOME=/opt/$COMPONENT_NAME
 BIN_PATH=$PRODUCT_HOME/bin
-LIB_PATH=$PRODUCT_HOME/lib
 LOG_PATH=/var/log/$COMPONENT_NAME/
 CONFIG_PATH=/etc/$COMPONENT_NAME/
 CERTS_PATH=$CONFIG_PATH/certs
@@ -74,7 +73,7 @@ KEYS_TRANSFER_POLICY_PATH=$PRODUCT_HOME/keys-transfer-policy
 SAML_CERTS_PATH=$CERTS_PATH/saml/
 TPM_IDENTITY_CERTS_PATH=$CERTS_PATH/tpm-identity/
 
-for directory in $BIN_PATH $LIB_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TRUSTEDCAS $CERTDIR_TRUSTEDJWTCERTS $KEYS_PATH $KEYS_TRANSFER_POLICY_PATH $SAML_CERTS_PATH $TPM_IDENTITY_CERTS_PATH; do
+for directory in $BIN_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TRUSTEDCAS $CERTDIR_TRUSTEDJWTCERTS $KEYS_PATH $KEYS_TRANSFER_POLICY_PATH $SAML_CERTS_PATH $TPM_IDENTITY_CERTS_PATH; do
     mkdir -p $directory
     if [ $? -ne 0 ]; then
         echo "Cannot create directory: $directory"
@@ -88,12 +87,7 @@ cp $COMPONENT_NAME $BIN_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $BIN_
 chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
-cp libkmip.so.0.2 $LIB_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $LIB_PATH/*
-chmod 700 $LIB_PATH/*
-ln -sfT $LIB_PATH/libkmip.so.0.2 $LIB_PATH/libkmip.so
-ln -sfT $LIB_PATH/libkmip.so.0.2 $LIB_PATH/libkmip.so.0
-
-# log file permission change
+# make log files world readable
 chmod 740 $LOG_PATH
 
 # Install systemd script
