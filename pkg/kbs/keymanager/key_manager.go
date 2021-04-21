@@ -18,19 +18,21 @@ import (
 
 var defaultLog = log.GetDefaultLogger()
 
-func NewKeyManager(cfg *config.KmipConfig, provider string) (KeyManager, error) {
+func NewKeyManager(cfg *config.Configuration) (KeyManager, error) {
 	defaultLog.Trace("keymanager/key_manager:NewKeyManager() Entering")
 	defer defaultLog.Trace("keymanager/key_manager:NewKeyManager() Leaving")
 
-	if strings.ToLower(provider) == constants.KmipKeyManager {
+	if strings.ToLower(cfg.KeyManager) == constants.KmipKeyManager {
 		kmipClient := kmipclient.NewKmipClient()
-		err := kmipClient.InitializeClient(cfg.Version, cfg.ServerIP, cfg.ServerPort, cfg.ClientCert, cfg.ClientKey, cfg.RootCert)
+		err := kmipClient.InitializeClient(cfg.Kmip.Version, cfg.Kmip.ServerIP, cfg.Kmip.ServerPort, cfg.Kmip.Hostname, cfg.Kmip.Username, cfg.Kmip.Password, cfg.Kmip.ClientKeyFilePath, cfg.Kmip.ClientCertificateFilePath, cfg.Kmip.RootCertificateFilePath)
 		if err != nil {
-			return nil, errors.Wrap(err, "keymanager/key_manager:NewKeyManager() Failed to initialize client")
+			defaultLog.WithError(err).Error("keymanager/key_manager:NewKeyManager() Failed to initialize client")
+			return nil, errors.New("Failed to initialize KeyManager")
 		}
 		return NewKmipManager(kmipClient), nil
 	} else {
-		return nil, errors.Errorf("keymanager/key_manager:NewKeyManager() No Key Manager supported for provider: %s", provider)
+		defaultLog.Errorf("keymanager/key_manager:NewKeyManager() No Key Manager supported for provider: %s", cfg.KeyManager)
+		return nil, errors.Errorf("No Key Manager supported for provider: %s", cfg.KeyManager)
 	}
 }
 
