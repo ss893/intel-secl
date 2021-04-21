@@ -74,10 +74,11 @@ const (
 	CRYPTOALG_EC  = "EC"
 
 	// kmip constants
-	KMIP_CRYPTOALG_AES  = 0x03
-	KMIP_CRYPTOALG_RSA  = 0x04
-	KMIP_CRYPTOALG_EC   = 0x06
-	KMIP_CLIENT_SUCCESS = 0x00
+	KMIP_1_4           = "1.4"
+	KMIP_2_0           = "2.0"
+	KMIP_CRYPTOALG_AES = 0x03
+	KMIP_CRYPTOALG_RSA = 0x04
+	KMIP_CRYPTOALG_EC  = 0x06
 
 	NonceLength = 32
 )

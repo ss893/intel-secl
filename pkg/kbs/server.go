@@ -49,7 +49,7 @@ func (app *App) startServer() error {
 	}
 
 	// Initialize KeyManager
-	km, err := keymanager.NewKeyManager(&configuration.Kmip, configuration.KeyManager)
+	km, err := keymanager.NewKeyManager(configuration)
 	if err != nil {
 		return err
 	}
