@@ -1,8 +1,14 @@
 #!/bin/bash
 
 COMPONENT_NAME=hvs
-
 SERVICE_USERNAME=hvs
+
+# Upgrade if component is already installed
+if command -v $COMPONENT_NAME &>/dev/null; then
+  echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
+  ./${COMPONENT_NAME}_upgrade.sh
+  exit $?
+fi
 
 if [[ $EUID -ne 0 ]]; then 
     echo "This installer must be run as root"

@@ -9,6 +9,13 @@ OS="$temp"
 COMPONENT_NAME=wpm
 SERVICE_ENV=wpm.env
 
+# Upgrade if component is already installed
+if command -v $COMPONENT_NAME &>/dev/null; then
+  echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
+  ./${COMPONENT_NAME}_upgrade.sh
+  exit $?
+fi
+
 # find .env file
 echo PWD IS $(pwd)
 if [ -f ~/$SERVICE_ENV ]; then
