@@ -16,7 +16,6 @@ import (
 	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
 	aasModel "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
@@ -232,13 +231,13 @@ func (controller UsersController) QueryUsers(w http.ResponseWriter, r *http.Requ
 
 	users, err := controller.Database.UserStore().RetrieveAll(filter)
 	if err != nil {
-		log.WithError(err).WithField("filter", filter).Error("failed to retrieve users")
+		defaultLog.WithError(err).WithField("filter", filter).Error("failed to retrieve users")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
 	}
 
 	userBytes, err := json.Marshal(users)
 	if err != nil {
-		log.WithError(err).Error("Failed to marshal user content to JSON")
+		defaultLog.WithError(err).Error("Failed to marshal user content to JSON")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
 	}
 	secLog.Infof("%s: Return user query to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
@@ -296,21 +295,21 @@ func (controller UsersController) AddUserRoles(w http.ResponseWriter, r *http.Re
 	})
 
 	if err != nil {
-		log.WithError(err).Info("failed to retrieve roles")
+		defaultLog.WithError(err).Info("failed to retrieve roles")
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "failed to retrieve roles"}
 	}
 
 	// if the number of roles returned from the db does not match the number
 	// provided in json, then abort the association(s)
 	if len(roles) != len(rids.RoleUUIDs) {
-		log.Errorf("could not find matching role or user does not have authorization - requested roles - %s", rids.RoleUUIDs)
+		defaultLog.Errorf("could not find matching role or user does not have authorization - requested roles - %s", rids.RoleUUIDs)
 		errMsg := fmt.Sprintf("could not find matching role or user does not have authorization - requested roles - %s", rids.RoleUUIDs)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: errMsg}
 	}
 
 	u, err := controller.Database.UserStore().Retrieve(types.User{ID: id})
 	if err != nil {
-		log.WithError(err).WithField("id", id).Info("failed to retrieve user")
+		defaultLog.WithError(err).WithField("id", id).Info("failed to retrieve user")
 		errMsg := fmt.Sprintf("failed to retrieve user: %s", id)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: errMsg}
 	}
@@ -390,13 +389,13 @@ func (controller UsersController) QueryUserRoles(w http.ResponseWriter, r *http.
 
 	userRoles, err := controller.Database.UserStore().GetRoles(types.User{ID: id}, roleSearchFilter, true)
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve user roles")
+		defaultLog.WithError(err).Error("failed to retrieve user roles")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
 	}
 
 	userRoleBytes, err := json.Marshal(userRoles)
 	if err != nil {
-		log.WithError(err).Error("Failed to marshal user roles to JSON")
+		defaultLog.WithError(err).Error("Failed to marshal user roles to JSON")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
 	}
 
@@ -475,7 +474,7 @@ func (controller UsersController) QueryUserPermissions(w http.ResponseWriter, r 
 
 	userPermissionsBytes, err := json.Marshal(userPermissions)
 	if err != nil {
-		log.WithError(err).Error("Failed to marshal user permissions to JSON")
+		defaultLog.WithError(err).Error("Failed to marshal user permissions to JSON")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
 	}
 	secLog.Infof("%s: Return user permissions query request to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
@@ -512,7 +511,7 @@ func (controller UsersController) GetUserRoleById(w http.ResponseWriter, r *http
 
 	roleBytes, err := json.Marshal(role)
 	if err != nil {
-		log.WithError(err).Error("Failed to marshal user role to JSON")
+		defaultLog.WithError(err).Error("Failed to marshal user role to JSON")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
 	}
 	return string(roleBytes), http.StatusOK, nil

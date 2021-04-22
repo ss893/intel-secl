@@ -11,7 +11,6 @@ import (
 	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io"
 )
@@ -44,8 +43,8 @@ var envHelp = map[string]string{
 }
 
 func (uc UpdateServiceConfig) Run() error {
-	log.Trace("tasks/update_config:Run() Entering")
-	defer log.Trace("tasks/update_config:Run() Leaving")
+	defaultLog.Trace("tasks/update_config:Run() Entering")
+	defer defaultLog.Trace("tasks/update_config:Run() Leaving")
 	(*uc.AppConfig).Log = commConfig.LogConfig{
 		MaxLength:    viper.GetInt("log-max-length"),
 		EnableStdout: viper.GetBool("log-enable-stdout"),

@@ -13,7 +13,6 @@ import (
 	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
 	aasModel "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 
@@ -173,7 +172,7 @@ func (controller RolesController) GetRole(w http.ResponseWriter, r *http.Request
 
 	roleBytes, err := json.Marshal(rl)
 	if err != nil {
-		log.WithError(err).Error("failed to marshal json response")
+		defaultLog.WithError(err).Error("failed to marshal json response")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "failed to marshal json response"}
 	}
 	secLog.WithField("role", rl).Infof("%s: Return get role request to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
@@ -221,7 +220,7 @@ func (controller RolesController) DeleteRole(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := controller.Database.RoleStore().Delete(*delRl); err != nil {
-		log.WithError(err).WithField("id", id).Info("failed to delete role")
+		defaultLog.WithError(err).WithField("id", id).Info("failed to delete role")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to delete role"}
 	}
 	secLog.WithField("role", delRl).Infof("%s: Role deleted by: %s", commLogMsg.PrivilegeModified, r.RemoteAddr)
@@ -294,7 +293,7 @@ func (controller RolesController) QueryRoles(w http.ResponseWriter, r *http.Requ
 
 	roles, err := controller.Database.RoleStore().RetrieveAll(&filter)
 	if err != nil {
-		log.WithError(err).WithField("filter", filter).Info("failed to retrieve roles")
+		defaultLog.WithError(err).WithField("filter", filter).Info("failed to retrieve roles")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "failed to retrieve roles"}
 	}
 

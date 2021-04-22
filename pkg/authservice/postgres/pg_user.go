@@ -5,7 +5,6 @@
 package postgres
 
 import (
-	"fmt"
 	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
 	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
 
@@ -139,9 +138,9 @@ func (r *PostgresUserStore) GetPermissions(u types.User, rs *types.RoleSearch) (
 	}
 
 	curr := ct.PermissionInfo{res[0].Service, res[0].Context, []string{res[0].Rule}}
-	fmt.Println("First record:", res[0])
+	defaultLog.Info("First record:", res[0])
 	for i := 1; i < len(res); i++ {
-		fmt.Println("Record ", i, ":", res[i])
+		defaultLog.Info("Record ", i, ":", res[i])
 		if res[i].Service == curr.Service && res[i].Context == curr.Context {
 			curr.Rules = append(curr.Rules, res[i].Rule)
 		} else {
