@@ -93,13 +93,14 @@ const (
 	Running State = true
 )
 
-var DefaultRoles = [4]string{Administrator, RoleManager, UserManager, UserRoleManager}
+var DefaultRoles = [5]string{Administrator, RoleManager, UserManager, UserRoleManager, CustomClaimsCreator}
 
 const (
-	Administrator   = "Administrator"
-	RoleManager     = "RoleManager"
-	UserManager     = "UserManager"
-	UserRoleManager = "UserRoleManager"
+	Administrator       = "Administrator"
+	RoleManager         = "RoleManager"
+	UserManager         = "UserManager"
+	UserRoleManager     = "UserRoleManager"
+	CustomClaimsCreator = "CustomClaimsCreator"
 )
 
 func GetDefaultAdministratorRoles() []ct.RoleCreate {
@@ -143,6 +144,16 @@ func GetDefaultAdministratorRoles() []ct.RoleCreate {
 			},
 			Permissions: []string{
 				UserRoleCreate + ":*", UserRoleRetrieve + ":*", UserRoleSearch + ":*", UserRoleDelete + ":*",
+			},
+		},
+		{
+			RoleInfo: ct.RoleInfo{
+				Service: ServiceName,
+				Name:    CustomClaimsCreator,
+				Context: "",
+			},
+			Permissions: []string{
+				CustomClaimsCreate,
 			},
 		},
 	}

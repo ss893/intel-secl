@@ -306,7 +306,7 @@ func (controller RolesController) UpdateRole(w http.ResponseWriter, r *http.Requ
 	return nil, http.StatusNotImplemented, &commErr.ResourceError{Message: ""}
 }
 
-func contains(strArr [4]string, str string) bool {
+func contains(strArr [5]string, str string) bool {
 	for _, s := range strArr {
 		if s == str {
 			return true
