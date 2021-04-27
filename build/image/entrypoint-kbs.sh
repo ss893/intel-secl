@@ -36,12 +36,15 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
 fi
 
 if [ ! -z $SETUP_TASK ]; then
+  cp $CONFIG_PATH/config.yml /tmp/config.yml
   IFS=',' read -ra ADDR <<< "$SETUP_TASK"
   for task in "${ADDR[@]}"; do
     kbs setup $task --force
     if [ $? -ne 0 ]; then
+      cp /tmp/config.yml $CONFIG_PATH/config.yml
       exit 1
     fi
+    rm -rf /tmp/config.yml
   done
 fi
 
