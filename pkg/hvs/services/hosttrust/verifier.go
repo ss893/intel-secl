@@ -96,7 +96,7 @@ func (v *Verifier) Verify(hostId uuid.UUID, hostData *types.HostManifest, newDat
 		// check if the PCR Values are unchanged.
 		if ok {
 			cachedQuote := cacheEntry.(*models.QuoteReportCache)
-			if cachedQuote.QuoteDigest != "" && hostData.QuoteDigest != cachedQuote.QuoteDigest {
+			if cachedQuote.QuoteDigest != "" && hostData.QuoteDigest == cachedQuote.QuoteDigest {
 				// retrieve the stored report
 				log.Debugf("hosttrust/verifier:Verify() Quote values matches cached value for host %s - skipping flavor verification", hostId.String())
 				if report, err := v.refreshTrustReport(hostId, cachedQuote); err == nil {
