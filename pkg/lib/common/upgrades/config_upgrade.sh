@@ -15,20 +15,20 @@
 
 #Upgrade config
 echo "Config upgrade started"
-#get is currently installed version number after removing '.'
+#get currently installed version number after removing '.'
 COMPONENT_VERSION=$(echo $1 | sed 's/v//' | sed 's/\.//g')
 READ_FILES=false
 CONFIG_DIR="./config"
 if [ -d "$CONFIG_DIR" ]; then
   chmod +x $CONFIG_DIR/*.sh
   #Sort files
-  ls -1 $CONFIG_DIR | sort -n -k1.4 >temp_configs
+  cd $CONFIG_DIR && ls -1 *.sh | sort -n -k1.4 >temp_configs
   IFS=$'\r\n' GLOBIGNORE='*' command eval 'configUpgradeFiles=($(cat temp_configs))'
   rm -rf temp_configs
 
   for i in "${configUpgradeFiles[@]}"; do
     :
-    #get is script version number after removing '.'
+    #get script version number after removing '.'
     VERSION=$(echo $i | cut -d'_' -f1 | sed 's/v//' | sed 's/\.//g')
     #Ignore files till component version is matched
     if [ $VERSION -gt $COMPONENT_VERSION ]; then
@@ -37,14 +37,15 @@ if [ -d "$CONFIG_DIR" ]; then
 
     #Run all config files which are post current release
     if $READ_FILES; then
-      echo "Running upgrade script - $CONFIG_DIR/$i"
-      $CONFIG_DIR/$i
+      echo "Running upgrade script - $i with arguments $2"
+      ./$i $2
       if [ $? != 0 ]; then
-        echo "Failed to upgrade $i configuration"
-        break
+        echo "Failed to apply $i upgrade script"
+        exit 1
       fi
     fi
   done
+  cd -
 fi
 if $READ_FILES; then
   echo "Config upgraded successfully"

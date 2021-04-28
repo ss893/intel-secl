@@ -21,6 +21,7 @@ Available Commands:
     create-container-image-flavor    Create container image flavors and encrypt the container image
     get-container-image-id           Fetch the container image ID given the sha256 digest of the image
     unwrap-key                       Unwraps the image encryption key fetched from KBS
+    fetch-key                        Fetches the image encryption key with associated tags from KBS
     uninstall [--purge]              Uninstall wpm. --purge option needs to be applied to remove configuration and data files
     setup                            Run workload-policy-manager setup tasks
 
@@ -112,7 +113,7 @@ func (a *App) printUnwrapKeyUsage() {
 	fmt.Fprintf(a.consoleWriter(), "usage: unwrap-key [-i |--in] <wrapped key file path>")
 }
 
-// unwrap-key command usage string
+// get-container-image-id command usage string
 func (a *App) printGetContainerImageIdUsage() {
 	log.Trace("app:printGetContainerImageIdUsage() Entering")
 	defer log.Trace("app:printGetContainerImageIdUsage() Leaving")

@@ -26,9 +26,11 @@ help() {
        -s | --service  - Service name                # To detect a version, start and stop service
        -v | --version  - Version of latest binary    # Version of the latest binary
        -b | --backup   - Backup folder path          # Folder path for backup, default would be taken as /tmp/
-       -n | --new-exec - New executable name         # Name of the executable {component}
+       -n | --new-exec - New executable name         # New name of the executable {component}
+       -o | --old-exec - Old executable name         # Old name of the executable {component}
        -e | --exec     - Executable path             # Installed executable path /opt/{component}/bin/{component}
-       -c | --config   - Configuration folder path   # Configuration folder path /etc/{component}/
+       -c | --config   - Configuration folder path   # Configuration folder path /etc/{component}
+       -l | --log      - Logging folder path         # Logging folder path, default would be taken as /var/log/
        -h | --help     - Script help                 # Script help
 "
   exit 0
@@ -59,8 +61,16 @@ parse_param() {
       CONFIG_PATH="$2"
       shift 2
       ;;
+    -l | --log)
+      LOG_PATH="$2"
+      shift 2
+      ;;
     -n | --new-exec)
       NEW_EXEC_NAME="$2"
+      shift 2
+      ;;
+    -o | --old-exec)
+      OLD_EXEC_NAME="$2"
       shift 2
       ;;
     -h | --help)
@@ -127,7 +137,8 @@ main() {
   #Set default path for backup if not provided
   BACKUP_PATH=${BACKUP_PATH:-"/tmp/"}
   INSTALLED_EXEC_PATH=${INSTALLED_EXEC_PATH:-"/opt/$SERVICE_NAME/bin/$SERVICE_NAME"}
-  CONFIG_PATH=${CONFIG_PATH:-"/etc/$SERVICE_NAME/"}
+  CONFIG_PATH=${CONFIG_PATH:-"/etc/$SERVICE_NAME"}
+  LOG_PATH=${LOG_PATH:-"/var/log/"}
   NEW_EXEC_NAME=${NEW_EXEC_NAME:-"$SERVICE_NAME"}
 
   echo "Starting with the upgrade process"
@@ -137,7 +148,13 @@ main() {
   echo "BACKUP_PATH             = ${BACKUP_PATH}"
   echo "INSTALLED_EXEC_PATH     = ${INSTALLED_EXEC_PATH}"
   echo "CONFIG_PATH             = ${CONFIG_PATH}"
+  echo "LOG_PATH                = ${LOG_PATH}"
   echo "NEW_EXEC_NAME           = ${NEW_EXEC_NAME}"
+  echo "OLD_EXEC_NAME           = ${OLD_EXEC_NAME}"
+
+  if [ -z "$OLD_EXEC_NAME" ]; then
+    OLD_EXEC_NAME=$NEW_EXEC_NAME
+  fi
 
   COMPONENT_VERSION=`$INSTALLED_EXEC_PATH --version | grep Version | cut -d' ' -f2 | cut -d'-' -f1`
   if [ -z "$COMPONENT_VERSION" ]; then
@@ -164,7 +181,7 @@ main() {
 
   BACKUP_DIR=${BACKUP_PATH}${SERVICE_NAME}_backup
   if [[ -z "$SERVICE_NAME" ]]; then
-    BACKUP_DIR=${BACKUP_PATH}${NEW_EXEC_NAME}_backup
+    BACKUP_DIR=${BACKUP_PATH}${OLD_EXEC_NAME}_backup
   fi
 
   echo "Creating backup directory $BACKUP_DIR"
@@ -186,17 +203,33 @@ main() {
   exit_on_error true "Failed to take backup of executable, exiting."
 
   echo "Backing up configuration to ${BACKUP_DIR}/config"
-  cp -af ${CONFIG_PATH}* ${BACKUP_DIR}/config
+  cp -af ${CONFIG_PATH}/* ${BACKUP_DIR}/config
   exit_on_error true "Failed to take backup of configuration, exiting."
 
   echo "Migrating Configuration"
-  ./config_upgrade.sh $COMPONENT_VERSION
+  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config
   exit_on_error false "Failed to upgrade the configuration to the latest."
 
   check_service_stop_status
+
   echo "Replacing executable to the latest version"
   cp -f ${NEW_EXEC_NAME} ${INSTALLED_EXEC_PATH}
   exit_on_error false "Failed to copy to new executable."
+
+  if [ "$NEW_EXEC_NAME" != "$OLD_EXEC_NAME" ]; then
+    echo "Updating component directories and symlinks"
+    echo "Updating log location from ${LOG_PATH}${OLD_EXEC_NAME} to ${LOG_PATH}${NEW_EXEC_NAME}"
+    mv ${LOG_PATH}${OLD_EXEC_NAME} ${LOG_PATH}${NEW_EXEC_NAME}
+    CONFIG_DIR_PATH=$(dirname "${CONFIG_PATH}")
+    echo "Updating config location from ${CONFIG_PATH} to ${CONFIG_DIR_PATH}/${NEW_EXEC_NAME}"
+    mv ${CONFIG_PATH} ${CONFIG_DIR_PATH}/${NEW_EXEC_NAME}
+    OLD_INSTALL_PATH=$(dirname "${INSTALLED_DIR_PATH}")
+    BASE_INSTALL_PATH=$(dirname "${OLD_INSTALL_PATH}")
+    echo "Updating install location from ${OLD_INSTALL_PATH} to ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}"
+    mv ${OLD_INSTALL_PATH} ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}
+    ln -sfT ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}/bin/${NEW_EXEC_NAME} /usr/bin/${NEW_EXEC_NAME}
+    hash ${NEW_EXEC_NAME}
+  fi
 
   start_service
   echo "Upgrade to the latest version '$UPGRADE_VERSION' completed successfully"

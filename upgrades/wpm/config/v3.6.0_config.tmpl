@@ -1,0 +1,15 @@
+aas-base-url: {{.aas.apiurl}}
+cms-base-url: {{.cms.baseurl}}
+cms-tls-cert-sha384: {{.cmstlscertdigest}}
+kbs-base-url: {{.kms.apiurl}}
+wpm:
+  service-username: {{.wpm.username}}
+  service-password: {{.wpm.password}}
+log:
+  max-length: {{.logentrymaxlength}}
+  enable-stdout: {{.logenablestdout}}
+  level: {{.loglevel}}
+flavor-signing:
+  cert-file: {{.flavorsigningcertfile}}
+  key-file: {{.flavorsigningkeyfile}}
+  common-name: {{.subject.commonname}}

@@ -26,7 +26,9 @@ kbs:
 %-installer: %
 	mkdir -p installer
 	cp build/linux/$*/* installer/
-	cp pkg/lib/common/upgrades/* installer/
+	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
+	cp pkg/lib/common/upgrades/config-upgrade installer/
+	cp pkg/lib/common/upgrades/*.sh installer/
 	cp -a upgrades/manifest/ installer/
 	cp -a upgrades/$*/* installer/
 	mv installer/build/* installer/
