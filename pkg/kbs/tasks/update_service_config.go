@@ -14,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io"
+	"strings"
 )
 
 type UpdateServiceConfig struct {
@@ -26,6 +27,9 @@ type UpdateServiceConfig struct {
 }
 
 const envHelpPrompt = "Following environment variables are required for update-service-config setup:"
+
+var allowedSKCChallengeTypes = map[string]bool{"sgx": true, "sw": true, "sgx,sw": true, "sw,sgx": true}
+var allowedKeyManagers = map[string]bool{"directory": true, "kmip": true}
 
 var envHelp = map[string]string{
 	"SERVICE_USERNAME":           "The service username as configured in AAS",
@@ -86,6 +90,7 @@ func (uc UpdateServiceConfig) Run() error {
 		SQVSUrl:           viper.GetString("sqvs-url"),
 		SessionExpiryTime: viper.GetInt("session-expiry-time"),
 	}
+	(*uc.AppConfig).KeyManager = viper.GetString("key-manager")
 	return nil
 }
 
@@ -96,6 +101,14 @@ func (uc UpdateServiceConfig) Validate() error {
 	if (*uc.AppConfig).Server.Port < 1024 ||
 		(*uc.AppConfig).Server.Port > 65535 {
 		return errors.New("Configured port is not valid")
+	}
+	if _, validInput := allowedKeyManagers[strings.ToLower((*uc.AppConfig).KeyManager)]; !validInput {
+		return errors.New("Invalid value provided for KEY_MANAGER. Value should be either directory or kmip")
+	}
+	if (*uc.AppConfig).Skc.StmLabel != "" {
+		if _, validInput := allowedSKCChallengeTypes[strings.ToLower((*uc.AppConfig).Skc.StmLabel)]; !validInput {
+			return errors.New("Invalid value provided for SKC_CHALLENGE_TYPE. List of allowed values SGX, SW or any combination for SGX and SW")
+		}
 	}
 	return nil
 }
