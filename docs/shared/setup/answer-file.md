@@ -47,28 +47,31 @@ INVALID_LINE=
 =invalid-line
 ```
 
-- Actual answer file for setup
+- An example of an answer file for setting up HVS:
 
 ```text
 CMS_BASE_URL=https://<cms-url>:<cms-port>/cms/v1/
-CMS_CERT_DIGEST=<cert-digest>
+CMS_TLS_CERT_SHA384=<cert-digest>
+AAS_API_URL=https://<aas-url>:<aas-port>/aas/v1
 
 BEARER_TOKEN=<token>
 
 TLS_COMMON_NAME=Mt Wilson TLS Certificate
 TLS_SAN_LIST=<hvs-ip>,127.0.0.1,localhost
 
-DATABASE_VENDOR=dbvendor
-DATABASE_HOST=dbhome
-DATABASE_PORT=1234
-DATABASE_DB_NAME=dbname
-DATABASE_USERNAME=username
-DATABASE_PASSWORD=password
-DATABASE_SSL_MODE=allow
-DATABASE_SSL_CERT=/etc/hvs/db-ssl.cert
-DATABASE_SSL_CERT_SOURCE=db-cert-source
-DATABASE_CONN_RETRY_ATTEMPTS=5
-DATABASE_CONN_RETRY_TIME=100
+HVS_DB_HOSTNAME=<host-name-of-db>
+HVS_DB_NAME=hvsdb
+HVS_DB_SSLCERTSRC=/etc/postgresql/server.crt
+HVS_DB_PORT="5432"
+HVS_DB_SSLMODE=verify-full
+HVS_DB_USERNAME=vsdbuser
+HVS_DB_PASSWORD=dbpassword
+HVS_DB_NAME=vsdb
+HVS_DB_CONN_RETRY_ATTEMPTS=5
+HVS_DB_CONN_RETRY_TIME=100
 
 SERVER_PORT=4567
+
+HVS_SERVICE_USERNAME=<HVS username in AAS>
+HVS_SERVICE_PASSWORD=<HVS password in AAS>
 ```
