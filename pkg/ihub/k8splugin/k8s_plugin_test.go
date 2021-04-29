@@ -263,19 +263,12 @@ func TestUpdateCRD(t *testing.T) {
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.args.isSGXAttestation {
-				tt.args.k.Config.AttestationService.AttestationType = "SGX"
-			} else {
-				tt.args.k.Config.AttestationService.AttestationType = "HVS"
-			}
-
 			if tt.args.httpMethodType == "POST" {
 				tt.args.k.Config.Endpoint.CRDName = "custom-isecl-not-found"
 			} else if tt.args.httpMethodType == "PUT" {
 				tt.args.k.Config.Endpoint.CRDName = "custom-isecl"
 			}
 
-			log.Info(tt.args.k.Config.Endpoint.CRDName)
 			err := UpdateCRD(tt.args.k)
 
 			if (err != nil) != tt.wantErr {
@@ -383,11 +376,10 @@ func TestKubePluginInit(t *testing.T) {
 			kPlugin.K8sClient = k8sClient
 
 			if tt.args.isSGXAttestation {
-				tt.args.configuration.AttestationService.AttestationType = "SGX"
+				tt.args.configuration.AttestationService.SHVSBaseURL = "http://localhost" + port + "/"
 			} else {
-				tt.args.configuration.AttestationService.AttestationType = "HVS"
+				tt.args.configuration.AttestationService.HVSBaseURL = "http://localhost" + port + "/"
 			}
-
 			err = SendDataToEndPoint(kPlugin)
 
 			if err != nil && tt.wantErr == false {

@@ -29,7 +29,6 @@ const (
 	DefaultKeyLength            = 3072
 	DefaultTLSSan               = "127.0.0.1,localhost"
 	DefaultIHUBTlsCn            = "Integration Hub TLS Certificate"
-	DefaultEndPointType         = "KUBERNETES"
 	K8sTenant                   = "KUBERNETES"
 	OpenStackTenant             = "OPENSTACK"
 	HTTP                        = "HTTP"
@@ -40,8 +39,6 @@ const (
 	KubernetesCRDKind           = "HostAttributesCrd"
 	KubernetesMetaDataNameSpace = "default"
 	KubernetesCRDName           = "custom-isecl"
-	DefaultAttestationType      = "HVS"
-	AttestationTypeSGX          = "SGX"
 	DefaultK8SCertFile          = "apiserver.crt"
 	RegexNonStandardChar        = "[^a-zA-Z0-9]"
 	DefaultLogEntryMaxlength    = 1500
@@ -52,16 +49,6 @@ const (
 	TrustedTrait                = IseclTraitPrefix + TraitDelimiter + "TRUSTED"
 	OpenStackAPIVersion         = "placement 1.23"
 	MaxArguments                = 5
-)
-
-// State represents whether or not a daemon is running or not
-type State bool
-
-const (
-	// Stopped is the default nil value, indicating not running
-	Stopped State = false
-	// Running means the daemon is active
-	Running State = true
 )
 
 const (

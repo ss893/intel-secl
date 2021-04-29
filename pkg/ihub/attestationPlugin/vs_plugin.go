@@ -68,7 +68,7 @@ func initializeClient(con *config.Configuration, certDirectory string) (*vs.Clie
 		return nil, errors.Wrap(err, "attestationPlugin/vs_plugin:initializeClient() Error parsing AAS URL")
 	}
 
-	attestationURL, err := url.Parse(con.AttestationService.AttestationURL)
+	attestationURL, err := url.Parse(con.AttestationService.HVSBaseURL)
 	if err != nil {
 		return nil, errors.Wrap(err, "attestationPlugin/vs_plugin:initializeClient() Error in parsing attestation service URL")
 	}
@@ -89,7 +89,7 @@ func GetHostReports(h string, conf *config.Configuration, certDirectory, samlCer
 	log.Trace("attestationPlugin/vs_plugin:GetHostReports() Entering")
 	defer log.Trace("attestationPlugin/vs_plugin:GetHostReports() Leaving")
 
-	reportUrl := conf.AttestationService.AttestationURL + "reports?latestPerHost=true&"
+	reportUrl := conf.AttestationService.HVSBaseURL + "reports?latestPerHost=true&"
 
 	var filterType string
 	if conf.Endpoint.Type == constants.OpenStackTenant {

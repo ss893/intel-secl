@@ -30,8 +30,7 @@ func TestDownloadSamlCertValidate(t *testing.T) {
 	}()
 	time.Sleep(1 * time.Second)
 	c1 := testutility.SetupMockK8sConfiguration(t, port)
-	c2 := testutility.SetupMockK8sConfiguration(t, port)
-	c2.AttestationService.AttestationURL = c2.AttestationService.AttestationURL + "/e"
+	c1.AttestationService.HVSBaseURL = c1.AttestationService.HVSBaseURL + "/e"
 
 	temp, err := ioutil.TempFile("", "samlCert.pem")
 	if err != nil {
@@ -59,7 +58,7 @@ func TestDownloadSamlCertValidate(t *testing.T) {
 		}, {
 			name: "download-saml-cert-validate negative test",
 			d: DownloadSamlCert{
-				AttestationConfig: &c2.AttestationService,
+				AttestationConfig: &c1.AttestationService,
 				SamlCertPath:      "",
 				ConsoleWriter:     os.Stdout,
 			},
@@ -89,7 +88,7 @@ func TestDownloadSamlCertRun(t *testing.T) {
 
 	tempSamlFile, err := ioutil.TempFile("", "samlCert.pem")
 	if err != nil {
-		t.Errorf("tasks/download_saml_cert_test:TestDownloadSamlCertRun() unable to create samlecert.pem temp file %v", err)
+		t.Errorf("tasks/download_saml_cert_test:TestDownloadSamlCertRun() unable to create samlCert.pem temp file %v", err)
 	}
 	defer func() {
 		cerr := tempSamlFile.Close()
@@ -101,22 +100,37 @@ func TestDownloadSamlCertRun(t *testing.T) {
 			t.Errorf("Error removing file : %v", derr)
 		}
 	}()
+
+	temp, err := ioutil.TempFile("", "config.yml")
+	if err != nil {
+		t.Log("tasks/tenant_connection_test:TestTenantConnectionRun(): Error in Reading Config File")
+	}
+	defer func() {
+		cerr := temp.Close()
+		if cerr != nil {
+			t.Errorf("Error closing file: %v", cerr)
+		}
+		derr := os.Remove(temp.Name())
+		if derr != nil {
+			t.Errorf("Error removing file :%v", derr)
+		}
+	}()
+
+	conf, _ := config.LoadConfiguration()
+
+	conf.AttestationService.HVSBaseURL = "http://localhost" + port + "/mtwilson/v2/"
+
 	tests := []struct {
-		name      string
-		d         DownloadSamlCert
-		EnvValues map[string]string
-		wantErr   bool
+		name    string
+		d       DownloadSamlCert
+		wantErr bool
 	}{
 		{
 			name: "download-saml-cert-run valid test",
 			d: DownloadSamlCert{
-				AttestationConfig: &config.AttestationConfig{},
+				AttestationConfig: &conf.AttestationService,
 				SamlCertPath:      tempSamlFile.Name(),
 				ConsoleWriter:     os.Stdout,
-			},
-			EnvValues: map[string]string{
-				"ATTESTATION_TYPE":        "HVS",
-				"ATTESTATION_SERVICE_URL": "http://localhost" + port + "/mtwilson/v2/",
 			},
 			wantErr: false,
 		},
@@ -124,13 +138,9 @@ func TestDownloadSamlCertRun(t *testing.T) {
 		{
 			name: "download-saml-cert-run negative test",
 			d: DownloadSamlCert{
-				AttestationConfig: &config.AttestationConfig{},
+				AttestationConfig: &conf.AttestationService,
 				SamlCertPath:      "",
 				ConsoleWriter:     os.Stdout,
-			},
-			EnvValues: map[string]string{
-				"ATTESTATION_TYPE":        "HVS",
-				"ATTESTATION_SERVICE_URL": "http://localhost" + port + "/mtwilson/v2/",
 			},
 			wantErr: true,
 		},
@@ -138,17 +148,6 @@ func TestDownloadSamlCertRun(t *testing.T) {
 	for _, tt := range tests {
 		vsPlugin.VsClient = &vs.Client{}
 		t.Run(tt.name, func(t *testing.T) {
-			for key := range tt.EnvValues {
-				os.Unsetenv(key)
-				os.Setenv(key, tt.EnvValues[key])
-				defer func() {
-					derr := os.Unsetenv(key)
-					if derr != nil {
-						t.Errorf("Error unseting ENV :%v", derr)
-					}
-				}()
-			}
-
 			if err := tt.d.Run(); (err != nil) != tt.wantErr {
 				t.Errorf("tasks/download_saml_cert_test:TestDownloadSamlCertRun() error = %v, wantErr %v", err, tt.wantErr)
 			}

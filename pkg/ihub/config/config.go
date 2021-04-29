@@ -30,8 +30,8 @@ type Configuration struct {
 }
 
 type AttestationConfig struct {
-	AttestationURL  string `yaml:"attestation-url" mapstructure:"attestation-url"`
-	AttestationType string `yaml:"attestation-type" mapstructure:"attestation-type"`
+	HVSBaseURL  string `yaml:"hvs-base-url" mapstructure:"hvs-base-url"`
+	SHVSBaseURL string `yaml:"shvs-base-url" mapstructure:"shvs-base-url"`
 }
 
 type Endpoint struct {

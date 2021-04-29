@@ -51,7 +51,7 @@ func TestGetHostReportsSGX(t *testing.T) {
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						AttestationURL: "http://localhost" + port + "/sgx-hvs/v2/",
+						SHVSBaseURL: "http://localhost" + port + "/sgx-hvs/v2/",
 					},
 				},
 			},
@@ -68,52 +68,6 @@ func TestGetHostReportsSGX(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetHostReportsSGX() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestGetSHVSVersion(t *testing.T) {
-
-	server, port := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
-
-	type args struct {
-		config *config.Configuration
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "Valid Test: get-shvs-version",
-			args: args{
-				config: &config.Configuration{
-					AASApiUrl: "http://localhost" + port + "/aas",
-					IHUB: commConfig.ServiceConfig{
-						Username: "admin@hub",
-						Password: "hubAdminPass",
-					},
-					AttestationService: config.AttestationConfig{
-						AttestationURL: "http://localhost" + port + "/sgx-hvs/v2",
-					},
-				},
-			},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := GetSHVSVersion(tt.args.config, "")
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetSHVSVersion() error = %v, wantErr %v", err, tt.wantErr)
-				return
 			}
 		})
 	}
@@ -149,8 +103,7 @@ func Test_initializeSKCClient(t *testing.T) {
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						AttestationType: "SGX",
-						AttestationURL:  "http://localhost" + port + "/sgx-hvs/v2",
+						SHVSBaseURL: "http://localhost" + port + "/sgx-hvs/v2",
 					},
 				},
 			},
