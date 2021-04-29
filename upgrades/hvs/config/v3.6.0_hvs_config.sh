@@ -1,0 +1,9 @@
+#!/bin/bash
+
+SERVICE_NAME=hvs
+CONFIG_FILE="/etc/$SERVICE_NAME/config.yml"
+
+echo "Starting $SERVICE_NAME config upgrade to v3.6.0"
+# Update default value of host trust cache
+sed -ri 's/^(\s*)(host-trust-cache-threshold\s*:\s*0\s*$)/\1host-trust-cache-threshold: 100000/' $CONFIG_FILE
+echo "Completed $SERVICE_NAME config upgrade to v3.6.0"
