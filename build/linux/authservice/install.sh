@@ -73,7 +73,7 @@ ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 cp db_rotation.sql $DB_SCRIPT_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $DB_SCRIPT_PATH/*
 
-# make log files world readable
+# make log files only owner readable
 chmod 700 $LOG_PATH
 
 # Install systemd script
