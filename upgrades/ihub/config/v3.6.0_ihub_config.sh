@@ -6,6 +6,15 @@ PRODUCT_HOME=/opt/$COMPONENT_NAME
 INSTANCE_NAME=${INSTANCE_NAME:-$COMPONENT_NAME}
 
 echo "Starting $COMPONENT_NAME config upgrade to v3.6.0"
+# Update config file
+echo "Using HVS Base Url $HVS_BASE_URL"
+echo "Using SHVS Base Url $SHVS_BASE_URL"
+./$COMPONENT_NAME setup attestation-service-connection
+if [ $? -ne 0 ]; then
+  echo "Failed to update config to v3.6.0"
+  exit 1
+fi
+
 # Install systemd script
 SERVICE_FILE=$SERVICE_USERNAME@.service
 cp $SERVICE_USERNAME.service $PRODUCT_HOME/$SERVICE_FILE && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/$SERVICE_FILE && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME
