@@ -10,9 +10,9 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
-	"errors"
 	"fmt"
 	hc "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector"
+	"github.com/pkg/errors"
 	"math/big"
 	"reflect"
 	"time"
@@ -30,19 +30,22 @@ func (aTag *atag) CreateAssetTag(tagCertConfig TagCertConfig) ([]byte, error) {
 
 	_, err = x509.ParseCertificate(tagCertConfig.TagCACert.Raw)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse the certificate to create an asset tag certificate: %s", err)
+		return nil, errors.Wrap(err, "Failed to parse the certificate to create an asset tag certificate")
 	}
 
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to generate serial number: %s", err)
+		return nil, errors.Wrap(err, "Failed to generate serial number")
 	}
 
 	var extensions []pkix.Extension
 
 	for _, tagKvAttribute := range tagCertConfig.TagAttributes {
-		derEncodedAttr, _ := asn1.Marshal(tagKvAttribute)
+		derEncodedAttr, err := asn1.Marshal(tagKvAttribute)
+		if err != nil {
+			return nil, errors.Wrap(err, "Failed to marshal ASN1 Tag Cert attributes")
+		}
 		extensions = append(extensions, pkix.Extension{
 			Critical: false,
 			Id:       asn1.ObjectIdentifier{2, 5, 4, 789, 1},
