@@ -8,6 +8,7 @@ import (
 	"fmt"
 	_ "github.com/intel-secl/intel-secl/v3/docs/shared/aas"
 	"github.com/intel-secl/intel-secl/v3/pkg/authservice"
+	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
 	"os"
 	"os/user"
 	"strconv"
@@ -37,6 +38,11 @@ func openLogFiles() (logFile *os.File, httpLogFile *os.File, secLogFile *os.File
 	}
 	if err = os.Chmod(SecurityLogFile, 0664); err != nil {
 		return nil, nil, nil, err
+	}
+
+	// Containers are always run as non root users, does not require changing ownership of log directories
+	if utils.IsContainerEnv() {
+		return logFile, httpLogFile, secLogFile, nil
 	}
 
 	aasUser, err := user.Lookup(ServiceUserName)
