@@ -158,8 +158,11 @@ main() {
 
   COMPONENT_VERSION=`$INSTALLED_EXEC_PATH --version | grep Version | cut -d' ' -f2 | cut -d'-' -f1`
   if [ -z "$COMPONENT_VERSION" ]; then
-    echo "Failed to read the component version, exiting."
-    exit 1
+    COMPONENT_VERSION=`$INSTALLED_EXEC_PATH version | grep Version | cut -d' ' -f2 | cut -d'-' -f1`
+    if [ -z "$COMPONENT_VERSION" ]; then
+      echo "Failed to read the component version, exiting."
+      exit 1
+    fi
   fi
 
   if [ "$UPGRADE_VERSION" = "$COMPONENT_VERSION" ]; then
