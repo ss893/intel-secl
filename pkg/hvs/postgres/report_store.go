@@ -234,15 +234,18 @@ func (r *ReportStore) Search(criteria *models.ReportFilterCriteria) ([]models.HV
 
 // FindHostIdsFromExpiredReports searches the report table for reports that have an
 // 'expiration' between 'fromTime' and 'toTime'.
+// It also discovers hosts that do not have a corresponding report in the table.
 func (r *ReportStore) FindHostIdsFromExpiredReports(fromTime time.Time, toTime time.Time) ([]uuid.UUID, error) {
 
 	var tx *gorm.DB
-	tx = r.Store.Db.Table("host h").Select("h.id")
-	tx = tx.Where("h.id NOT IN (SELECT CAST(params ->> 'host_id' AS uuid) from queue)")
-	tx = tx.Joins("INNER JOIN report r ON h.id = r.host_id")
-	tx = tx.Where("CAST(expiration AS TIMESTAMP) > CAST(? AS TIMESTAMP)", fromTime)
-	tx = tx.Where("CAST(expiration AS TIMESTAMP) <= CAST(? AS TIMESTAMP)", toTime)
-
+	tx = r.Store.Db.Raw("SELECT h.id from host h "+
+		"INNER JOIN report r ON h.id = r.host_id "+
+		"WHERE CAST(expiration AS TIMESTAMP) > CAST(? AS TIMESTAMP) "+
+		"AND CAST(expiration AS TIMESTAMP) <= CAST(? AS TIMESTAMP) "+
+		"AND h.id NOT IN (SELECT CAST(params ->> 'host_id' AS uuid) from queue) "+
+		"UNION "+
+		"SELECT h.id FROM host h LEFT JOIN report r ON h.id = r.host_id "+
+		"WHERE r.id IS NULL", fromTime, toTime)
 	rows, err := tx.Rows()
 	if err != nil {
 		return nil, errors.Wrap(err, "postgres/report_store:FindHostIdsFromExpiredReports() failed to retrieve records from db")
