@@ -65,8 +65,8 @@ cp $COMPONENT_NAME $BIN_PATH/
 chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
-# make log files world readable
-chmod 644 $LOG_PATH
+# make log files only owner readable
+chmod 600 $LOG_PATH
 
 auto_install() {
   local component=${1}

@@ -70,7 +70,7 @@ chmod 700 $CONFIG_PATH/intermediate-ca
 
 # Create logging dir in /var/log
 mkdir -p $LOG_PATH && chown cms:cms $LOG_PATH
-chmod 700 $LOG_PATH
+chmod 600 $LOG_PATH
 
 # Install systemd script
 cp cms.service $PRODUCT_HOME && chown cms:cms $PRODUCT_HOME/cms.service && chown cms:cms $PRODUCT_HOME

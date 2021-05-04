@@ -53,8 +53,8 @@ ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 # Copy Endorsement CA cert
 cp *.pem $CERTDIR_ENDORSEMENTCA/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $CERTDIR_ENDORSEMENTCA/*.pem
 
-# make log files world readable
-chmod 744 $LOG_PATH
+# make log files only owner readable
+chmod 600 $LOG_PATH
 
 # Install systemd script
 cp ${COMPONENT_NAME}.service $PRODUCT_HOME && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/${COMPONENT_NAME}.service && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME
