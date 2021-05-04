@@ -80,8 +80,8 @@ cp $COMPONENT_NAME $BIN_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $BIN_
 chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
-# make log files only owner readable
-chmod 600 $LOG_PATH
+# log file permission change
+chmod 640 $LOG_PATH
 
 # Install systemd script
 SERVICE_FILE=$SERVICE_USERNAME@.service
