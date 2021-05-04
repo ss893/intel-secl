@@ -14,7 +14,6 @@
 # v3.5.0_{comopnent}_config.sh
 
 #Upgrade config
-echo "Config upgrade started"
 #get currently installed version number after removing '.'
 COMPONENT_VERSION=$(echo $1 | sed 's/v//' | sed 's/\.//g')
 READ_FILES=false

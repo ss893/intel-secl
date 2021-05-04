@@ -1,6 +1,7 @@
 #!/bin/bash
 
 COMPONENT_NAME=authservice
+# Upgrade if component is already installed
 if command -v $COMPONENT_NAME &>/dev/null; then
   echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
   ./${COMPONENT_NAME}_upgrade.sh
@@ -65,7 +66,6 @@ for directory in $BIN_PATH $DB_SCRIPT_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $C
   chown -R $SERVICE_USERNAME:$SERVICE_USERNAME $directory
   chmod 700 $directory
 done
-
 
 cp $COMPONENT_NAME $BIN_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $BIN_PATH/*
 chmod 700 $BIN_PATH/*

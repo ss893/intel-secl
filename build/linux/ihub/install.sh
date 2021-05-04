@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# Upgrade if component is already installed
-COMPONENT_NAME=ihub
-if command -v $COMPONENT_NAME &>/dev/null; then
-  echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
-  ./${COMPONENT_NAME}_upgrade.sh
-  exit $?
-fi
-
 # Check OS
 OS=$(cat /etc/os-release | grep ^ID= | cut -d'=' -f2)
 temp="${OS%\"}"
@@ -36,6 +28,25 @@ else
     if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
 fi
 
+COMPONENT_NAME=$SERVICE_USERNAME
+INSTANCE_NAME=${INSTANCE_NAME:-$COMPONENT_NAME}
+SERVICE_NAME=$SERVICE_USERNAME@$INSTANCE_NAME
+
+service_exists() {
+    if [[ $(systemctl list-units --all -t service --full --no-legend "$1.service" | cut -f1 -d' ') == $1.service ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Upgrade if service is already installed
+if service_exists $SERVICE_USERNAME || service_exists $SERVICE_NAME; then
+  echo "$SERVICE_NAME is installed, proceeding with the upgrade"
+  ./${COMPONENT_NAME}_upgrade.sh
+  exit $?
+fi
+
 if [[ $EUID -ne 0 ]]; then
     echo "This installer must be run as root"
     exit 1
@@ -47,13 +58,10 @@ id -u $SERVICE_USERNAME 2> /dev/null || useradd -M --system --shell /sbin/nologi
 
 echo "Installing Integration Hub Service..."
 
-COMPONENT_NAME=$SERVICE_USERNAME
 PRODUCT_HOME=/opt/$COMPONENT_NAME
 BIN_PATH=$PRODUCT_HOME/bin
-INSTANCE_NAME=${INSTANCE_NAME:-$COMPONENT_NAME}
 LOG_PATH=/var/log/$INSTANCE_NAME/
 CONFIG_PATH=/etc/$INSTANCE_NAME/
-SERVICE_NAME=$SERVICE_USERNAME@$INSTANCE_NAME
 CERTS_PATH=$CONFIG_PATH/certs
 CERTDIR_TRUSTEDJWTCAS=$CERTS_PATH/trustedca
 SAML_CERT_DIR_PATH=$CERTS_PATH/saml
