@@ -156,7 +156,8 @@ main() {
     OLD_EXEC_NAME=$NEW_EXEC_NAME
   fi
 
-  COMPONENT_VERSION=`$INSTALLED_EXEC_PATH --version | grep Version | cut -d' ' -f2 | cut -d'-' -f1`
+  INSTALLED_COMPONENT_VERSION=`$INSTALLED_EXEC_PATH --version  2> /dev/null`
+  COMPONENT_VERSION=`printf "$INSTALLED_COMPONENT_VERSION" | grep Version | cut -d' ' -f2 | cut -d'-' -f1`
   if [ -z "$COMPONENT_VERSION" ]; then
     COMPONENT_VERSION=`$INSTALLED_EXEC_PATH version | grep Version | cut -d' ' -f2 | cut -d'-' -f1`
     if [ -z "$COMPONENT_VERSION" ]; then
