@@ -66,7 +66,7 @@ chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 # log file permission change
-chmod 640 $LOG_PATH
+chmod 740 $LOG_PATH
 
 auto_install() {
   local component=${1}

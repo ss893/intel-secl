@@ -80,7 +80,7 @@ ln -sfT $LIB_PATH/libkmip.so.0.2 $LIB_PATH/libkmip.so
 ln -sfT $LIB_PATH/libkmip.so.0.2 $LIB_PATH/libkmip.so.0
 
 # log file permission change
-chmod 640 $LOG_PATH
+chmod 740 $LOG_PATH
 
 # Install systemd script
 cp $COMPONENT_NAME.service $PRODUCT_HOME && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/$COMPONENT_NAME.service && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME
