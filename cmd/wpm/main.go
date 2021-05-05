@@ -12,7 +12,7 @@ import (
 
 func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
 
-	logFile, err = os.OpenFile(LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	logFile, err = os.OpenFile(LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -21,7 +21,7 @@ func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
 		return nil, nil, err
 	}
 
-	secLogFile, err = os.OpenFile(SecurityLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	secLogFile, err = os.OpenFile(SecurityLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, err
 	}
