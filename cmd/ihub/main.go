@@ -23,7 +23,7 @@ func openLogFiles(logDir string) (logFile *os.File, secLogFile *os.File, err err
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not open/create %s", LogFile)
 	}
-	err = os.Chmod(logFilePath, 0664)
+	err = os.Chmod(logFilePath, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error in setting file permission for file : %s", LogFile)
 	}
@@ -32,7 +32,7 @@ func openLogFiles(logDir string) (logFile *os.File, secLogFile *os.File, err err
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not open/create %s", SecurityLogFile)
 	}
-	err = os.Chmod(securityLogFilePath, 0664)
+	err = os.Chmod(securityLogFilePath, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error in setting file permission for file : %s", SecurityLogFile)
 	}

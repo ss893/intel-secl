@@ -16,7 +16,7 @@ func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	err = os.Chmod(LogFile, 0644)
+	err = os.Chmod(LogFile, 0640)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -25,7 +25,7 @@ func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	err = os.Chmod(SecurityLogFile, 0644)
+	err = os.Chmod(SecurityLogFile, 0640)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -20,7 +20,7 @@ func openLogFiles() (logFile *os.File, httpLogFile *os.File, secLogFile *os.File
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	err = os.Chmod(LogFile, 0664)
+	err = os.Chmod(LogFile, 0640)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -29,7 +29,7 @@ func openLogFiles() (logFile *os.File, httpLogFile *os.File, secLogFile *os.File
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	err = os.Chmod(HttpLogFile, 0664)
+	err = os.Chmod(HttpLogFile, 0640)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -38,7 +38,7 @@ func openLogFiles() (logFile *os.File, httpLogFile *os.File, secLogFile *os.File
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	err = os.Chmod(SecurityLogFile, 0664)
+	err = os.Chmod(SecurityLogFile, 0640)
 	if err != nil {
 		return nil, nil, nil, err
 	}
