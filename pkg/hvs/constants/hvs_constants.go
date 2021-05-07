@@ -175,6 +175,15 @@ const (
 	MaxNumDaysSearchLimit = 365
 )
 
+//Schema location constansts
+const (
+	CommonDefinitionsSchema = "/etc/hvs/schema/common.schema.json"
+	FlavorTemplateSchema    = "/etc/hvs/schema/flavor-template.json"
+)
+
+//Default flavor templates directory
+const DefaultFlavorTemplatesDirectory = "/etc/hvs/templates/"
+
 const (
 	FvsNumberOfVerifiers               = "fvs-number-of-verifiers"
 	FvsNumberOfDataFetchers            = "fvs-number-of-data-fetchers"

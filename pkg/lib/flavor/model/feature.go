@@ -4,6 +4,10 @@
  */
 package model
 
+import (
+	model "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+)
+
 /**
  *
  * @author mullas
@@ -14,34 +18,38 @@ type AES_NI struct {
 	Enabled bool `json:"enabled,omitempty"`
 }
 
-// TXT
-type TXT struct {
-	Enabled bool `json:"enabled"`
-}
+type HardwareFeature = model.HardwareFeature
 
-// TPM
-type TPM struct {
-	Enabled  bool     `json:"enabled"`
-	Version  string   `json:"version,omitempty"`
-	PcrBanks []string `json:"pcr_banks,omitempty"`
-}
-
-// CBNT
 type CBNT struct {
-	Enabled bool   `json:"enabled,omitempty"`
-	Profile string `json:"profile,omitempty"`
+	HardwareFeature
+	Meta struct {
+		Profile string `json:"profile"`
+		MSR     string `json:"msr"`
+	} `json:"meta"`
 }
 
-// SUEFI
-type SUEFI struct {
-	Enabled bool `json:"enabled,omitempty"`
+type TPM struct {
+	HardwareFeature
+	Meta struct {
+		TPMVersion string   `json:"tpm_version"`
+		PCRBanks   []string `json:"pcr_banks"`
+	} `json:"meta"`
+}
+
+type UEFI struct {
+	HardwareFeature
+	Meta struct {
+		SecureBootEnabled bool `json:"secure_boot_enabled"`
+	} `json:"meta"`
 }
 
 // Feature encapsulates the presence of various Platform security features on the Host hardware
 type Feature struct {
-	AES_NI *AES_NI `json:"AES_NI,omitempty"`
-	TXT    *TXT    `json:"TXT,omitempty"`
-	TPM    *TPM    `json:"TPM,omitempty"`
-	CBNT   *CBNT   `json:"CBNT,omitempty"`
-	SUEFI  *SUEFI  `json:"SUEFI,omitempty"`
+	AES_NI *AES_NI         `json:"AES_NI,omitempty"`
+	TXT    HardwareFeature `json:"TXT"`
+	TPM    TPM             `json:"TPM"`
+	CBNT   CBNT            `json:"CBNT"`
+	UEFI   UEFI            `json:"UEFI"`
+	PFR    HardwareFeature `json:"PFR"`
+	BMC    HardwareFeature `json:"BMC"`
 }

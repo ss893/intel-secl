@@ -61,7 +61,7 @@ func getTrustPcrListReport(hostInfo taModel.HostInfo, report *hvs.TrustReport) [
 
 	for _, result := range report.Results {
 		if result.Rule.ExpectedPcr != nil {
-			pcrIndex := int(result.Rule.ExpectedPcr.Index)
+			pcrIndex := int(result.Rule.ExpectedPcr.Pcr.Index)
 			if _, ok := trustPcrMap[pcrIndex]; !ok {
 				trustPcrMap[pcrIndex] = struct{}{}
 				trustPcrList = append(trustPcrList, pcrIndex)
