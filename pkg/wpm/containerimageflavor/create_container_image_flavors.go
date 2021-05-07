@@ -40,7 +40,7 @@ var (
 
 //CreateContainerImageFlavor is used to create flavor of a container image
 func CreateContainerImageFlavor(imageName, tag, dockerFilePath, buildDir,
-	keyID string, encryptionRequired, integrityEnforced bool, notaryServerURL, outputFlavorFilePath string) (string, error) {
+	keyID string, encryptionRequired, integrityEnforced bool, notaryServerURL, outputFlavorFilename string) (string, error) {
 	log.Trace("pkg/wpm/containerimageflavor/create_container_image_flavors.go:CreateContainerImageFlavor() Entering")
 	defer log.Trace("pkg/wpm/containerimageflavor/create_container_image_flavors.go:CreateContainerImageFlavor() Leaving")
 
@@ -49,6 +49,7 @@ func CreateContainerImageFlavor(imageName, tag, dockerFilePath, buildDir,
 	var keyUrlString string
 	signedFlavor := ""
 
+	outputFlavorFilePath := constants.FlavorsDir + outputFlavorFilename
 	// set logger fields
 	log = log.WithFields(logrus.Fields{
 		"imageName":            imageName,
@@ -159,7 +160,7 @@ func CreateContainerImageFlavor(imageName, tag, dockerFilePath, buildDir,
 	}
 
 	//If no output flavor file path was specified, return the marshalled image flavor
-	if len(strings.TrimSpace(outputFlavorFilePath)) <= 0 {
+	if len(strings.TrimSpace(outputFlavorFilename)) <= 0 {
 		return signedFlavor, nil
 	}
 

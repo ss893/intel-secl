@@ -30,7 +30,7 @@ var (
 )
 
 //CreateImageFlavor is used to create flavor of an encrypted image
-func CreateImageFlavor(flavorLabel string, outputFlavorFilePath string, inputImageFilePath string, outputEncImageFilePath string,
+func CreateImageFlavor(flavorLabel string, outputFlavorFilename string, inputImageFilename string, outputEncImageFilename string,
 	keyID string, integrityRequired bool) (string, error) {
 	log.Trace("pkg/wpm/imageflavor/create_image_flavors.go:CreateImageFlavor() Entering")
 	defer log.Trace("pkg/wpm/imageflavor/create_image_flavors.go:CreateImageFlavor() Leaving")
@@ -39,11 +39,14 @@ func CreateImageFlavor(flavorLabel string, outputFlavorFilePath string, inputIma
 	var wrappedKey []byte
 	var keyUrlString string
 	encRequired := true
-	imageFilePath := inputImageFilePath
+	imageFilePath := consts.VmImagesDir + inputImageFilename
+	inputImageFilePath := imageFilePath
+	outputEncImageFilePath := consts.VmImagesDir + outputEncImageFilename
+	outputFlavorFilePath := consts.FlavorsDir + outputFlavorFilename
 
 	//Determine if encryption is required
-	outputEncImageFilePath = strings.TrimSpace(outputEncImageFilePath)
-	if len(outputEncImageFilePath) <= 0 {
+	outputEncImageFilename = strings.TrimSpace(outputEncImageFilename)
+	if len(outputEncImageFilename) <= 0 {
 		encRequired = false
 	}
 
@@ -54,7 +57,7 @@ func CreateImageFlavor(flavorLabel string, outputFlavorFilePath string, inputIma
 		"integrityrequired":      integrityRequired,
 		"inputImageFilePath":     inputImageFilePath,
 		"outputFlavorFilePath":   outputFlavorFilePath,
-		"outputEncImageFilePath": keyID,
+		"outputEncImageFilePath": outputEncImageFilePath,
 	})
 
 	//Error if image specified doesn't exist
@@ -108,7 +111,7 @@ func CreateImageFlavor(flavorLabel string, outputFlavorFilePath string, inputIma
 	log.Debugf("pkg/imageflavor/create_image_flavors.go:CreateImageFlavor() Successfully created image flavor %s", signedFlavor)
 
 	//If no output flavor file path was specified, return the marshalled image flavor
-	if len(strings.TrimSpace(outputFlavorFilePath)) <= 0 {
+	if len(strings.TrimSpace(outputFlavorFilename)) <= 0 {
 		return signedFlavor, nil
 	}
 

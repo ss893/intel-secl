@@ -174,8 +174,8 @@ func (a *App) createContainerImageFlavor(args []string) error {
 	flag.BoolVar(integrityEnforced, "integrity-enforced", false, "specifies if container image needs to be signed")
 	notaryServerURL := flag.String("n", "", "notary server url to pull signed images")
 	flag.StringVar(notaryServerURL, "notary-server", "", "notary server url to pull signed images")
-	outputFlavorFilePath := flag.String("o", "", "output flavor file path")
-	flag.StringVar(outputFlavorFilePath, "out-file", "", "output flavor file path")
+	outputFlavorFilename := flag.String("o", "", "output flavor file name")
+	flag.StringVar(outputFlavorFilename, "out-file", "", "output flavor file name")
 	flag.Usage = func() { a.printContainerFlavorUsage() }
 	err := flag.CommandLine.Parse(args[2:])
 	if err != nil {
@@ -188,7 +188,7 @@ func (a *App) createContainerImageFlavor(args []string) error {
 	}
 
 	// validate input strings
-	inputArr := []string{*imageName, *tagName, *dockerFilePath, *buildDir, *outputFlavorFilePath}
+	inputArr := []string{*imageName, *tagName, *dockerFilePath, *buildDir, *outputFlavorFilename}
 	if validationErr := validation.ValidateStrings(inputArr); validationErr != nil {
 		log.WithError(validationErr).Errorf("app:createContainerImageFlavor() %s : Error Creating Container Flavor: Validation error for input args: %s\n", message.InvalidInputBadParam, inputArr)
 		a.printContainerFlavorUsage()
@@ -216,7 +216,7 @@ func (a *App) createContainerImageFlavor(args []string) error {
 	}
 
 	containerImageFlavor, err := containerimageflavor.CreateContainerImageFlavor(*imageName, *tagName, *dockerFilePath, *buildDir,
-		*keyID, *encryptionRequired, *integrityEnforced, *notaryServerURL, *outputFlavorFilePath)
+		*keyID, *encryptionRequired, *integrityEnforced, *notaryServerURL, *outputFlavorFilename)
 	if err != nil {
 		log.WithError(err).Errorf("app:createContainerImageFlavor() %s : Error Creating Container Flavor: %s\n", message.AppRuntimeErr, err.Error())
 		a.printContainerFlavorUsage()
@@ -266,12 +266,12 @@ func (a *App) fetchKey(args []string) error {
 func (a *App) createImageFlavor(args []string) error {
 	flavorLabel := flag.String("l", "", "flavor label")
 	flag.StringVar(flavorLabel, "label", "", "flavor label")
-	inputImageFilePath := flag.String("i", "", "input image file path")
-	flag.StringVar(inputImageFilePath, "in", "", "input image file path")
-	outputFlavorFilePath := flag.String("o", "", "output flavor file path")
-	flag.StringVar(outputFlavorFilePath, "out", "", "output flavor file path")
-	outputEncImageFilePath := flag.String("e", "", "output encrypted image file path")
-	flag.StringVar(outputEncImageFilePath, "encout", "", "output encrypted image file path")
+	inputImageFilename := flag.String("i", "", "input image file name")
+	flag.StringVar(inputImageFilename, "in", "", "input image file name")
+	outputFlavorFilename := flag.String("o", "", "output flavor file name")
+	flag.StringVar(outputFlavorFilename, "out", "", "output flavor file name")
+	outputEncImageFilename := flag.String("e", "", "output encrypted image file name")
+	flag.StringVar(outputEncImageFilename, "encout", "", "output encrypted image file name")
 	keyID := flag.String("k", "", "existing key ID")
 	flag.StringVar(keyID, "key", "", "existing key ID")
 	flag.Usage = func() { a.printImageFlavorUsage() }
@@ -281,14 +281,14 @@ func (a *App) createImageFlavor(args []string) error {
 		return errors.Wrap(err, "Error parsing arguments")
 	}
 
-	if len(strings.TrimSpace(*flavorLabel)) <= 0 || len(strings.TrimSpace(*inputImageFilePath)) <= 0 {
+	if len(strings.TrimSpace(*flavorLabel)) <= 0 || len(strings.TrimSpace(*inputImageFilename)) <= 0 {
 		log.Errorf("app:createImageFlavor() %s : Error creating VM image flavor: Missing arguments Flavor label and image file path\n", message.InvalidInputBadParam)
 		a.printImageFlavorUsage()
 		return errors.New("Error creating VM image flavor: Missing arguments Flavor label and image file path")
 	}
 
 	// validate input strings
-	inputArr := []string{*flavorLabel, *outputFlavorFilePath, *inputImageFilePath, *outputEncImageFilePath}
+	inputArr := []string{*flavorLabel, *outputFlavorFilename, *inputImageFilename, *outputEncImageFilename}
 	if validationErr := validation.ValidateStrings(inputArr); validationErr != nil {
 		log.WithError(validationErr).Errorf("app:createImageFlavor() %s : Error creating VM image flavor. Parse error for input args: [ %s ] - %s\n", message.InvalidInputBadParam, inputArr, validationErr.Error())
 		a.printImageFlavorUsage()
@@ -304,8 +304,8 @@ func (a *App) createImageFlavor(args []string) error {
 		}
 	}
 
-	imageFlavor, err := imageflavor.CreateImageFlavor(*flavorLabel, *outputFlavorFilePath, *inputImageFilePath,
-		*outputEncImageFilePath, *keyID, false)
+	imageFlavor, err := imageflavor.CreateImageFlavor(*flavorLabel, *outputFlavorFilename, *inputImageFilename,
+		*outputEncImageFilename, *keyID, false)
 	if err != nil {
 		log.WithError(err).Errorf("app:createImageFlavor() %s - Error creating VM image flavor: %s\n", message.AppRuntimeErr, err.Error())
 		a.printImageFlavorUsage()
