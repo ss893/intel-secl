@@ -134,5 +134,5 @@ func (a *App) printImageFlavorUsage() {
 		"\t  -e, --encout    (optional) output encrypted image file name\n"+
 		"\t                  if not specified, encryption is skipped\n"+
 		"\t  -k, --key       (optional) existing key ID\n"+
-		"\t                  if not specified, a new key is generated")
+		"\t                  if not specified, a new key is generated\n\n")
 }

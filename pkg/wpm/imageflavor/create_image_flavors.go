@@ -21,17 +21,17 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 var (
-	log    = cLog.GetDefaultLogger()
-	secLog = cLog.GetSecurityLogger()
+	log = cLog.GetDefaultLogger()
 )
 
 //CreateImageFlavor is used to create flavor of an encrypted image
-func CreateImageFlavor(flavorLabel string, outputFlavorFilename string, inputImageFilename string, outputEncImageFilename string,
-	keyID string, integrityRequired bool) (string, error) {
+func CreateImageFlavor(flavorLabel, outputFlavorFilename, inputImageFilename,
+	outputEncImageFilename, keyID string, integrityRequired bool) (string, error) {
 	log.Trace("pkg/wpm/imageflavor/create_image_flavors.go:CreateImageFlavor() Entering")
 	defer log.Trace("pkg/wpm/imageflavor/create_image_flavors.go:CreateImageFlavor() Leaving")
 
@@ -39,10 +39,20 @@ func CreateImageFlavor(flavorLabel string, outputFlavorFilename string, inputIma
 	var wrappedKey []byte
 	var keyUrlString string
 	encRequired := true
-	imageFilePath := consts.VmImagesDir + inputImageFilename
-	inputImageFilePath := imageFilePath
-	outputEncImageFilePath := consts.VmImagesDir + outputEncImageFilename
-	outputFlavorFilePath := consts.FlavorsDir + outputFlavorFilename
+
+	if filepath.IsAbs(inputImageFilename) {
+		return "", errors.New("Image filename should not be an absolute path")
+	}
+	if filepath.IsAbs(outputFlavorFilename) {
+		return "", errors.New("Image flavor filename should not be an absolute path")
+	}
+	if filepath.IsAbs(outputEncImageFilename) {
+		return "", errors.New("Output image filename should not be an absolute path")
+	}
+	imageFilePath := filepath.Join(consts.VmImagesDir, inputImageFilename)
+	inputImageFilePath := filepath.Clean(imageFilePath)
+	outputEncImageFilePath := filepath.Join(consts.EncryptedVmImagesDir, outputEncImageFilename)
+	outputFlavorFilePath := filepath.Join(consts.FlavorsDir, outputFlavorFilename)
 
 	//Determine if encryption is required
 	outputEncImageFilename = strings.TrimSpace(outputEncImageFilename)
@@ -88,7 +98,7 @@ func CreateImageFlavor(flavorLabel string, outputFlavorFilename string, inputIma
 	}
 
 	//Take the digest of the encrypted image
-	digest := sha512.Sum384([]byte(imageFile))
+	digest := sha512.Sum384(imageFile)
 
 	//Create image flavor
 	imageFlavor, err := flavor.GetImageFlavor(flavorLabel, encRequired, keyUrlString, base64.StdEncoding.EncodeToString(digest[:]))
