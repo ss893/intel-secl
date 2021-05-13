@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/config"
 	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
+	"reflect"
 	"strings"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
@@ -140,8 +141,11 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		SSLCertSource: viper.GetString("db-ssl-cert-source"),
 		ConsoleWriter: a.consoleWriter(),
 	})
+	if reflect.DeepEqual(a.Config.DB, commConfig.DBConfig{}) {
+		a.Config.DB = dbConf
+	}
 	runner.AddTask("create-default-flavorgroup", "", &tasks.CreateDefaultFlavor{
-		DBConfig: dbConf,
+		DBConfig: a.Config.DB,
 	})
 	runner.AddTask("create-dek", "", &tasks.CreateDek{
 		DekStore: &a.Config.Dek,
