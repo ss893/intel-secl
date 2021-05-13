@@ -16,6 +16,7 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
+	"github.com/cloudflare/cfssl/revoke"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -487,7 +488,7 @@ func SavePemCertChain(certFilePath string, certs ...[]byte) error {
 
 func GetCertPool(certs []x509.Certificate) *x509.CertPool {
 	certPool := x509.NewCertPool()
-	for i, _ := range certs {
+	for i := range certs {
 		certPool.AddCert(&certs[i])
 	}
 	return certPool
@@ -539,5 +540,59 @@ func GetCertExtension(cert *x509.Certificate, oid asn1.ObjectIdentifier) []byte 
 			return ext.Value
 		}
 	}
+	return nil
+}
+
+// VerifyX509CertChain verifies a cert chain for validity and ensures no certs have been
+// revoked
+func VerifyX509CertChain(certchain []*x509.Certificate) error {
+	roots := x509.NewCertPool()
+	inters := x509.NewCertPool()
+	leafcerts := []*x509.Certificate{}
+
+	// split into root and intermediate CAs
+	for _, cert := range certchain {
+		if cert.IsCA {
+			if cert.Subject.String() == cert.Issuer.String() {
+				roots.AddCert(cert)
+				continue
+			} else {
+				inters.AddCert(cert)
+				continue
+			}
+		} else {
+			// everything else is a leaf
+			leafcerts = append(leafcerts, cert)
+		}
+	}
+
+	// set params for verification
+	vopts := x509.VerifyOptions{
+		Roots:         roots,
+		Intermediates: inters,
+		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
+	}
+
+	// verify all leaf certs
+	for _, lc := range leafcerts {
+		lc.UnhandledCriticalExtensions = []asn1.ObjectIdentifier{}
+		_, err := lc.Verify(vopts)
+		if err != nil {
+			return errors.Wrapf(err, "lib/common/crypt/x509/VerifyX509CertChain: cert %v "+
+				"failed verification", lc.Subject)
+		}
+		isRevoked, isOk := revoke.VerifyCertificate(lc)
+		if isOk {
+			if isRevoked {
+				return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert %v was "+
+					"revoked", lc.Subject)
+			}
+			return nil
+		} else {
+			return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: revocation check "+
+				"failed for cert %v", lc.Subject)
+		}
+	}
+
 	return nil
 }
