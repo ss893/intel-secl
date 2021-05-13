@@ -24,8 +24,13 @@ chmod 740 $LOG_PATH
 FLAVOR_SIGNING_CERTS_PATH=$CONFIG_PATH/certs/flavorsign
 echo "Renaming flavor-signing-cert.pem to flavor-signing.pem"
 mv $FLAVOR_SIGNING_CERTS_PATH/flavor-signing-cert.pem $FLAVOR_SIGNING_CERTS_PATH/flavor-signing.pem
+sed -i 's/flavor-signing-cert\.pem/flavor-signing\.pem/g' $CONFIG_PATH/config.yml
 echo "Renaming flavor-signing-key.pem to flavor-signing.key"
 mv $FLAVOR_SIGNING_CERTS_PATH/flavor-signing-key.pem $FLAVOR_SIGNING_CERTS_PATH/flavor-signing.key
+sed -i 's/flavor-signing-key\.pem/flavor-signing\.key/g' $CONFIG_PATH/config.yml
+
+# Update paths in the config file to the new path
+sed -i 's/\/etc\/workload-policy-manager\//\/etc\/wpm\//g' $CONFIG_PATH/config.yml
 
 echo "Creating new directories... "
 for directory in $FLAVORS $VM_IMAGES_PATH $ENCRYPTED_VM_IMAGES_PATH; do
