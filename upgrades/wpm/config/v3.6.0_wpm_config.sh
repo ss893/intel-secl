@@ -3,6 +3,7 @@
 SERVICE_USERNAME=wpm
 COMPONENT_NAME=workload-policy-manager
 CONFIG_PATH=/etc/$COMPONENT_NAME
+LOG_PATH=/var/log/$COMPONENT_NAME
 
 # New Directories
 FLAVORS="/opt/workload-policy-manager/flavors"
@@ -16,6 +17,9 @@ if [ $? -ne 0 ]; then
   echo "Failed to update config to v3.6.0"
   exit 1
 fi
+
+chmod 640 $LOG_PATH/*
+chmod 740 $LOG_PATH
 
 FLAVOR_SIGNING_CERTS_PATH=$CONFIG_PATH/certs/flavorsign
 echo "Renaming flavor-signing-cert.pem to flavor-signing.pem"
