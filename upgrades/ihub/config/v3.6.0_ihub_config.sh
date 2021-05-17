@@ -9,7 +9,6 @@ BACKUP_DIR=${BACKUP_PATH}${SERVICE_USERNAME}_backup
 LOG_PATH=/var/log/$COMPONENT_NAME
 
 echo "Starting $COMPONENT_NAME config upgrade to v3.6.0"
-mv $PRODUCT_HOME/ihub.service "$BACKUP_DIR"/
 # Update config file
 echo "Using HVS Base Url $HVS_BASE_URL"
 echo "Using SHVS Base Url $SHVS_BASE_URL"
@@ -33,5 +32,8 @@ systemctl enable $PRODUCT_HOME/$SERVICE_FILE
 systemctl disable $COMPONENT_NAME@$INSTANCE_NAME >/dev/null 2>&1
 systemctl enable $COMPONENT_NAME@$INSTANCE_NAME
 systemctl daemon-reload
+
+# Backup service file post service stop
+mv $PRODUCT_HOME/ihub.service "$BACKUP_DIR"/
 
 echo "Completed $COMPONENT_NAME config upgrade to v3.6.0"
