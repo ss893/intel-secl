@@ -1,6 +1,7 @@
 #!/bin/bash
 
 COMPONENT_NAME=authservice
+# Upgrade if component is already installed
 if command -v $COMPONENT_NAME &>/dev/null; then
   echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
   ./${COMPONENT_NAME}_upgrade.sh
@@ -66,15 +67,14 @@ for directory in $BIN_PATH $DB_SCRIPT_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $C
   chmod 700 $directory
 done
 
-
 cp $COMPONENT_NAME $BIN_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $BIN_PATH/*
 chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 cp db_rotation.sql $DB_SCRIPT_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $DB_SCRIPT_PATH/*
 
-# make log files world readable
-chmod 744 $LOG_PATH
+# log file permission change
+chmod 740 $LOG_PATH
 
 # Install systemd script
 cp authservice.service $PRODUCT_HOME && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/authservice.service && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME

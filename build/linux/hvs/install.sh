@@ -61,8 +61,8 @@ cp -r schema/ $CONFIG_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $SCHEMA
 # Copy template files
 cp -r templates/ $CONFIG_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $TEMPLATES_PATH/*
 
-# make log files world readable
-chmod 744 $LOG_PATH
+# log file permission change
+chmod 740 $LOG_PATH
 
 # Install systemd script
 cp ${COMPONENT_NAME}.service $PRODUCT_HOME && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/${COMPONENT_NAME}.service && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME

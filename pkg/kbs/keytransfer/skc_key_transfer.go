@@ -382,7 +382,6 @@ func (keyInfo *KeyDetails) IsValidSession(stmLabel string) (validSession, validS
 				if keyInfo.validateSgxEnclaveIssuer(attributes.EnclaveIssuer) &&
 					keyInfo.validateSgxEnclaveIssuerProdId(attributes.EnclaveIssuerProductID) &&
 					keyInfo.validateSgxEnclaveIssuerExtProdId(attributes.EnclaveIssuerExtendedProductID) &&
-					keyInfo.validateSgxEnclaveMeasurement(attributes.EnclaveMeasurement) &&
 					keyInfo.validateSgxConfigId(attributes.ConfigID) &&
 					keyInfo.validateSgxIsvSvn(attributes.IsvSvn) &&
 					keyInfo.validateSgxConfigIdSvn(attributes.ConfigSvn) {

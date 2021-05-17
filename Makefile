@@ -83,9 +83,13 @@ aas-manager:
 wpm-docker-installer: wpm
 	mkdir -p installer
 	cp build/linux/wpm/* installer/
-	chmod +x installer/install.sh
-	chmod +x installer/build-secure-docker-daemon.sh
-	chmod +x installer/uninstall-secure-docker-daemon.sh
+	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
+	cp pkg/lib/common/upgrades/config-upgrade installer/
+	cp pkg/lib/common/upgrades/*.sh installer/
+	cp -a upgrades/manifest/ installer/
+	cp -a upgrades/wpm/* installer/
+	mv installer/build/* installer/
+	chmod +x installer/*.sh
 	installer/build-secure-docker-daemon.sh
 	cp -rf secure-docker-daemon/out installer/docker-daemon
 	rm -rf secure-docker-daemon

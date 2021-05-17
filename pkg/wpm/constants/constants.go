@@ -16,6 +16,9 @@ const (
 	ConfigDir             = "/etc/" + ServiceDir
 	ConfigFile            = "config"
 	DefaultConfigFilePath = ConfigDir + "config.yml"
+	FlavorsDir            = HomeDir + "flavors/"
+	VmImagesDir           = HomeDir + "vm-images/"
+	EncryptedVmImagesDir  = HomeDir + "encrypted-vm-images/"
 
 	// certificates' path
 	FlavorSigningCertDir = ConfigDir + "certs/flavorsign/"

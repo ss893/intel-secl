@@ -12,20 +12,20 @@ import (
 
 func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
 
-	logFile, err = os.OpenFile(LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	logFile, err = os.OpenFile(LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, err
 	}
-	err = os.Chmod(LogFile, 0644)
+	err = os.Chmod(LogFile, 0640)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	secLogFile, err = os.OpenFile(SecurityLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	secLogFile, err = os.OpenFile(SecurityLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, err
 	}
-	err = os.Chmod(SecurityLogFile, 0644)
+	err = os.Chmod(SecurityLogFile, 0640)
 	if err != nil {
 		return nil, nil, err
 	}

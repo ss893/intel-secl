@@ -37,6 +37,8 @@ spec:
           volumeMounts:
             - name: kbs-config-volume
               mountPath: /etc/kbs
+            - name: kbs-kmip-volume
+              mountPath: /etc/kmip
             - name: kbs-logs-volume
               mountPath: /var/log/kbs
             - name: kbs-opt-volume
@@ -57,4 +59,6 @@ spec:
         - name: kbs-credentials
           secret:
               secretName: kbs-secret
-
+        - name: kbs-kmip-volume
+          secret:
+            secretName: kmip-certs

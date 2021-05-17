@@ -19,20 +19,20 @@ import (
 func openLogFiles(logDir string) (logFile *os.File, secLogFile *os.File, err error) {
 	logFilePath := logDir + LogFile
 	securityLogFilePath := logDir + SecurityLogFile
-	logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not open/create %s", LogFile)
 	}
-	err = os.Chmod(logFilePath, 0664)
+	err = os.Chmod(logFilePath, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error in setting file permission for file : %s", LogFile)
 	}
 
-	secLogFile, err = os.OpenFile(securityLogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	secLogFile, err = os.OpenFile(securityLogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not open/create %s", SecurityLogFile)
 	}
-	err = os.Chmod(securityLogFilePath, 0664)
+	err = os.Chmod(securityLogFilePath, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error in setting file permission for file : %s", SecurityLogFile)
 	}

@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 
 	"gopkg.in/yaml.v2"
 )
@@ -46,12 +47,11 @@ func main() {
 		}
 	}()
 
-	tmpl := template.New(templateFile)
+	tmpl := template.New(path.Base(templateFile))
 	tmpl, err = tmpl.ParseFiles(templateFile)
 	if err != nil {
 		log.Fatal("Error Parsing template: ", err)
 	}
-
 	err = tmpl.Execute(configFile, data)
 	if err != nil {
 		log.Fatal("Error executing template: ", err)

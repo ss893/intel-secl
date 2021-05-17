@@ -96,7 +96,7 @@ func (controller TagCertificateController) Create(w http.ResponseWriter, r *http
 	}
 
 	if r.ContentLength == 0 {
-		secLog.Warnf("controllers/tagcertificate_controller:Create() %s : The request body is not provided", commLogMsg.InvalidInputBadParam)
+		secLog.Errorf("controllers/tagcertificate_controller:Create() %s : The request body is not provided", commLogMsg.InvalidInputBadParam)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body is not provided"}
 	}
 
@@ -108,13 +108,13 @@ func (controller TagCertificateController) Create(w http.ResponseWriter, r *http
 
 	err := dec.Decode(&reqTCCriteria)
 	if err != nil {
-		defaultLog.WithError(err).Warnf("controllers/tagcertificate_controller:Create() %s : Failed to decode request body as TagCertificateCreateCriteria", commLogMsg.InvalidInputBadEncoding)
+		defaultLog.WithError(err).Errorf("controllers/tagcertificate_controller:Create() %s : Failed to decode request body as TagCertificateCreateCriteria", commLogMsg.InvalidInputBadEncoding)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
 	}
 
 	// validate Tag Certificate creation params
 	if err := validateTagCertCreateCriteria(reqTCCriteria); err != nil {
-		secLog.WithError(err).Warnf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation", commLogMsg.InvalidInputBadParam)
+		secLog.WithError(err).Errorf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation", commLogMsg.InvalidInputBadParam)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Error during Tag Certificate creation - " + err.Error()}
 	}
 
@@ -135,20 +135,20 @@ func (controller TagCertificateController) Create(w http.ResponseWriter, r *http
 	atCreator := asset_tag.NewAssetTag()
 	newAssetTagBytes, err := atCreator.CreateAssetTag(newTCConfig)
 	if err != nil {
-		defaultLog.Warnf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation: %s", commLogMsg.AppRuntimeErr, err.Error())
+		defaultLog.Errorf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation: %s", commLogMsg.AppRuntimeErr, err.Error())
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Creation failure"}
 	}
 
 	newX509TC, err := x509.ParseCertificate(newAssetTagBytes)
 	if err != nil {
-		defaultLog.Warnf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation: %s", commLogMsg.AppRuntimeErr, err.Error())
+		defaultLog.Errorf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation: %s", commLogMsg.AppRuntimeErr, err.Error())
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Creation failure"}
 	}
 
 	// put this in an X509AttributeCert to extract the properties easily
 	tempX509AttrCert, err := model.NewX509AttributeCertificate(newX509TC)
 	if err != nil {
-		defaultLog.Warnf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation: %s", commLogMsg.AppRuntimeErr, err.Error())
+		defaultLog.Errorf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation: %s", commLogMsg.AppRuntimeErr, err.Error())
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Creation failure"}
 	}
 
@@ -168,7 +168,7 @@ func (controller TagCertificateController) Create(w http.ResponseWriter, r *http
 	// persist to DB
 	newTC, err := controller.Store.Create(&newTagCert)
 	if err != nil {
-		defaultLog.WithError(err).Warnf("controllers/tagcertificate_controller:Create() %s : TagCertificate Creation failed", commLogMsg.AppRuntimeErr)
+		defaultLog.WithError(err).Errorf("controllers/tagcertificate_controller:Create() %s : TagCertificate Creation failed", commLogMsg.AppRuntimeErr)
 		return nil, http.StatusInternalServerError, errors.Errorf("Error while persisting TagCertificate to DB")
 	}
 	secLog.WithField("Name", newTC.Subject).Infof("%s: TagCertificate created by: %s", commLogMsg.PrivilegeModified, r.RemoteAddr)
@@ -191,7 +191,7 @@ func (controller TagCertificateController) Search(w http.ResponseWriter, r *http
 	// get the TagCertificateFilterCriteria
 	filter, err := getTCFilterCriteria(r.URL.Query())
 	if err != nil {
-		defaultLog.Warnf("controllers/tagcertificate_controller:Search() %s : %s", commLogMsg.InvalidInputBadParam, err.Error())
+		defaultLog.Errorf("controllers/tagcertificate_controller:Search() %s : %s", commLogMsg.InvalidInputBadParam, err.Error())
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid filter criteria"}
 	}
 
@@ -395,7 +395,7 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 
 	// check if certificateID is populated
 	if dtcReq.CertID == uuid.Nil {
-		secLog.WithError(err).WithField("id", dtcReq.CertID).Warnf(
+		secLog.WithError(err).WithField("id", dtcReq.CertID).Errorf(
 			"controllers/tagcertificate_controller:Deploy() %s : Invalid UUID format of the identifier provided", commLogMsg.InvalidInputBadParam)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid UUID format of the Tag Certificate identifier provided"}
 	}
@@ -404,7 +404,7 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 
 	tc, err := controller.Store.Retrieve(dtcReq.CertID)
 	if err != nil {
-		secLog.WithError(err).WithField("id", dtcReq.CertID).Warnf(
+		secLog.WithError(err).WithField("id", dtcReq.CertID).Errorf(
 			"controllers/tagcertificate_controller:Deploy() %s : Error retrieving TagCertificate", commLogMsg.AppRuntimeErr)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Tag Certificate does not exist"}
 	}
@@ -418,11 +418,11 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 	defaultLog.Debug("controllers/tagcertificate_controller:Deploy() Tag Cert not after: {}", tc.NotAfter)
 	defaultLog.Debug("controllers/tagcertificate_controller:Deploy() Time now: {}", today)
 	if today.Before(tc.NotBefore) {
-		secLog.WithField("Certid", dtcReq.CertID).Warnf("controllers/tagcertificate_controller:Deploy() %s : Certificate with Subject %s is not yet valid", commLogMsg.InvalidInputBadParam, tc.Subject)
+		secLog.WithField("Certid", dtcReq.CertID).Errorf("controllers/tagcertificate_controller:Deploy() %s : Certificate with Subject %s is not yet valid", commLogMsg.InvalidInputBadParam, tc.Subject)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Tag Certificate Deploy failure"}
 	}
 	if today.After(tc.NotAfter) {
-		secLog.WithField("Certid", dtcReq.CertID).Warnf("controllers/tagcertificate_controller:Deploy() %s : Certificate with Subject %s has expired", commLogMsg.InvalidInputBadParam, tc.Subject)
+		secLog.WithField("Certid", dtcReq.CertID).Errorf("controllers/tagcertificate_controller:Deploy() %s : Certificate with Subject %s has expired", commLogMsg.InvalidInputBadParam, tc.Subject)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Tag Certificate Deploy failure"}
 	}
 

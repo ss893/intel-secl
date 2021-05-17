@@ -39,8 +39,8 @@ if [ ! -z $SETUP_TASK ]; then
       cp /tmp/config.yml $CONFIG_PATH/config.yml
       exit 1
     fi
-     rm -rf /tmp/config.yml
   done
+  rm -rf /tmp/config.yml
 fi
 
 ihub run

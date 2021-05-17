@@ -87,7 +87,7 @@ func (a *App) printContainerFlavorUsage() {
 		"\t  -s, --integrity-enforced        (optional) boolean parameter specifies if\n"+
 		"\t                                  container image should be signed\n"+
 		"\t  -n, --notary-server             (optional) specify notary server url\n"+
-		"\t  -o, --out-file                  (optional) specify output file path")
+		"\t  -o, --out-file                  (optional) specify output file name")
 
 }
 
@@ -128,11 +128,11 @@ func (a *App) printImageFlavorUsage() {
 
 	fmt.Fprintf(a.consoleWriter(), "usage: wpm create-image-flavor [-l label] [-i in] [-o out] [-e encout] [-k key]\n"+
 		"\t  -l, --label     image flavor label\n"+
-		"\t  -i, --in        input image file path\n"+
-		"\t  -o, --out       (optional) output image flavor file path\n"+
+		"\t  -i, --in        input image file name\n"+
+		"\t  -o, --out       (optional) output image flavor file name\n"+
 		"\t                  if not specified, will print to the console\n"+
-		"\t  -e, --encout    (optional) output encrypted image file path\n"+
+		"\t  -e, --encout    (optional) output encrypted image file name\n"+
 		"\t                  if not specified, encryption is skipped\n"+
 		"\t  -k, --key       (optional) existing key ID\n"+
-		"\t                  if not specified, a new key is generated")
+		"\t                  if not specified, a new key is generated\n\n")
 }
