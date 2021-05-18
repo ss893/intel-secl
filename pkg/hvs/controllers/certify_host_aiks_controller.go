@@ -28,7 +28,6 @@ import (
 	"math/big"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -184,24 +183,18 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() unable to get ek cert bytes")
 	}
 
-	ekCert, err := x509.ParseCertificate(ekCertBytes)
+	ekCertChain, err := x509.ParseCertificates(ekCertBytes)
 	if err != nil {
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, err
 	}
 	endorsementCerts := (*certifyHostAiksController.CertStore)[models.CaCertTypesEndorsementCa.String()].Certificates
 
-	defaultLog.Debugf("controllers/certify_host_aiks_controller:getIdentityProofRequest() ekCert Issuer Name :%s", ekCert.Issuer.CommonName)
-	var endorsementCertsToVerify x509.Certificate
-	for _, cert := range endorsementCerts {
-		if cert.Issuer.CommonName == strings.ReplaceAll(ekCert.Issuer.CommonName, "\\x00", "") {
-			endorsementCertsToVerify = cert
-			break
-		}
-	}
-	if !certifyHostAiksController.isEkCertificateVerifiedByAuthority(ekCert, &endorsementCertsToVerify) && !certifyHostAiksController.isEkCertificateVerifiedByAnyAuthority(ekCert, endorsementCerts) && !certifyHostAiksController.isEkCertRegistered(ekCert) {
+	if err = crypt.VerifyX509CertChain(ekCertChain, crypt.GetCertPool(endorsementCerts)); err != nil {
 		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted, Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is not registered with hvs")
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
 	}
+
+	ekLeafCert := ekCertChain[len(ekCertChain)-1]
 
 	identityRequestChallenge, err := crypt.GetRandomBytes(32)
 	if err != nil {
@@ -218,7 +211,7 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, err
 	}
 
-	proofReq, err := privacyca.ProcessIdentityRequest(identityChallengePayload.IdentityRequest, ekCert.PublicKey.(*rsa.PublicKey), identityRequestChallenge)
+	proofReq, err := privacyca.ProcessIdentityRequest(identityChallengePayload.IdentityRequest, ekLeafCert.PublicKey.(crypto.PublicKey), identityRequestChallenge)
 	if err != nil {
 		defaultLog.WithError(err).Error("Unable to generate random bytes for identityRequestChallenge")
 		return taModel.IdentityProofRequest{}, http.StatusInternalServerError, err

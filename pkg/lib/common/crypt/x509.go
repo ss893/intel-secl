@@ -545,8 +545,13 @@ func GetCertExtension(cert *x509.Certificate, oid asn1.ObjectIdentifier) []byte 
 
 // VerifyX509CertChain verifies a cert chain for validity and ensures no certs have been
 // revoked
-func VerifyX509CertChain(certchain []*x509.Certificate) error {
-	roots := x509.NewCertPool()
+func VerifyX509CertChain(certchain []*x509.Certificate, ecPool *x509.CertPool) error {
+	var roots *x509.CertPool
+	if ecPool == nil {
+		roots = x509.NewCertPool()
+	} else {
+		roots = ecPool
+	}
 	inters := x509.NewCertPool()
 	leafcerts := []*x509.Certificate{}
 
