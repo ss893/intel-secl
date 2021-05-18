@@ -75,12 +75,12 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
 
 		Context("ek root ca not present in endorsement certificate and ek cert is registered", func() {
-			It("Return Identity Proof request", func() {
+			It("Should get HTTP Status: 400 ", func() {
 				// mockEndorsement is having the ekcert
 				mockEndorsement := mocks.NewFakeTpmEndorsementStore()
 				certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, mockEndorsement, 2, "../domain/mocks/resources/aik-reqs-dir/")
@@ -115,7 +115,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -152,7 +152,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -190,7 +190,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -233,7 +233,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
 
@@ -273,7 +273,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})

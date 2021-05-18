@@ -44,7 +44,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 				var teCollection *hvs.TpmEndorsementCollection
 				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
 				Expect(err).NotTo(HaveOccurred())
@@ -60,7 +60,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 				var teCollection *hvs.TpmEndorsementCollection
 				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
 				Expect(err).NotTo(HaveOccurred())
@@ -75,7 +75,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var teCollection *hvs.TpmEndorsementCollection
 				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
@@ -91,7 +91,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var teCollection *hvs.TpmEndorsementCollection
 				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
@@ -107,7 +107,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var teCollection *hvs.TpmEndorsementCollection
 				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
@@ -123,7 +123,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var teCollection *hvs.TpmEndorsementCollection
 				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
@@ -139,7 +139,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 		Context("Search TpmEndorsements from data store with invalid id", func() {
@@ -150,7 +150,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -166,7 +166,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
 		Context("Try to retrieve TpmEndorsement by invalid ID from data store", func() {
@@ -176,7 +176,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(404))
+				Expect(w.Code).To(Equal(http.StatusNotFound))
 			})
 		})
 	})
@@ -200,7 +200,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(404))
+				Expect(w.Code).To(Equal(http.StatusNotFound))
 			})
 		})
 	})
@@ -224,7 +224,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -249,7 +249,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(201))
+				Expect(w.Code).To(Equal(http.StatusCreated))
 			})
 		})
 		Context("Provide a TpmEndorsement data that contains duplicate hardware_uuid", func() {
@@ -271,7 +271,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -294,7 +294,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -312,7 +312,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -338,7 +338,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
 
@@ -361,7 +361,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(404))
+				Expect(w.Code).To(Equal(http.StatusNotFound))
 			})
 		})
 
@@ -384,7 +384,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -402,7 +402,7 @@ var _ = Describe("TpmEndorsementController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
