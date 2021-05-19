@@ -545,7 +545,7 @@ func GetCertExtension(cert *x509.Certificate, oid asn1.ObjectIdentifier) []byte 
 
 // VerifyX509CertChain verifies a cert chain for validity and ensures no certs have been
 // revoked
-func VerifyX509CertChain(certchain []*x509.Certificate, ecPool *x509.CertPool) error {
+func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecPool *x509.CertPool) error {
 	var roots *x509.CertPool
 	if ecPool == nil {
 		roots = x509.NewCertPool()
@@ -586,17 +586,19 @@ func VerifyX509CertChain(certchain []*x509.Certificate, ecPool *x509.CertPool) e
 			return errors.Wrapf(err, "lib/common/crypt/x509/VerifyX509CertChain: cert %v "+
 				"failed verification", lc.Subject)
 		}
-		isRevoked, isOk := revoke.VerifyCertificate(lc)
-		if isOk {
-			if isRevoked {
-				return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert %v was "+
-					"revoked", lc.Subject)
+		if enableRevCheck {
+			isRevoked, isOk := revoke.VerifyCertificate(lc)
+			if isOk {
+				if isRevoked {
+					return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert %v was "+
+						"revoked", lc.Subject)
+				}
+			} else {
+				return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: revocation check "+
+					"failed for cert %v", lc.Subject)
 			}
-			return nil
-		} else {
-			return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: revocation check "+
-				"failed for cert %v", lc.Subject)
 		}
+		return nil
 	}
 
 	return nil

@@ -37,7 +37,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 	BeforeEach(func() {
 		router = mux.NewRouter()
 		cacert = &(*certStore)[models.CaCertTypesPrivacyCa.String()].Certificates[0]
-		certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, &ecStore, 2, "../domain/mocks/resources/aik-reqs-dir/")
+		certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, &ecStore, 2, "../domain/mocks/resources/aik-reqs-dir/", true)
 	})
 
 	Describe("Create Identity Proof request", func() {
@@ -83,7 +83,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 			It("Should get HTTP Status: 400 ", func() {
 				// mockEndorsement is having the ekcert
 				mockEndorsement := mocks.NewFakeTpmEndorsementStore()
-				certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, mockEndorsement, 2, "../domain/mocks/resources/aik-reqs-dir/")
+				certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, mockEndorsement, 2, "../domain/mocks/resources/aik-reqs-dir/", true)
 				router.Handle("/privacyca/identity-challenge-request", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostAiksController.IdentityRequestGetChallenge))).Methods("POST")
 
 				// Mock TA Flow for generating data for identityChallengeRequest

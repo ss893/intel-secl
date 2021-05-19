@@ -84,7 +84,7 @@ func TestVerifyX509CertChainGoodChain(t *testing.T) {
 	var allCerts []*x509.Certificate
 	allCerts = append(allCerts, rootCertx509, intermediate1Certx509, ekCertx509)
 
-	assert.NoError(t, VerifyX509CertChain(allCerts, nil))
+	assert.NoError(t, VerifyX509CertChain(true, allCerts, nil))
 }
 
 func TestVerifyX509CertChainExpired(t *testing.T) {
@@ -179,5 +179,5 @@ func TestVerifyX509CertChainExpired(t *testing.T) {
 	var allCerts []*x509.Certificate
 	allCerts = append(allCerts, rootCertx509, intermediate1Certx509, ekCertx509)
 
-	assert.Error(t, VerifyX509CertChain(allCerts, nil))
+	assert.Error(t, VerifyX509CertChain(true, allCerts, nil))
 }
