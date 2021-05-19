@@ -34,6 +34,9 @@ flavorgen-installer:
 	makeself installer deployments/installer/flavorgen-$(VERSION).bin "flavorgen $(VERSION)" ./install.sh
 	rm -rf installer
 
+flavorconvert-installer:
+	cd upgrades/hvs/build && make all
+	
 %-installer: %
 	mkdir -p installer
 	cp -r build/linux/$*/* installer/
