@@ -106,7 +106,7 @@ func (router *Router) fnGetJwtCerts() error {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS12,
+				MinVersion:         tls.VersionTLS13,
 				InsecureSkipVerify: false,
 				RootCAs:            rootCAs,
 			},

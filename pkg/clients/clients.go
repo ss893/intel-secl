@@ -31,7 +31,7 @@ func HTTPClientTLSNoVerify() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS12,
+				MinVersion:         tls.VersionTLS13,
 				InsecureSkipVerify: true},
 		},
 	}
@@ -39,7 +39,7 @@ func HTTPClientTLSNoVerify() *http.Client {
 
 func HTTPClientWithCA(caCertificates []x509.Certificate) (*http.Client, error) {
 	config := &tls.Config{
-		MinVersion:         tls.VersionTLS12,
+		MinVersion:         tls.VersionTLS13,
 		InsecureSkipVerify: false,
 		RootCAs:            GetCertPool(caCertificates),
 	}
