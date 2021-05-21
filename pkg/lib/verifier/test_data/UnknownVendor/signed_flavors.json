@@ -19,9 +19,9 @@
                     "tboot_installed": false,
                     "tpm_version": "2.0",
                     "uefi_enabled": true,
-                    "vendor": "Linux"
+                    "vendor": "UNKNOWN"
                 },
-                "vendor": "INTEL"
+                "vendor": "UNKNOWN"
             },
             "bios": {
                 "bios_name": "American Megatrends Inc.",
@@ -208,11 +208,11 @@
                     "tboot_installed": false,
                     "tpm_version": "2.0",
                     "uefi_enabled": true,
-                    "vendor": "Linux",
+                    "vendor": "UNKNOWN",
                     "vmm_name": "Docker",
                     "vmm_version": "19.03.5"
                 },
-                "vendor": "INTEL"
+                "vendor": "UNKNOWN"
             },
             "bios": {
                 "bios_name": "American Megatrends Inc.",
@@ -270,7 +270,7 @@
                     "tboot_installed": false,
                     "tpm_version": "2.0"
                 },
-                "vendor": "INTEL"
+                "vendor": "UNKNOWN"
             },
             "bios": {
                 "bios_name": "American Megatrends Inc.",
@@ -291,7 +291,7 @@
                     "flavor_part": "SOFTWARE",
                     "label": "ISecL_Default_Application_Flavor_v3.3_TPM2.0"
                 },
-                "vendor": "INTEL"
+                "vendor": "UNKNOWN"
             },
             "software": {
                 "measurements": {
@@ -434,7 +434,7 @@
                     "flavor_part": "SOFTWARE",
                     "label": "ISecL_Default_Workload_Flavor_v3.3"
                 },
-                "vendor": "INTEL"
+                "vendor": "UNKNOWN"
             },
             "software": {
                 "cumulative_hash": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
@@ -454,7 +454,7 @@
                     "hardware_uuid": "800012a7-669d-e811-906e-00163566263e",
                     "tboot_installed": "true"
                 },
-                "vendor": "INTEL"
+                "vendor": "UNKNOWN"
             },
             "bios": {
                 "bios_name": "Intel Corporation",

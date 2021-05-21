@@ -1010,5 +1010,54 @@
             ]
         },
         "signature": "rjaHzDKNF51oB3gYLHRy3gwmOR0ZUZNb6caeGkWlrQPgi3O9rx3Ilx8x2Q+IC5Sj7E5JsACpi5Bem1Xt79xYG8SpztEQNrQ/eaLpo4utOqz7/HkNflf3T6mFfPe7ZQMIaeXinNeAb5nmBpUOHHxsHwkod+/+D3mpVv33xi5mOroz6XB+fKDQPWc4ZnudkpYAq1w4VFIBvU7i6lu4CdbjO0tlTGFX4UaA/ihHAGFEeeasIPnHwLtrF0dDTE+bOBG9/+skrMODJFOGeCg910a/D2Nbyk+W1mXvlO9uOKZDV1b+VY3iyEnQ0s7A9oMCj6BveUNEZDbHYSS2kIzmB6ZrfiAmP77ZvO1dLQNW4pjOhG7Bf/sZRgYAfO9iF9G4cHyu4QBZzVux8vgJ91XALJZrRaQJXB5TFoEkv9ZWcOyluAUP3YHJ7QkX3BoEYd7sA+RH3ue/JnSdRJH4rw6gcWH1YCG3gK1Q3JynZVx2iepuyJ37/iqPMD+3X5ZRJbS+safq"
+    },
+    {
+        "flavor": {
+            "meta": {
+                "id": "2b46a0b7-a6fe-446e-8e73-46235ad612ee",
+                "description": {
+                    "flavor_part": "ASSET_TAG",
+                    "source": "localhost.localdomain",
+                    "label": "INTEL_800012a7-669d-e811-906e-00163566263e_2021-04-29T00:07:56.005213+05:30",
+                    "tpm_version": "2.0",
+                    "hardware_uuid": "800012a7-669d-e811-906e-00163566263e",
+                    "tboot_installed": "true"
+                },
+                "vendor": "INTEL"
+            },
+            "bios": {
+                "bios_name": "Intel Corporation",
+                "bios_version": "SE5C620.86B.00.01.0014.070920180847"
+            },
+            "external": {
+                "asset_tag": {
+                    "tag_certificate": {
+                        "encoded": "MIID+DCCAmCgAwIBAgIQNu8aiy0AxMobHk1b7f9FSjANBgkqhkiG9w0BAQwFADAeMRwwGgYDVQQDExNIVlMgVGFnIENlcnRpZmljYXRlMB4XDTIxMDQyODE4Mzc0MVoXDTIyMDQyODE4Mzc0MVowLzEtMCsGA1UEAxMkODAwMDEyYTctNjY5ZC1lODExLTkwNmUtMDAxNjM1NjYyNjNlMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEArgVZ82XECRZd6o0N6vhpADpW/tnwXJSo/H9MUc9xoYGhMsZlL3mBNVx7afVS3P5G7gnCULbBqUyY5md/ROohboj6gzql4FtmNKF9M1RQk55HOTCr+zglopdZJmetNOIfs2/E32jPXzY6RWlAGMZTowIWCjxEaOLCWmEfTeV1GcXQiV9DswuaLMb3nGweEp0oArIu73hAPXcxNXFtNHKeyiypl0mr6V1cMXnxFLcoQVN2h5Ok4CjsWmLKBji5S2kAUsKZvolRM+L234y8Ek/j2bIF8Y4tasAW+iqNgojv0xLvLaDc8fx7+TaUU8UTHCv170Rnqbsu6wK/aXUEVfzxcsTNVcxoyI++majzV0VKEjTdUSBrEzAt7FOkwqoJfVqBa13hiUTMeUhRdSESgt9j1WX43iqu0X4gHH7ShS96k7DEygkcy6Yj9aghuOBuHr8p+9fSaI87qRO5ZbWrFsLdVLSHaVRCT7SFkxRz2422LkYNsW08VtG0YwngqmT/vqXVAgMBAAGjITAfMB0GBVUEhhUBBBQwEhMFc3RhdGUTCVRhbWlsTmFkdTANBgkqhkiG9w0BAQwFAAOCAYEAJgEPQaMyD7NU+NTfHKppfBLGaGPJV6u3Dg/0GnC+6Du77K3wWL7QUGheKDl11vmpSExirF4slqmkZBN1/GdjtERBC9tCZ+1lSfXFxN92k39zypoi8SgYe93fNIP8j924AFEhYnsGqtNp4NX3dXgnxcv7R9cpb8bduX0BHjFM4LF7P2lf7qkpP51xtEdHxePicwtSWT2eZLiWqQBuRU/fYks+pY4k3XVEsaPL6bhQKTPbkUgdc2p1ri0qnmL7EMbgfr8xhOAQSLrEKVwDiA9wF09DtCMVLF9UIViPkgprvMVPkiDARIRVg+BjeynNMwM1iTi6P1kw5YB7IL9dg2Nf6nVT+sQ0PU0DQGlD7Q8Kr0lqwyPG6jSBEtkfYjXpWPzx30LGquswTvFgttq2aJFgZEFne5PMMukvMQyghRTGFbs6KGvLpSe72IMeXb8mibwFpvPT16qAQu42pSv4PP9fER9c3X6VxoGGCpMNxl01ELI8nDj6KYP6a+IuwYmUkogN",
+                        "issuer": "CN=HVS Tag Certificate",
+                        "serial_number": 1954084345555666250,
+                        "subject": "800012a7-669d-e811-906e-00163566263e",
+                        "not_before": "2021-04-28T18:37:41Z",
+                        "not_after": "2022-04-28T18:37:41Z",
+                        "attribute": [
+                            {
+                                "attr_type": {
+                                    "id": "2.5.4.789.1"
+                                },
+                                "attribute_values": [
+                                    {
+                                        "objects": {
+                                            "name": "state",
+                                            "value": "TamilNadu"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "fingerprint_sha384": "97c21b5719faf9de837eaf6ec60d35f0c27abf36a2e208e9f88c7bebbdcfc183edf80e726fa1a31df9b9db0d3c597d33"
+                    }
+                }
+            }
+        },
+        "signature": "HX61KyFsj960z4nlmu5mJh278sF5YDZX/DyxVNNFya8Qxy3VoFKVQzaPzb0IFgJNuJuNnoGBWdmBCQAc/vQHmbXwvlj5NEh8eDGnP5rxtX/NTX89efOO631xjFPRzL6cJOfTnhJ1jMwF10dpI+PLpJQ6K6SU5s16mB+3m3LjwrhSh9SJrHkdAzc4di2vETIg5ltXSrDquL8n+pxTpAn00entNBF600IAU5DRy5gwCDgQyjZQ3ENZU+GtjOTSlhyKMe9kzzl9PJPs0B5o8q1sYsYd58urIbYqqZ4J9q8kwh82EsTOUC79BD+42akhfDJjlGiwYeeAelPlhuo9OvQjeDqmMpxCKxUVx0vOCY7ymRX/eyXvWrEcOnzo/ePI/XUcaGZdKJjPhiiY8fw5djj47MJ1p5SPTIlmwmJmX7NFz9FcNajhKQqi6Anh8RntZbRQRN4icjU/zKFXJnaVdVOvcJIdgS2FHYzwGr2cc28LQ2oIQyNAZh1ufjEC+jjI5VAM"
     }
 ]

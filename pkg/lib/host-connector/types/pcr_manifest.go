@@ -11,7 +11,7 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
-	"encoding/xml"
+
 	"fmt"
 	"hash"
 	"reflect"
@@ -122,29 +122,6 @@ const (
 	INVALID_INDEX = -1
 )
 
-// Convert the integer value of PcrIndex into "pcr_N" string (for xml serialization)
-func (pcrIndex PcrIndex) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	xmlValue := fmt.Sprintf("pcr_%d", int(pcrIndex))
-	return e.EncodeElement(xmlValue, start)
-}
-
-// Convert the xml string value "pcr_N" to PcrIndex
-func (pcrIndex *PcrIndex) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	var xmlValue string
-	err := d.DecodeElement(&xmlValue, &start)
-	if err != nil {
-		return errors.Wrap(err, "Could not decode PcrIndex from XML")
-	}
-
-	index, err := GetPcrIndexFromString(xmlValue)
-	if err != nil {
-		return errors.Wrap(err, "Could not unmarshal PcrIndex from XML")
-	}
-
-	*pcrIndex = index
-	return nil
-}
-
 // Convert the integer value of PcrIndex into "pcr_N" string (for json serialization)
 func (pcrIndex PcrIndex) MarshalJSON() ([]byte, error) {
 	jsonValue := fmt.Sprintf("pcr_%d", int(pcrIndex))
@@ -241,21 +218,6 @@ func (pcrManifest *PcrManifest) GetPcrValue(pcrBank SHAAlgorithm, pcrIndex PcrIn
 		}
 	default:
 		return nil, errors.Errorf("Unsupported sha algorithm %s", pcrBank)
-	}
-
-	return pcrValue, nil
-}
-
-// Utility function that uses GetPcrValue but also returns an error if
-// the Pcr was not found.
-func (pcrManifest *PcrManifest) GetRequiredPcrValue(bank SHAAlgorithm, pcrIndex PcrIndex) (*HostManifestPcrs, error) {
-	pcrValue, err := pcrManifest.GetPcrValue(bank, pcrIndex)
-	if err != nil {
-		return nil, err
-	}
-
-	if pcrValue == nil {
-		return nil, errors.Errorf("Could not retrive PCR at bank '%s', index %d", bank, pcrIndex)
 	}
 
 	return pcrValue, nil

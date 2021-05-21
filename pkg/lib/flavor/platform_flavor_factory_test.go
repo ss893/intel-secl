@@ -428,6 +428,21 @@ func TestPlatformFlavorFactory_GetGenericPlatformFlavor(t *testing.T) {
 	getSignedFlavor(t, pflavor, cf.FlavorPartAssetTag)
 }
 
+func TestPlatformFlavorFactory_GetGenericPlatformFlavorFault(t *testing.T) {
+	var pffactory FlavorProvider
+	var err error
+
+	// load hostManifest
+	hm, _ := loadManifestAndTagCert(ESXHostManifestPath, "")
+
+	pffactory, err = NewPlatformFlavorProvider(hm, nil, getFlavorTemplates(hm.HostInfo.OSName, FlavorTemplatePath))
+	var vendor hcConstants.Vendor
+	_ = (&vendor).GetVendorFromOSName(hm.HostInfo.OSName)
+	// get the flavor
+	_, err = pffactory.GetGenericPlatformFlavor(vendor)
+	assert.Error(t, err, "Error initializing GenericPlatformFlavor")
+}
+
 // NEGATIVE Cases
 // Let's enumerate possible scenarios where the flavor genration might fail
 // 1. SignedFlavor creation fails due to null PrivateKey

@@ -45,6 +45,24 @@ func TestPcrMatchesConstantNoFault(t *testing.T) {
 	t.Logf("Pcr matches constant rule verified")
 }
 
+func TestPcrMatchesConstantNoMeasurementFault(t *testing.T) {
+	expectedPcr := types.FlavorPcrs{
+		Pcr: types.Pcr{
+			Index: 0,
+			Bank:  "SHA256",
+		},
+	}
+
+	_, err := NewPcrMatchesConstant(&expectedPcr, common.FlavorPartPlatform)
+	assert.Error(t, err)
+}
+
+func TestPcrMatchesConstantNoExpectedPcrFault(t *testing.T) {
+
+	_, err := NewPcrMatchesConstant(nil, common.FlavorPartPlatform)
+	assert.Error(t, err)
+}
+
 func TestPcrMatchesConstantPcrManifestMissingFault(t *testing.T) {
 	expectedPcr := types.FlavorPcrs{
 		Pcr: types.Pcr{

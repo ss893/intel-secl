@@ -213,3 +213,47 @@ func TestDeploySoftwareManifest(t *testing.T) {
 	err = intelConnector.DeploySoftwareManifest(manifest)
 	assert.NoError(t, err)
 }
+
+func TestGetHostManifest(t *testing.T) {
+	// create a mock ta client that will return dummy data to host-connector
+	mockTAClient, err := ta.NewMockTAClient()
+
+	// read sample tpm quote that will be returned by the mock client
+	var tpmQuoteResponse taModel.TpmQuoteResponse
+	b, err := ioutil.ReadFile("./test/sample_tpm_quote.xml")
+	assert.NoError(t, err)
+	err = xml.Unmarshal(b, &tpmQuoteResponse)
+	assert.NoError(t, err)
+	mockTAClient.On("GetTPMQuote", mock.Anything, mock.Anything, mock.Anything).Return(tpmQuoteResponse, nil)
+
+	// read sample platform-info that will be returned my the mock client
+	var hostInfo taModel.HostInfo
+	b, err = ioutil.ReadFile("./test/sample_platform_info.json")
+	assert.NoError(t, err)
+	err = json.Unmarshal(b, &hostInfo)
+	assert.NoError(t, err)
+	mockTAClient.On("GetHostInfo").Return(hostInfo, nil)
+
+	// read the aik that will be returned by the mock
+	aikBytes, err := ioutil.ReadFile("./test/aik.pem")
+	aikDer, _ := pem.Decode(aikBytes)
+	assert.NoError(t, err)
+	mockTAClient.On("GetAIK").Return(aikDer.Bytes, nil)
+
+	// the sample data in ./test was collected from 168.63 -- this is needed
+	// for the nonce to verify...
+	baseUrl, err := url.Parse("http://127.0.0.1:1443/")
+	assert.NoError(t, err)
+	mockTAClient.On("GetBaseURL").Return(baseUrl, nil)
+
+	// binding key is only applicable to workload-agent (skip for now)
+	mockTAClient.On("GetBindingKeyCertificate").Return([]byte{}, nil)
+
+	// create an intel host connector and collect the manifest
+	intelConnector := IntelConnector{
+		client: mockTAClient,
+	}
+
+	_, err = intelConnector.GetHostManifest(nil)
+	assert.Error(t, err)
+}

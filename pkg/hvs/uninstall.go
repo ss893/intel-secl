@@ -7,10 +7,8 @@ package hvs
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/tasks"
 	e "github.com/intel-secl/intel-secl/v3/pkg/lib/common/exec"
@@ -131,6 +129,7 @@ var tablesToDrop = []string{
 	"trust_cache",
 	"hostunique_flavor",
 	"audit_log_entry",
+	"flavor_template",
 }
 
 func (a *App) eraseData() error {
@@ -162,31 +161,21 @@ func (a *App) eraseData() error {
 		return errors.Wrap(err, "Failed to validate setup task CreateDefaultFlavor")
 	}
 
+	// create default flavor templates
+	ft := tasks.CreateDefaultFlavorTemplate{
+		DBConf:    dbConf,
+		Directory: constants.DefaultFlavorTemplatesDirectory,
+	}
+	if err := ft.Run(); err != nil {
+		return errors.Wrap(err, "Failed to run setup task CreateDefaultFlavorTemplate")
+	}
+	if err := ft.Validate(); err != nil {
+		return errors.Wrap(err, "Failed to validate setup task CreateDefaultFlavorTemplate")
+	}
+
 	err = a.configDBRotation()
 	if err != nil {
 		return errors.Wrap(err, "Failed to configure database rotation")
-	}
-
-	//Restore only default flavor templates
-	ft := tasks.CreateDefaultFlavorTemplate{
-		DBConf: dbConf,
-	}
-	if ft.TemplateStore == nil {
-		err := ft.FlavorTemplateStore()
-		if err != nil {
-			return errors.Wrap(err, "Failed to initialize flavor template store instance")
-		}
-	}
-
-	ftc := models.FlavorTemplateFilterCriteria{IncludeDeleted: false}
-	flavorTemplates, err := ft.TemplateStore.Search(&ftc)
-	if err != nil {
-		return errors.Wrap(err, "Error retrieving all flavor templates")
-	}
-	for _, template := range flavorTemplates {
-		if !strings.Contains(template.Label, "default") {
-			ft.TemplateStore.Delete(template.ID)
-		}
 	}
 	return nil
 }

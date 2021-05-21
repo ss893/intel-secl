@@ -66,6 +66,124 @@ func TestPcrEventLogEqualsExcludingNoFault(t *testing.T) {
 	t.Logf("Equals Excluding rule verified")
 }
 
+// Provide the empty pcr manifest values in the host manifest and when applying PcrEventLogEquals rule, expecting
+// 'PcrManifestMissing' fault.
+func TestEqualsExcludingPcrManifestMissingFault(t *testing.T) {
+	hostManifest := types.HostManifest{
+		PcrManifest: types.PcrManifest{},
+	}
+
+	rule, err := NewPcrEventLogEquals(&testHostManifestPcrEventLogEntry, uuid.New(), common.FlavorPartPlatform)
+	result, err := rule.Apply(&hostManifest)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 1, len(result.Faults))
+	assert.Equal(t, constants.FaultPcrManifestMissing, result.Faults[0].Name)
+	t.Logf("Fault description: %s", result.Faults[0].Description)
+}
+
+// Provide unsupported SHA algorithm
+func TestPcrEventLogEqualsExcludingUnsupportedSHAFault(t *testing.T) {
+	var excludetag = []string{"commandLine.", "LCP_CONTROL_HASH", "initrd", "vmlinuz", "componentName.imgdb.tgz", "componentName.onetime.tgz"}
+
+	hostManifest := types.HostManifest{
+		PcrManifest: types.PcrManifest{
+			Sha256Pcrs: []types.HostManifestPcrs{
+				{
+					Index:   0,
+					Value:   PCR_VALID_256,
+					PcrBank: types.SHA256,
+				},
+			},
+		},
+	}
+
+	flavorEventsLog := types.TpmEventLog{
+		Pcr: types.Pcr{
+			Index: 0,
+			Bank:  "SHA512",
+		},
+		TpmEvent: []types.EventLog{
+			{
+				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
+				Measurement: zeros,
+			},
+		},
+	}
+
+	hostEventsLog := types.TpmEventLog{
+		Pcr: types.Pcr{
+			Index: 0,
+			Bank:  "SHA256",
+		},
+		TpmEvent: []types.EventLog{
+			{
+				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
+				Measurement: zeros,
+			},
+		},
+	}
+
+	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
+	rule, err := NewPcrEventLogEqualsExcluding(&flavorEventsLog, excludetag, uuid.New(), common.FlavorPartPlatform)
+	result, err := rule.Apply(&hostManifest)
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
+// Create a host event log which has a mismatch field with the flavor event log
+// which invokes 'mismatchfieldinformation' to the user.
+func TestPcrEventLogEqualsExcludingMismatchFields(t *testing.T) {
+	var excludetag = []string{"commandLine.", "LCP_CONTROL_HASH", "initrd", "vmlinuz", "componentName.imgdb.tgz", "componentName.onetime.tgz"}
+
+	hostManifest := types.HostManifest{
+		PcrManifest: types.PcrManifest{
+			Sha256Pcrs: []types.HostManifestPcrs{
+				{
+					Index:   0,
+					Value:   PCR_VALID_256,
+					PcrBank: types.SHA256,
+				},
+			},
+		},
+	}
+
+	flavorEventsLog := types.TpmEventLog{
+		Pcr: types.Pcr{
+			Index: 0,
+			Bank:  "SHA256",
+		},
+		TpmEvent: []types.EventLog{
+			{
+				TypeName:    util.EVENT_LOG_DIGEST_SHA1,
+				Measurement: zeros,
+			},
+		},
+	}
+
+	hostEventsLog := types.TpmEventLog{
+		Pcr: types.Pcr{
+			Index: 0,
+			Bank:  "SHA256",
+		},
+		TpmEvent: []types.EventLog{
+			{
+				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
+				Measurement: zeros,
+			},
+		},
+	}
+
+	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
+	rule, err := NewPcrEventLogEqualsExcluding(&flavorEventsLog, excludetag, uuid.New(), common.FlavorPartPlatform)
+	result, err := rule.Apply(&hostManifest)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 0, len(result.Faults))
+	assert.Equal(t, constants.PcrEventLogUnexpectedFields, result.MismatchField[0].Name)
+	t.Logf("MismatchField description: %s", result.MismatchField[0].Description)
+}
+
 // Create a host event log that does not include the bank/index specified
 // in the flavor event log to invoke a 'PcrEventLogMissing' fault.
 func TestPcrEventLogEqualsExcludingPcrEventLogMissingFault(t *testing.T) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2021 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package tasks
@@ -27,6 +27,7 @@ type CreateDefaultFlavorTemplate struct {
 
 	commandName   string
 	TemplateStore *postgres.FlavorTemplateStore
+	Directory     string
 }
 
 var defaultFlavorTemplateNames = []string{
@@ -61,7 +62,7 @@ func (t *CreateDefaultFlavorTemplate) Run() error {
 		return nil
 	}
 
-	templates, err := getTemplates()
+	templates, err := t.getTemplates()
 	if err != nil {
 		return err
 	}
@@ -151,10 +152,10 @@ func (t *CreateDefaultFlavorTemplate) FlavorTemplateStore() error {
 	return nil
 }
 
-func getTemplates() ([]hvs.FlavorTemplate, error) {
+func (t *CreateDefaultFlavorTemplate) getTemplates() ([]hvs.FlavorTemplate, error) {
 	var ret []hvs.FlavorTemplate
 
-	defaultFlavorTemplatesRaw, err := readDefaultTemplates()
+	defaultFlavorTemplatesRaw, err := t.readDefaultTemplates()
 	if err != nil {
 		return nil, err
 	}
@@ -171,16 +172,16 @@ func getTemplates() ([]hvs.FlavorTemplate, error) {
 }
 
 // readDefaultTemplates This method is used to read the default template json files
-func readDefaultTemplates() ([]string, error) {
+func (t *CreateDefaultFlavorTemplate) readDefaultTemplates() ([]string, error) {
 	var defaultFlavorTemplatesRaw []string
 
-	flavorTemplatesPath, err := ioutil.ReadDir(constants.DefaultFlavorTemplatesDirectory)
+	flavorTemplatesPath, err := ioutil.ReadDir(t.Directory)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, flavorTemplatePath := range flavorTemplatesPath {
-		flavorTemplateBytes, err := ioutil.ReadFile(constants.DefaultFlavorTemplatesDirectory + flavorTemplatePath.Name())
+		flavorTemplateBytes, err := ioutil.ReadFile(t.Directory + flavorTemplatePath.Name())
 		if err != nil {
 			return nil, err
 		}

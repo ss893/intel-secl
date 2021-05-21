@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2021 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -68,10 +68,6 @@ func (ftc *FlavorTemplateController) Create(w http.ResponseWriter, r *http.Reque
 		default:
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
 		}
-	}
-
-	if strings.Contains(flavorTemplateReq.Label, "default") {
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Flavor template label should not contain 'default' keyword"}
 	}
 
 	//Store this template into database.

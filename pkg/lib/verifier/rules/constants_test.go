@@ -324,6 +324,22 @@ var (
 			 "cumulative_hash": "fc898764d5adb9053136a90e2ecdf2202e0f7fa58ff4a0e73d9e115804bc7d6e362b170aa358b996f016d915bd017e06"
 		 }
 	 }`
+
+	testInvalidSoftwareFlavor = `{
+		"meta": {
+			"schema": {
+				"uri": "lib:wml:measurements:1.0"
+			},
+			"id": "5aed8104-f68b-40a1-b8f1-b646ecf33b40",
+			"description": {
+				"flavor_part": "SOFTWARE",
+				"label": "",
+				"digest_algorithm": "SHA384"
+			}
+		},
+		"software": {
+		}
+	}`
 )
 
 const (

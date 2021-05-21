@@ -261,40 +261,6 @@ func (pfutil PlatformFlavorUtil) GetHardwareSectionDetails(hostManifest *hcTypes
 	return &hardware
 }
 
-// PcrExists checks if required list of PCRs are populated in the PCRManifest
-func (pfutil PlatformFlavorUtil) PcrExists(pcrManifest hcTypes.PcrManifest, pcrList []int) bool {
-	log.Trace("flavor/util/platform_flavor_util:PcrExists() Entering")
-	defer log.Trace("flavor/util/platform_flavor_util:PcrExists() Leaving")
-
-	var pcrExists bool
-
-	// check for empty pcrList
-	if len(pcrList) == 0 {
-		return pcrExists
-	}
-
-	for _, digestBank := range pcrManifest.GetPcrBanks() {
-		var pcrExistsForDigestAlg bool
-
-		for _, pcrIndex := range pcrList {
-			// get PcrIndex
-			pI := hcTypes.PcrIndex(pcrIndex)
-			pcr, err := pcrManifest.GetPcrValue(digestBank, pI)
-
-			if pcr != nil && err == nil {
-				pcrExistsForDigestAlg = true
-			}
-
-			// This check ensures that even if PCRs exist for one supported algorithm, we
-			// return back true.
-			if pcrExistsForDigestAlg && !pcrExists {
-				pcrExists = true
-			}
-		}
-	}
-	return pcrExists
-}
-
 // GetPcrDetails extracts Pcr values and Event Logs from the HostManifest/PcrManifest and  returns
 // in a format suitable for inserting into the flavor
 func (pfutil PlatformFlavorUtil) GetPcrDetails(pcrManifest hcTypes.PcrManifest, pcrList map[hvs.PCR]hvs.PcrListRules) []hcTypes.FlavorPcrs {

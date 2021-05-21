@@ -147,7 +147,7 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		a.Config.DB = dbConf
 	}
 	runner.AddTask("create-default-flavorgroup", "", &tasks.CreateDefaultFlavor{
-		DBConfig: a.Config.DB,
+		DBConfig: dbConf,
 	})
 	runner.AddTask("create-dek", "", &tasks.CreateDek{
 		DekStore: &a.Config.Dek,
@@ -198,7 +198,8 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("create-endorsement-ca", "endorsement-ca", a.selfSignTask("endorsement-ca"))
 	runner.AddTask("create-tag-ca", "tag-ca", a.selfSignTask("tag-ca"))
 	runner.AddTask("create-default-flavor-template", "", &tasks.CreateDefaultFlavorTemplate{
-		DBConf: a.Config.DB,
+		DBConf:    dbConf,
+		Directory: constants.DefaultFlavorTemplatesDirectory,
 	})
 
 	return runner, nil

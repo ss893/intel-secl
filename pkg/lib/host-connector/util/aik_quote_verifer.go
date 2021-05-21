@@ -359,12 +359,12 @@ func getPcrEventLog(eventLog string) (types.PcrEventLogMap, error) {
 		return types.PcrEventLogMap{}, errors.Wrap(err, "util/aik_quote_verifier:getPcrEventLog() Error unmarshalling measureLog")
 	}
 	for _, measureLog := range measureLogs {
-		pcrEventLogMap = addPcrEntry(measureLog, pcrEventLogMap)
+		addPcrEntry(measureLog, &pcrEventLogMap)
 	}
 	return pcrEventLogMap, nil
 }
 
-func addPcrEntry(module types.MeasureLog, eventLogMap types.PcrEventLogMap) types.PcrEventLogMap {
+func addPcrEntry(module types.MeasureLog, eventLogMap *types.PcrEventLogMap) {
 
 	log.Trace("util/aik_quote_verifier:addPcrEntry() Entering")
 	defer log.Trace("util/aik_quote_verifier:addPcrEntry() Leaving")
@@ -412,7 +412,6 @@ func addPcrEntry(module types.MeasureLog, eventLogMap types.PcrEventLogMap) type
 
 	}
 	log.Debugf("util/aik_quote_verifier:addPcrEntry() Successfully added PCR log entries")
-	return eventLogMap
 }
 
 func GenerateNonce(nonceSize int) (string, error) {

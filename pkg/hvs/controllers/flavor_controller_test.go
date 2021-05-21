@@ -301,321 +301,251 @@ var _ = Describe("FlavorController", func() {
 			It("Should return 201 Response code and a signed flavor", func() {
 				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
 				flavorJson := `{
-								"flavor_collection": {
-									"flavors": [
-										{
-											"flavor": {
-												"meta": {
-													"description": {
-														"flavor_part": "PLATFORM",
-														"source": "myhost.example.com",
-														"label": "ImportPlatformFlavor",
-														"bios_name": "Intel Corporation",
-														"bios_version": "SE5C620.86B.02.01.0009.092820190230",
-														"tpm_version": "2.0",
-														"tboot_installed": "true"
-													},
-													"vendor": "INTEL"
-												},
-												"bios": {
-													"bios_name": "Intel Corporation",
-													"bios_version": "SE5C620.86B.02.01.0009.092820190230"
-												},
-												"hardware": {
-													"processor_info": "57 06 05 00 FF FB EB BF",
-													"processor_flags": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE-36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE",
-													"feature": {
-														"TXT": {
-															"enabled": true
-														},
-														"TPM": {
-															"enabled": true,
-															"version": "2.0",
-															"pcr_banks": [
-																"SHA1",
-																"SHA256"
-															]
-														}
-													}
-												},
-												"pcrs": {
-													"SHA1": {
-														"pcr_0": {
-															"value": "308c314172d79c8ed0c91d91eb6d6b78a2a451a0"
-														},
-														"pcr_17": {
-															"value": "f0c4bc16f4ccc7e813ec562a26ac181264b6b453",
-															"event": [
-																{
-																	"value": "bc6b1c2e40d0d37f0e9415670515f869c14e3fe1",
-																	"label": "HASH_START",
-																	"info": {
-																		"ComponentName": "HASH_START",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "1fad8a10c0f5723017987a842a332d922ff559eb",
-																	"label": "BIOSAC_REG_DATA",
-																	"info": {
-																		"ComponentName": "BIOSAC_REG_DATA",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "3c585604e87f855973731fea83e21fab9392d2fc",
-																	"label": "CPU_SCRTM_STAT",
-																	"info": {
-																		"ComponentName": "CPU_SCRTM_STAT",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "5ba93c9db0cff93f52b521d7420e43f6eda2784f",
-																	"label": "LCP_DETAILS_HASH",
-																	"info": {
-																		"ComponentName": "LCP_DETAILS_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "5ba93c9db0cff93f52b521d7420e43f6eda2784f",
-																	"label": "STM_HASH",
-																	"info": {
-																		"ComponentName": "STM_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "0cf169a95bd32a9a1dc4c3499ade207d30ab8895",
-																	"label": "OSSINITDATA_CAP_HASH",
-																	"info": {
-																		"ComponentName": "OSSINITDATA_CAP_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "c49243843032f40ceabf7528f53b7c2cbf8e9355",
-																	"label": "MLE_HASH",
-																	"info": {
-																		"ComponentName": "MLE_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "274f929dbab8b98a7031bbcd9ea5613c2a28e5e6",
-																	"label": "NV_INFO_HASH",
-																	"info": {
-																		"ComponentName": "NV_INFO_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "ca96de412b4e8c062e570d3013d2fccb4b20250a",
-																	"label": "tb_policy",
-																	"info": {
-																		"ComponentName": "tb_policy",
-																		"EventName": "OpenSource.EventName"
-																	}
-																}
-															]
-														},
-														"pcr_18": {
-															"value": "86da61107994a14c0d154fd87ca509f82377aa30",
-															"event": [
-																{
-																	"value": "a395b723712b3711a89c2bb5295386c0db85fe44",
-																	"label": "SINIT_PUBKEY_HASH",
-																	"info": {
-																		"ComponentName": "SINIT_PUBKEY_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "3c585604e87f855973731fea83e21fab9392d2fc",
-																	"label": "CPU_SCRTM_STAT",
-																	"info": {
-																		"ComponentName": "CPU_SCRTM_STAT",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "0cf169a95bd32a9a1dc4c3499ade207d30ab8895",
-																	"label": "OSSINITDATA_CAP_HASH",
-																	"info": {
-																		"ComponentName": "OSSINITDATA_CAP_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "5ba93c9db0cff93f52b521d7420e43f6eda2784f",
-																	"label": "LCP_AUTHORITIES_HASH",
-																	"info": {
-																		"ComponentName": "LCP_AUTHORITIES_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "274f929dbab8b98a7031bbcd9ea5613c2a28e5e6",
-																	"label": "NV_INFO_HASH",
-																	"info": {
-																		"ComponentName": "NV_INFO_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "ca96de412b4e8c062e570d3013d2fccb4b20250a",
-																	"label": "tb_policy",
-																	"info": {
-																		"ComponentName": "tb_policy",
-																		"EventName": "OpenSource.EventName"
-																	}
-																}
-															]
-														}
-													},
-													"SHA256": {
-														"pcr_0": {
-															"value": "b8b8a376ab2cc30632b544aaee67b464a8bff184f1f09698fa5b7470074510b3"
-														},
-														"pcr_17": {
-															"value": "412beb56e05525c9522aea6b47a2abe58cb8387e57a6ad434fddb0b4f4ee41eb",
-															"event": [
-																{
-																	"value": "9a31321ff5d4e5699cc368a0684be901837db04b5dca532b805e5895a39e57e7",
-																	"label": "HASH_START",
-																	"info": {
-																		"ComponentName": "HASH_START",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "19f34545cdbf9316036535e6732a349fbe4d85bb6f102523934ba215329293fb",
-																	"label": "BIOSAC_REG_DATA",
-																	"info": {
-																		"ComponentName": "BIOSAC_REG_DATA",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450",
-																	"label": "CPU_SCRTM_STAT",
-																	"info": {
-																		"ComponentName": "CPU_SCRTM_STAT",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
-																	"label": "LCP_DETAILS_HASH",
-																	"info": {
-																		"ComponentName": "LCP_DETAILS_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
-																	"label": "STM_HASH",
-																	"info": {
-																		"ComponentName": "STM_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "d81fe96dc500bc43e1cd5800bef9d72b3d030bdb7e860e10c522e4246b30bd93",
-																	"label": "OSSINITDATA_CAP_HASH",
-																	"info": {
-																		"ComponentName": "OSSINITDATA_CAP_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "c78680644d8e0cf90174fc78f09b75c99cfd71367433a88ee259f743226f03ec",
-																	"label": "MLE_HASH",
-																	"info": {
-																		"ComponentName": "MLE_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "0f6e0c7a5944963d7081ea494ddff1e9afa689e148e39f684db06578869ea38b",
-																	"label": "NV_INFO_HASH",
-																	"info": {
-																		"ComponentName": "NV_INFO_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "27808f64e6383982cd3bcc10cfcb3457c0b65f465f779d89b668839eaf263a67",
-																	"label": "tb_policy",
-																	"info": {
-																		"ComponentName": "tb_policy",
-																		"EventName": "OpenSource.EventName"
-																	}
-																}
-															]
-														},
-														"pcr_18": {
-															"value": "d9e55bd1c570a6408fb1368f3663ae92747241fc4d2a3622cef0efadae284d75",
-															"event": [
-																{
-																	"value": "da256395df4046319ef0af857d377a729e5bc0693429ac827002ffafe485b2e7",
-																	"label": "SINIT_PUBKEY_HASH",
-																	"info": {
-																		"ComponentName": "SINIT_PUBKEY_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450",
-																	"label": "CPU_SCRTM_STAT",
-																	"info": {
-																		"ComponentName": "CPU_SCRTM_STAT",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "d81fe96dc500bc43e1cd5800bef9d72b3d030bdb7e860e10c522e4246b30bd93",
-																	"label": "OSSINITDATA_CAP_HASH",
-																	"info": {
-																		"ComponentName": "OSSINITDATA_CAP_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
-																	"label": "LCP_AUTHORITIES_HASH",
-																	"info": {
-																		"ComponentName": "LCP_AUTHORITIES_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "0f6e0c7a5944963d7081ea494ddff1e9afa689e148e39f684db06578869ea38b",
-																	"label": "NV_INFO_HASH",
-																	"info": {
-																		"ComponentName": "NV_INFO_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "27808f64e6383982cd3bcc10cfcb3457c0b65f465f779d89b668839eaf263a67",
-																	"label": "tb_policy",
-																	"info": {
-																		"ComponentName": "tb_policy",
-																		"EventName": "OpenSource.EventName"
-																	}
-																}
-															]
-														}
-													}
-												}
-											}
-										}
-									]
+					"connection_string":"",
+					"flavor_collection":{
+					   "flavors":[
+						  {
+							 "flavor":{
+								"meta":{
+								   "id":"0fcb8e8d-6fe6-46ba-9526-32b53bf3df75",
+								   "description":{
+									  "bios_name":"Intel Corporation",
+									  "bios_version":"SE5C610.86B.01.01.0016.033120161139",
+									  "flavor_part":"PLATFORM",
+									  "flavor_template_ids":[
+										 "8b022050-3ade-40fd-8e3b-45bf8b1dc56a"
+									  ],
+									  "label":"INTEL_IntelCorporation_SE5C610.86B.01.01.0016.033120161139_TPM_TXT_2021-04-23T12:25:58.815135+05:30",
+									  "source":"k8s-node",
+									  "tboot_installed":true,
+									  "tpm_version":"2.0"
+								   },
+								   "vendor":"INTEL"
 								},
-								"flavorgroup_name": "custom-flavorgroup"
-							}`
+								"bios":{
+								   "bios_name":"Intel Corporation",
+								   "bios_version":"SE5C610.86B.01.01.0016.033120161139"
+								},
+								"hardware":{
+								   "processor_info":"F1 06 04 00 FF FB EB BF",
+								   "processor_flags":"FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE-36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE",
+								   "feature":{
+									  "TXT":{
+										 "supported":"true",
+										 "enabled":"true"
+									  },
+									  "TPM":{
+										 "supported":"true",
+										 "enabled":"true",
+										 "meta":{
+											"tpm_version":"2.0",
+											"pcr_banks":[
+											   "SHA1",
+											   "SHA256"
+											]
+										 }
+									  },
+									  "CBNT":{
+										 "supported":"false",
+										 "enabled":"false",
+										 "meta":{
+											"profile":"",
+											"msr":""
+										 }
+									  },
+									  "UEFI":{
+										 "supported":"false",
+										 "enabled":"false",
+										 "meta":{
+											"secure_boot_enabled":false
+										 }
+									  },
+									  "PFR":{
+										 "supported":"false",
+										 "enabled":"false"
+									  },
+									  "BMC":{
+										 "supported":"false",
+										 "enabled":"false"
+									  }
+								   }
+								},
+								"pcrs":[
+								   {
+									  "pcr":{
+										 "index":0,
+										 "bank":"SHA256"
+									  },
+									  "measurement":"fad7981e1d16de3269667f4e84bf84a0a0c84f4f8a183e13ac5ba1c441bbfd3c",
+									  "pcr_matches":true
+								   },
+								   {
+									  "pcr":{
+										 "index":17,
+										 "bank":"SHA256"
+									  },
+									  "measurement":"b33e4a30200d6bc8c4d5b439c682fd591afaa500e045de85cf945c75a6d27860",
+									  "pcr_matches":true,
+									  "eventlog_equals":{
+										 "events":[
+											{
+											   "type_id":"0x402",
+											   "type_name":"HASH_START",
+											   "tags":[
+												  "HASH_START"
+											   ],
+											   "measurement":"4bf4446b07c0cc0159f7df959c118887eefb3510983ce8eadbc7557af2e1f06f"
+											},
+											{
+											   "type_id":"0x40a",
+											   "type_name":"BIOSAC_REG_DATA",
+											   "tags":[
+												  "BIOSAC_REG_DATA"
+											   ],
+											   "measurement":"8eb9c8fd49f5c228ee42eb581b1d134ee6d30925d019717ca83d9041ec04ce13"
+											},
+											{
+											   "type_id":"0x40b",
+											   "type_name":"CPU_SCRTM_STAT",
+											   "tags":[
+												  "CPU_SCRTM_STAT"
+											   ],
+											   "measurement":"67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+											},
+											{
+											   "type_id":"0x412",
+											   "type_name":"LCP_DETAILS_HASH",
+											   "tags":[
+												  "LCP_DETAILS_HASH"
+											   ],
+											   "measurement":"6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+											},
+											{
+											   "type_id":"0x40e",
+											   "type_name":"STM_HASH",
+											   "tags":[
+												  "STM_HASH"
+											   ],
+											   "measurement":"6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+											},
+											{
+											   "type_id":"0x40f",
+											   "type_name":"OSSINITDATA_CAP_HASH",
+											   "tags":[
+												  "OSSINITDATA_CAP_HASH"
+											   ],
+											   "measurement":"67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+											},
+											{
+											   "type_id":"0x404",
+											   "type_name":"MLE_HASH",
+											   "tags":[
+												  "MLE_HASH"
+											   ],
+											   "measurement":"3b02dbc9b1669d14d5085184b9558f5ff8beb348770608d1eeff8437366773e0"
+											},
+											{
+											   "type_id":"0x414",
+											   "type_name":"NV_INFO_HASH",
+											   "tags":[
+												  "NV_INFO_HASH"
+											   ],
+											   "measurement":"0f6e0c7a5944963d7081ea494ddff1e9afa689e148e39f684db06578869ea38b"
+											},
+											{
+											   "type_id":"0x501",
+											   "type_name":"tb_policy",
+											   "tags":[
+												  "tb_policy"
+											   ],
+											   "measurement":"27808f64e6383982cd3bcc10cfcb3457c0b65f465f779d89b668839eaf263a67"
+											}
+										 ],
+										 "exclude_tags":[
+											"LCP_CONTROL_HASH",
+											"initrd",
+											"vmlinuz"
+										 ]
+									  }
+								   },
+								   {
+									  "pcr":{
+										 "index":18,
+										 "bank":"SHA256"
+									  },
+									  "measurement":"6f33d58a1fc09382042d2fd650f4c26af20cf2b18ea3bc0fdb075af2fa04f6d9",
+									  "pcr_matches":true,
+									  "eventlog_equals":{
+										 "events":[
+											{
+											   "type_id":"0x410",
+											   "type_name":"SINIT_PUBKEY_HASH",
+											   "tags":[
+												  "SINIT_PUBKEY_HASH"
+											   ],
+											   "measurement":"dbd2dc6c323d51b61aea2706133b587fea2ef2fa70b5a523b8138e9154302e20"
+											},
+											{
+											   "type_id":"0x40b",
+											   "type_name":"CPU_SCRTM_STAT",
+											   "tags":[
+												  "CPU_SCRTM_STAT"
+											   ],
+											   "measurement":"67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+											},
+											{
+											   "type_id":"0x40f",
+											   "type_name":"OSSINITDATA_CAP_HASH",
+											   "tags":[
+												  "OSSINITDATA_CAP_HASH"
+											   ],
+											   "measurement":"67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+											},
+											{
+											   "type_id":"0x413",
+											   "type_name":"LCP_AUTHORITIES_HASH",
+											   "tags":[
+												  "LCP_AUTHORITIES_HASH"
+											   ],
+											   "measurement":"6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+											},
+											{
+											   "type_id":"0x414",
+											   "type_name":"NV_INFO_HASH",
+											   "tags":[
+												  "NV_INFO_HASH"
+											   ],
+											   "measurement":"0f6e0c7a5944963d7081ea494ddff1e9afa689e148e39f684db06578869ea38b"
+											},
+											{
+											   "type_id":"0x501",
+											   "type_name":"tb_policy",
+											   "tags":[
+												  "tb_policy"
+											   ],
+											   "measurement":"27808f64e6383982cd3bcc10cfcb3457c0b65f465f779d89b668839eaf263a67"
+											}
+										 ],
+										 "exclude_tags":[
+											"LCP_CONTROL_HASH",
+											"initrd",
+											"vmlinuz"
+										 ]
+									  }
+								   }
+								]
+							 },
+							 "signature":"ppfkmzhhBMTcVRAztNK1qp/9Ioh8krIgcvIhvIi1xaAxh/4hKSKc4mwKqSIlYpFO64hu9qzv6j6Ap9cw5gM4ZDu3oJkli9pJ/2+9y/9XIYs7nw+sV/i1xNdgzeUbw7urvARf8PmS6/AxltNNdPslrfpPvWHtnIU8yVpwoMTCbThK9JL8ZIZQLXouTJ1Cdh2YMSfsQa8840yFoKPFMz0n2mn70lGKbaWY3wyET5KWJFMLGxTpVkkWoO5Eh+K+2g6h+R/gBo1j+GQDcG4MZ/9dtHAu0iGrFxTSJ7LtSQtlzXUH+aYUE03jmF1Hdhwdhe5WZ4PEyNCIef31ewhSwY3Xp5xlmZdqOLS7bZGdC7FomtDgiRLAzC8wEu4BVSBZqtqwg/Unf2dnqKRFVk5dayM2pc8XFRLKOzBu2FUmah4/SoXC6u1xGMpZzbkL7CWQK1JHJBvLymiQoEkxEOknzXi5hJYAtc1q21lmINPl5VPLWPGF6JWlnhxCG4XcMe9jSNIY"
+						  }
+					   ]
+					},
+					"flavorgroup_names":[
+					   "Test"
+					],
+					"partial_flavor_types":[
+					   "PLATFORM"
+					]
+				 }`
 				req, err := http.NewRequest(
 					"POST",
 					"/flavors",
@@ -626,328 +556,257 @@ var _ = Describe("FlavorController", func() {
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 		Context("Provide a manually crafted Flavor request with an invalid field name", func() {
 			It("Should return 400 Error code", func() {
 				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
 				flavorJson := `{
-								"flavor_collection": {
-									"flavors": [
-										{
-											"flavor": {
-												"meta": {
-													"description": {
-														"flavor_part": "PLATFORM",
-														"source": "myhost.example.com",
-														"label": "ImportPlatformFlavor",
-														"bios_name": "Intel Corporation",
-														"bios_version": "SE5C620.86B.02.01.0009.092820190230",
-														"tpm_version": "2.0",
-														"tboot_installed": "true"
-													},
-													"vendor": "INTEL"
-												},
-												"bios": {
-													"bios_name": "Intel Corporation",
-													"bios_version": "SE5C620.86B.02.01.0009.092820190230"
-												},
-												"hardware": {
-													"processor_info": "57 06 05 00 FF FB EB BF",
-													"processor_flags": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE-36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE",
-													"feature": {
-														"TXT": {
-															"enabled": true
-														},
-														"TPM": {
-															"enabled": true,
-															"version": "2.0",
-															"pcr_banks": [
-																"SHA1",
-																"SHA256"
-															]
-														}
-													}
-												},
-												"pcrs": {
-													"SHA1": {
-														"pcr_0": {
-															"value": "308c314172d79c8ed0c91d91eb6d6b78a2a451a0"
-														},
-														"pcr_17": {
-															"value": "f0c4bc16f4ccc7e813ec562a26ac181264b6b453",
-															"event": [
-																{
-																	"value": "bc6b1c2e40d0d37f0e9415670515f869c14e3fe1",
-																	"label": "HASH_START",
-																	"info": {
-																		"ComponentName": "HASH_START",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "1fad8a10c0f5723017987a842a332d922ff559eb",
-																	"label": "BIOSAC_REG_DATA",
-																	"info": {
-																		"ComponentName": "BIOSAC_REG_DATA",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "3c585604e87f855973731fea83e21fab9392d2fc",
-																	"label": "CPU_SCRTM_STAT",
-																	"info": {
-																		"ComponentName": "CPU_SCRTM_STAT",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "5ba93c9db0cff93f52b521d7420e43f6eda2784f",
-																	"label": "LCP_DETAILS_HASH",
-																	"info": {
-																		"ComponentName": "LCP_DETAILS_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "5ba93c9db0cff93f52b521d7420e43f6eda2784f",
-																	"label": "STM_HASH",
-																	"info": {
-																		"ComponentName": "STM_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "0cf169a95bd32a9a1dc4c3499ade207d30ab8895",
-																	"label": "OSSINITDATA_CAP_HASH",
-																	"info": {
-																		"ComponentName": "OSSINITDATA_CAP_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "c49243843032f40ceabf7528f53b7c2cbf8e9355",
-																	"label": "MLE_HASH",
-																	"info": {
-																		"ComponentName": "MLE_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "274f929dbab8b98a7031bbcd9ea5613c2a28e5e6",
-																	"label": "NV_INFO_HASH",
-																	"info": {
-																		"ComponentName": "NV_INFO_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "ca96de412b4e8c062e570d3013d2fccb4b20250a",
-																	"label": "tb_policy",
-																	"info": {
-																		"ComponentName": "tb_policy",
-																		"EventName": "OpenSource.EventName"
-																	}
-																}
-															]
-														},
-														"pcr_18": {
-															"value": "86da61107994a14c0d154fd87ca509f82377aa30",
-															"event": [
-																{
-																	"value": "a395b723712b3711a89c2bb5295386c0db85fe44",
-																	"label": "SINIT_PUBKEY_HASH",
-																	"info": {
-																		"ComponentName": "SINIT_PUBKEY_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "3c585604e87f855973731fea83e21fab9392d2fc",
-																	"label": "CPU_SCRTM_STAT",
-																	"info": {
-																		"ComponentName": "CPU_SCRTM_STAT",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "0cf169a95bd32a9a1dc4c3499ade207d30ab8895",
-																	"label": "OSSINITDATA_CAP_HASH",
-																	"info": {
-																		"ComponentName": "OSSINITDATA_CAP_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "5ba93c9db0cff93f52b521d7420e43f6eda2784f",
-																	"label": "LCP_AUTHORITIES_HASH",
-																	"info": {
-																		"ComponentName": "LCP_AUTHORITIES_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "274f929dbab8b98a7031bbcd9ea5613c2a28e5e6",
-																	"label": "NV_INFO_HASH",
-																	"info": {
-																		"ComponentName": "NV_INFO_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "ca96de412b4e8c062e570d3013d2fccb4b20250a",
-																	"label": "tb_policy",
-																	"info": {
-																		"ComponentName": "tb_policy",
-																		"EventName": "OpenSource.EventName"
-																	}
-																}
-															]
-														}
-													},
-													"SHA256": {
-														"pcr_0": {
-															"value": "b8b8a376ab2cc30632b544aaee67b464a8bff184f1f09698fa5b7470074510b3"
-														},
-														"pcr_17": {
-															"value": "412beb56e05525c9522aea6b47a2abe58cb8387e57a6ad434fddb0b4f4ee41eb",
-															"event": [
-																{
-																	"value": "9a31321ff5d4e5699cc368a0684be901837db04b5dca532b805e5895a39e57e7",
-																	"label": "HASH_START",
-																	"info": {
-																		"ComponentName": "HASH_START",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "19f34545cdbf9316036535e6732a349fbe4d85bb6f102523934ba215329293fb",
-																	"label": "BIOSAC_REG_DATA",
-																	"info": {
-																		"ComponentName": "BIOSAC_REG_DATA",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450",
-																	"label": "CPU_SCRTM_STAT",
-																	"info": {
-																		"ComponentName": "CPU_SCRTM_STAT",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
-																	"label": "LCP_DETAILS_HASH",
-																	"info": {
-																		"ComponentName": "LCP_DETAILS_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
-																	"label": "STM_HASH",
-																	"info": {
-																		"ComponentName": "STM_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "d81fe96dc500bc43e1cd5800bef9d72b3d030bdb7e860e10c522e4246b30bd93",
-																	"label": "OSSINITDATA_CAP_HASH",
-																	"info": {
-																		"ComponentName": "OSSINITDATA_CAP_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "c78680644d8e0cf90174fc78f09b75c99cfd71367433a88ee259f743226f03ec",
-																	"label": "MLE_HASH",
-																	"info": {
-																		"ComponentName": "MLE_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "0f6e0c7a5944963d7081ea494ddff1e9afa689e148e39f684db06578869ea38b",
-																	"label": "NV_INFO_HASH",
-																	"info": {
-																		"ComponentName": "NV_INFO_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "27808f64e6383982cd3bcc10cfcb3457c0b65f465f779d89b668839eaf263a67",
-																	"label": "tb_policy",
-																	"info": {
-																		"ComponentName": "tb_policy",
-																		"EventName": "OpenSource.EventName"
-																	}
-																}
-															]
-														},
-														"pcr_18": {
-															"value": "d9e55bd1c570a6408fb1368f3663ae92747241fc4d2a3622cef0efadae284d75",
-															"event": [
-																{
-																	"value": "da256395df4046319ef0af857d377a729e5bc0693429ac827002ffafe485b2e7",
-																	"label": "SINIT_PUBKEY_HASH",
-																	"info": {
-																		"ComponentName": "SINIT_PUBKEY_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450",
-																	"label": "CPU_SCRTM_STAT",
-																	"info": {
-																		"ComponentName": "CPU_SCRTM_STAT",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "d81fe96dc500bc43e1cd5800bef9d72b3d030bdb7e860e10c522e4246b30bd93",
-																	"label": "OSSINITDATA_CAP_HASH",
-																	"info": {
-																		"ComponentName": "OSSINITDATA_CAP_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
-																	"label": "LCP_AUTHORITIES_HASH",
-																	"info": {
-																		"ComponentName": "LCP_AUTHORITIES_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "0f6e0c7a5944963d7081ea494ddff1e9afa689e148e39f684db06578869ea38b",
-																	"label": "NV_INFO_HASH",
-																	"info": {
-																		"ComponentName": "NV_INFO_HASH",
-																		"EventName": "OpenSource.EventName"
-																	}
-																},
-																{
-																	"value": "27808f64e6383982cd3bcc10cfcb3457c0b65f465f779d89b668839eaf263a67",
-																	"label": "tb_policy",
-																	"info": {
-																		"ComponentName": "tb_policy",
-																		"EventName": "OpenSource.EventName"
-																	}
-																}
-															]
-														}
-													}
-												}
-											}
-										}
-									]
+					"connection_string":"",
+					"flavor_collection":{
+					   "flavors":[
+						  {
+							 "flavor":{
+								"meta":{
+								   "id":"0fcb8e8d-6fe6-46ba-9526-32b53bf3df7b",
+								   "description":{
+									  "bios_name":"Intel Corporation",
+									  "bios_version":"SE5C610.86B.01.01.0016.033120161139",
+									  "flavor_part":"PLATFORM",
+									  "flavor_template_ids":[
+										 "8b022050-3ade-40fd-8e3b-45bf8b1dc56a"
+									  ],
+									  "label":"INTEL_IntelCorporation_SE5C610.86B.01.01.0016.033120161139_TPM_TXT_2021-04-23T12:25:58.815135+05:30",
+									  "source":"k8s-node",
+									  "tboot_installed":true,
+									  "tpm_version":"2.0"
+								   },
+								   "vendor":"INTEL"
 								},
-								"invalid_field_name": ["custom-flavorgroup"]
-							}`
+								"bios":{
+								   "bios_name":"Intel Corporation",
+								   "bios_version":"SE5C610.86B.01.01.0016.033120161139"
+								},
+								"hardware":{
+								   "processor_info":"F1 06 04 00 FF FB EB BF",
+								   "processor_flags":"FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE-36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE",
+								   "feature":{
+									  "TXT":{
+										 "supported":"true",
+										 "enabled":"true"
+									  },
+									  "TPM":{
+										 "supported":"true",
+										 "enabled":"true",
+										 "meta":{
+											"tpm_version":"2.0",
+											"pcr_banks":[
+											   "SHA1",
+											   "SHA256"
+											]
+										 }
+									  },
+									  "CBNT":{
+										 "supported":"false",
+										 "enabled":"false",
+										 "meta":{
+											"profile":"",
+											"msr":""
+										 }
+									  },
+									  "UEFI":{
+										 "supported":"false",
+										 "enabled":"false",
+										 "meta":{
+											"secure_boot_enabled":false
+										 }
+									  },
+									  "PFR":{
+										 "supported":"false",
+										 "enabled":"false"
+									  },
+									  "BMC":{
+										 "supported":"false",
+										 "enabled":"false"
+									  }
+								   }
+								},
+								"pcrs":[
+								   {
+									  "pcr":{
+										 "index":0,
+										 "bank":"SHA256"
+									  },
+									  "measurement":"fad7981e1d16de3269667f4e84bf84a0a0c84f4f8a183e13ac5ba1c441bbfd3c",
+									  "pcr_matches":true
+								   },
+								   {
+									  "pcr":{
+										 "index":17,
+										 "bank":"SHA256"
+									  },
+									  "measurement":"b33e4a30200d6bc8c4d5b439c682fd591afaa500e045de85cf945c75a6d27860",
+									  "pcr_matches":true,
+									  "eventlog_equals":{
+										 "events":[
+											{
+											   "type_id":"0x402",
+											   "type_name":"HASH_START",
+											   "tags":[
+												  "HASH_START"
+											   ],
+											   "measurement":"4bf4446b07c0cc0159f7df959c118887eefb3510983ce8eadbc7557af2e1f06f"
+											},
+											{
+											   "type_id":"0x40a",
+											   "type_name":"BIOSAC_REG_DATA",
+											   "tags":[
+												  "BIOSAC_REG_DATA"
+											   ],
+											   "measurement":"8eb9c8fd49f5c228ee42eb581b1d134ee6d30925d019717ca83d9041ec04ce13"
+											},
+											{
+											   "type_id":"0x40b",
+											   "type_name":"CPU_SCRTM_STAT",
+											   "tags":[
+												  "CPU_SCRTM_STAT"
+											   ],
+											   "measurement":"67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+											},
+											{
+											   "type_id":"0x412",
+											   "type_name":"LCP_DETAILS_HASH",
+											   "tags":[
+												  "LCP_DETAILS_HASH"
+											   ],
+											   "measurement":"6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+											},
+											{
+											   "type_id":"0x40e",
+											   "type_name":"STM_HASH",
+											   "tags":[
+												  "STM_HASH"
+											   ],
+											   "measurement":"6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+											},
+											{
+											   "type_id":"0x40f",
+											   "type_name":"OSSINITDATA_CAP_HASH",
+											   "tags":[
+												  "OSSINITDATA_CAP_HASH"
+											   ],
+											   "measurement":"67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+											},
+											{
+											   "type_id":"0x404",
+											   "type_name":"MLE_HASH",
+											   "tags":[
+												  "MLE_HASH"
+											   ],
+											   "measurement":"3b02dbc9b1669d14d5085184b9558f5ff8beb348770608d1eeff8437366773e0"
+											},
+											{
+											   "type_id":"0x414",
+											   "type_name":"NV_INFO_HASH",
+											   "tags":[
+												  "NV_INFO_HASH"
+											   ],
+											   "measurement":"0f6e0c7a5944963d7081ea494ddff1e9afa689e148e39f684db06578869ea38b"
+											},
+											{
+											   "type_id":"0x501",
+											   "type_name":"tb_policy",
+											   "tags":[
+												  "tb_policy"
+											   ],
+											   "measurement":"27808f64e6383982cd3bcc10cfcb3457c0b65f465f779d89b668839eaf263a67"
+											}
+										 ],
+										 "exclude_tags":[
+											"LCP_CONTROL_HASH",
+											"initrd",
+											"vmlinuz"
+										 ]
+									  }
+								   },
+								   {
+									  "pcr":{
+										 "index":18,
+										 "bank":"SHA256"
+									  },
+									  "measurement":"6f33d58a1fc09382042d2fd650f4c26af20cf2b18ea3bc0fdb075af2fa04f6d9",
+									  "pcr_matches":true,
+									  "eventlog_equals":{
+										 "events":[
+											{
+											   "type_id":"0x410",
+											   "type_name":"SINIT_PUBKEY_HASH",
+											   "tags":[
+												  "SINIT_PUBKEY_HASH"
+											   ],
+											   "measurement":"dbd2dc6c323d51b61aea2706133b587fea2ef2fa70b5a523b8138e9154302e20"
+											},
+											{
+											   "type_id":"0x40b",
+											   "type_name":"CPU_SCRTM_STAT",
+											   "tags":[
+												  "CPU_SCRTM_STAT"
+											   ],
+											   "measurement":"67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+											},
+											{
+											   "type_id":"0x40f",
+											   "type_name":"OSSINITDATA_CAP_HASH",
+											   "tags":[
+												  "OSSINITDATA_CAP_HASH"
+											   ],
+											   "measurement":"67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+											},
+											{
+											   "type_id":"0x413",
+											   "type_name":"LCP_AUTHORITIES_HASH",
+											   "tags":[
+												  "LCP_AUTHORITIES_HASH"
+											   ],
+											   "measurement":"6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+											},
+											{
+											   "type_id":"0x414",
+											   "type_name":"NV_INFO_HASH",
+											   "tags":[
+												  "NV_INFO_HASH"
+											   ],
+											   "measurement":"0f6e0c7a5944963d7081ea494ddff1e9afa689e148e39f684db06578869ea38b"
+											},
+											{
+											   "type_id":"0x501",
+											   "type_name":"tb_policy",
+											   "tags":[
+												  "tb_policy"
+											   ],
+											   "measurement":"27808f64e6383982cd3bcc10cfcb3457c0b65f465f779d89b668839eaf263a67"
+											}
+										 ],
+										 "exclude_tags":[
+											"LCP_CONTROL_HASH",
+											"initrd",
+											"vmlinuz"
+										 ]
+									  }
+								   }
+								]
+							 },
+							 "signature":"ppfkmzhhBMTcVRAztNK1qp/9Ioh8krIgcvIhvIi1xaAxh/4hKSKc4mwKqSIlYpFO64hu9qzv6j6Ap9cw5gM4ZDu3oJkli9pJ/2+9y/9XIYs7nw+sV/i1xNdgzeUbw7urvARf8PmS6/AxltNNdPslrfpPvWHtnIU8yVpwoMTCbThK9JL8ZIZQLXouTJ1Cdh2YMSfsQa8840yFoKPFMz0n2mn70lGKbaWY3wyET5KWJFMLGxTpVkkWoO5Eh+K+2g6h+R/gBo1j+GQDcG4MZ/9dtHAu0iGrFxTSJ7LtSQtlzXUH+aYUE03jmF1Hdhwdhe5WZ4PEyNCIef31ewhSwY3Xp5xlmZdqOLS7bZGdC7FomtDgiRLAzC8wEu4BVSBZqtqwg/Unf2dnqKRFVk5dayM2pc8XFRLKOzBu2FUmah4/SoXC6u1xGMpZzbkL7CWQK1JHJBvLymiQoEkxEOknzXi5hJYAtc1q21lmINPl5VPLWPGF6JWlnhxCG4XcMe9jSNIY"
+						  }
+					   ]
+					},
+					"invalid_field_names":[
+					   "Test"
+					],
+					"partial_flavor_types":[
+					   "PLATFORM"
+					]
+				 }`
 				req, err := http.NewRequest(
 					"POST",
 					"/flavors",

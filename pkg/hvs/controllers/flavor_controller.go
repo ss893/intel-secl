@@ -791,26 +791,6 @@ func (fcon *FlavorController) Retrieve(w http.ResponseWriter, r *http.Request) (
 
 }
 
-func (fcon *FlavorController) RetrieveEsxiFlavor(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
-	defaultLog.Trace("controllers/flavor_controller:Retrieve() Entering")
-	defer defaultLog.Trace("controllers/flavor_controller:Retrieve() Leaving")
-
-	id := uuid.MustParse(mux.Vars(r)["id"])
-	flavor, err := fcon.FStore.Retrieve(id)
-	if err != nil {
-		if strings.Contains(err.Error(), commErr.RowsNotFound) {
-			secLog.WithError(err).WithField("id", id).Info(
-				"controllers/flavor_controller:Retrieve() Flavor with given ID does not exist")
-			return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Flavor with given ID does not exist"}
-		} else {
-			secLog.WithError(err).WithField("id", id).Info(
-				"controllers/flavor_controller:Retrieve() failed to retrieve Flavor")
-			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve Flavor with the given ID"}
-		}
-	}
-	return flavor, http.StatusOK, nil
-}
-
 func validateFlavorFilterCriteria(key, value, flavorgroupId string, ids, flavorParts []string) (*dm.FlavorFilterCriteria, error) {
 	defaultLog.Trace("controllers/flavor_controller:validateFlavorFilterCriteria() Entering")
 	defer defaultLog.Trace("controllers/flavor_controller:validateFlavorFilterCriteria() Leaving")

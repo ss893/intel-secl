@@ -44,6 +44,68 @@ func TestPcrEventLogIntegrityNoFault(t *testing.T) {
 	t.Logf("Integrity rule verified")
 }
 
+func TestPcrEventLogIntegrityFault(t *testing.T) {
+
+	_, err := NewPcrEventLogIntegrity(nil, common.FlavorPartPlatform)
+	assert.Error(t, err)
+}
+
+// Provide the empty pcr manifest values in the host manifest and when applying PcrEventLogEquals rule, expecting
+// 'PcrManifestMissing' fault.
+func TestIntegrityPcrManifestMissingFault(t *testing.T) {
+	expectedCumulativeHash, err := testExpectedPcrEventLogEntry.Replay()
+	assert.NoError(t, err)
+
+	expectedPcrLog := types.FlavorPcrs{
+		Pcr: types.Pcr{
+			Index: 0,
+			Bank:  "SHA256",
+		},
+		Measurement: expectedCumulativeHash,
+	}
+
+	hostManifest := types.HostManifest{
+		PcrManifest: types.PcrManifest{},
+	}
+
+	rule, err := NewPcrEventLogIntegrity(&expectedPcrLog, common.FlavorPartPlatform)
+	result, err := rule.Apply(&hostManifest)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 1, len(result.Faults))
+	assert.Equal(t, constants.FaultPcrManifestMissing, result.Faults[0].Name)
+	t.Logf("Fault description: %s", result.Faults[0].Description)
+}
+
+// Provide unsupported SHA algorithm
+func TestPcrEventLogIntegrityUnsupportedSHAFault(t *testing.T) {
+	expectedCumulativeHash, err := testExpectedPcrEventLogEntry.Replay()
+	assert.NoError(t, err)
+
+	expectedPcrLog := types.FlavorPcrs{
+		Pcr: types.Pcr{
+			Index: 0,
+			Bank:  "SHA512",
+		},
+		Measurement: expectedCumulativeHash,
+	}
+
+	expectedPcrLog1 := types.HostManifestPcrs{
+		Index:   0,
+		PcrBank: "SHA256",
+		Value:   expectedCumulativeHash,
+	}
+
+	hostManifest := types.HostManifest{}
+	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, testExpectedPcrEventLogEntry)
+	hostManifest.PcrManifest.Sha256Pcrs = append(hostManifest.PcrManifest.Sha256Pcrs, expectedPcrLog1)
+
+	rule, err := NewPcrEventLogIntegrity(&expectedPcrLog, common.FlavorPartPlatform)
+	result, err := rule.Apply(&hostManifest)
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
 func TestPcrEventLogIntegrityPcrValueMissingFault(t *testing.T) {
 	hostManifest := types.HostManifest{
 		PcrManifest: types.PcrManifest{

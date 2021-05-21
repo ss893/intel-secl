@@ -5,11 +5,9 @@
 
 package constants
 
-const PolicyPrefix = "com.intel.mtwilson.core.verifier.policy."
-
 // Verifier Rules
 const (
-	RulePrefix                      = PolicyPrefix + "rule."
+	RulePrefix                      = "rule."
 	RuleAikCertificateTrusted       = RulePrefix + "AikCertificateTrusted"
 	RuleAssetTagMatches             = RulePrefix + "AssetTagMatches"
 	RuleFlavorTrusted               = RulePrefix + "FlavorTrusted"
@@ -26,7 +24,7 @@ const (
 
 // Verifier Faults
 const (
-	FaultPrefix                                     = PolicyPrefix + "fault."
+	FaultPrefix                                     = "fault."
 	FaultAikCertificateExpired                      = FaultPrefix + "AikCertificateExpired"
 	FaultAikCertificateMissing                      = FaultPrefix + "AikCertificateMissing"
 	FaultAikCertificateNotTrusted                   = FaultPrefix + "AikCertificateNotTrusted"
