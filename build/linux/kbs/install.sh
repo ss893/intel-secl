@@ -10,6 +10,13 @@ COMPONENT_NAME=kbs
 SERVICE_USERNAME=kbs
 SERVICE_ENV=kbs.env
 
+# Upgrade if component is already installed
+if command -v $COMPONENT_NAME &>/dev/null; then
+  echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
+  ./${COMPONENT_NAME}_upgrade.sh
+  exit $?
+fi
+
 # find .env file
 echo PWD IS $(pwd)
 if [ -f ~/$SERVICE_ENV ]; then
@@ -72,8 +79,8 @@ chmod 700 $LIB_PATH/*
 ln -sfT $LIB_PATH/libkmip.so.0.2 $LIB_PATH/libkmip.so
 ln -sfT $LIB_PATH/libkmip.so.0.2 $LIB_PATH/libkmip.so.0
 
-# make log files world readable
-chmod 744 $LOG_PATH
+# log file permission change
+chmod 740 $LOG_PATH
 
 # Install systemd script
 cp $COMPONENT_NAME.service $PRODUCT_HOME && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/$COMPONENT_NAME.service && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME

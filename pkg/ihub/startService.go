@@ -48,6 +48,13 @@ func (app *App) startDaemon() error {
 	var k k8splugin.KubernetesDetails
 	var o openstackplugin.OpenstackDetails
 
+	attestationHVSURL := configuration.AttestationService.HVSBaseURL
+	attestationSHVSURL := configuration.AttestationService.SHVSBaseURL
+
+	if attestationHVSURL == "" && attestationSHVSURL == "" {
+		return errors.New("startService:startDaemon() Neither HVS nor SHVS Attestation URL are defined")
+	}
+
 	if configuration.Endpoint.Type == constants.OpenStackTenant {
 
 		o.Config = configuration
@@ -73,25 +80,27 @@ func (app *App) startDaemon() error {
 		}
 		o.OpenstackClient = openstackClient
 
-		o.TrustedCAsStoreDir = constants.TrustedCAsStoreDir
+		o.TrustedCAsStoreDir = app.configDir() + constants.TrustedCAsStoreDir
 		if _, err := os.Stat(o.TrustedCAsStoreDir); err != nil {
-			return errors.Wrap(err, "startService:startDaemon() Error in initializing the OpenStack client")
+			return errors.Wrap(err, "startService:startDaemon(): TrustedCA Certificate Missing, Error in initializing the OpenStack client")
 		}
 
-		o.SamlCertFilePath = constants.SamlCertFilePath
-		if _, err := os.Stat(o.SamlCertFilePath); err != nil && configuration.AttestationService.AttestationType == constants.DefaultAttestationType {
-			return errors.Wrap(err, "startService:startDaemon() Error in initializing the OpenStack client")
+		if attestationHVSURL != "" {
+			o.SamlCertFilePath = app.configDir() + constants.SamlCertFilePath
+			if _, err := os.Stat(o.SamlCertFilePath); err != nil {
+				return errors.Wrap(err, "startService:startDaemon(): Saml Certificate Missing, Error in initializing the OpenStack client")
+			}
 		}
 
 	} else if configuration.Endpoint.Type == constants.K8sTenant {
 
-		privateKey, err := crypt.GetPrivateKeyFromPKCS8File(constants.PrivatekeyLocation)
+		privateKey, err := crypt.GetPrivateKeyFromPKCS8File(app.configDir() + constants.PrivatekeyLocation)
 		if err != nil {
 			return errors.Wrap(err, "startService:startDaemon() Error in reading the ihub private key from file")
 		}
 		k.PrivateKey = privateKey
 
-		publicKeyBytes, err := ioutil.ReadFile(constants.PublickeyLocation)
+		publicKeyBytes, err := ioutil.ReadFile(app.configDir() + constants.PublickeyLocation)
 		if err != nil {
 			return errors.Wrap(err, "startService:startDaemon() : Error in reading the ihub public key from file")
 		}
@@ -118,14 +127,16 @@ func (app *App) startDaemon() error {
 		}
 		k.K8sClient = k8sClient
 
-		k.TrustedCAsStoreDir = constants.TrustedCAsStoreDir
+		k.TrustedCAsStoreDir = app.configDir() + constants.TrustedCAsStoreDir
 		if _, err := os.Stat(k.TrustedCAsStoreDir); err != nil {
-			return errors.Wrap(err, "startService:startDaemon() Error in initializing the Kubernetes client")
+			return errors.Wrap(err, "startService:startDaemon(): TrustedCA Certificate Missing, Error in initializing the Kubernetes client")
 		}
 
-		k.SamlCertFilePath = constants.SamlCertFilePath
-		if _, err := os.Stat(k.SamlCertFilePath); err != nil && configuration.AttestationService.AttestationType == constants.DefaultAttestationType {
-			return errors.Wrap(err, "startService:startDaemon() Error in initializing the Kubernetes client")
+		if attestationHVSURL != "" {
+			k.SamlCertFilePath = app.configDir() + constants.SamlCertFilePath
+			if _, err := os.Stat(k.SamlCertFilePath); err != nil {
+				return errors.Wrap(err, "startService:startDaemon(): Saml Certificate Missing, Error in initializing the Kubernetes client")
+			}
 		}
 
 	} else {

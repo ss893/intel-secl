@@ -1,5 +1,12 @@
 #!/bin/bash
 
+source /etc/secret-volume/secrets.txt
+export HVS_SERVICE_USERNAME
+export HVS_SERVICE_PASSWORD
+export HVS_DB_USERNAME
+export HVS_DB_PASSWORD
+export BEARER_TOKEN
+
 USER_ID=$(id -u)
 LOG_PATH=/var/log/hvs
 CONFIG_PATH=/etc/hvs
@@ -21,7 +28,7 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
     chown -R $USER_ID:$USER_ID $directory
     chmod 700 $directory
   done
-  mv /opt/hvs/EndorsementCA-external.pem $ENDORSEMENTS_CA_DIR/
+  mv /tmp/*.pem $ENDORSEMENTS_CA_DIR/
   hvs setup all --force
   if [ $? -ne 0 ]; then
     exit 1
@@ -30,13 +37,16 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
 fi
 
 if [ ! -z $SETUP_TASK ]; then
+  cp $CONFIG_PATH/config.yml /tmp/config.yml
   IFS=',' read -ra ADDR <<< "$SETUP_TASK"
   for task in "${ADDR[@]}"; do
     hvs setup $task --force
     if [ $? -ne 0 ]; then
+      cp /tmp/config.yml $CONFIG_PATH/config.yml
       exit 1
     fi
   done
+  rm -rf /tmp/config.yml
 fi
 
 hvs run

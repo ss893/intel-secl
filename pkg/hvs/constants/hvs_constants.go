@@ -179,6 +179,7 @@ const (
 	FvsNumberOfVerifiers               = "fvs-number-of-verifiers"
 	FvsNumberOfDataFetchers            = "fvs-number-of-data-fetchers"
 	FvsSkipFlavorSignatureVerification = "fvs-skip-flavor-signature-verification"
+	FvsHostTrustCacheThreshold         = "fvs-host-trust-cache-threshold"
 	HrrsRefreshPeriod                  = "hrrs-refresh-period"
 	VcssRefreshPeriod                  = "vcss-refresh-period"
 )

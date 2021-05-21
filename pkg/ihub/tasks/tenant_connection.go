@@ -26,6 +26,7 @@ import (
 type TenantConnection struct {
 	TenantConfig  *config.Endpoint
 	ConsoleWriter io.Writer
+	K8SCertFile   string
 }
 
 // Run will run the tenant Connection setup task, but will skip if Validate() returns no errors
@@ -91,7 +92,7 @@ func (tenantConnection TenantConnection) Run() error {
 		k8sCRDName := viper.GetString("kubernetes-crd")
 		k8sToken := viper.GetString("kubernetes-token")
 		k8sCertFileSrc := viper.GetString("kubernetes-cert-file")
-		k8sCertFile := constants.DefaultK8SCertFile
+		k8sCertFile := tenantConnection.K8SCertFile
 
 		if k8sURL == "" {
 			return errors.New("tasks/tenant_connection:Run() KUBERNETES_URL is not defined in environment")

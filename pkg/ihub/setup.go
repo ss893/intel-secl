@@ -9,7 +9,7 @@ import (
 	"fmt"
 	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
 	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
-	"os"
+	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
 	"strings"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
@@ -91,12 +91,12 @@ func (app *App) setup(args []string) error {
 		}
 	}
 
-	err = app.Config.SaveConfiguration(constants.DefaultConfigFilePath)
+	err = app.Config.SaveConfiguration(app.configDir() + constants.DefaultConfigFilePath)
 	if err != nil {
 		return errors.Wrap(err, "Failed to save configuration")
 	}
 	// Containers are always run as non root users, does not require changing ownership of config directories
-	if _, err := os.Stat("/.container-env"); err == nil {
+	if utils.IsContainerEnv() {
 		return nil
 	}
 
@@ -118,15 +118,15 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.ErrorWriter = app.errorWriter()
 
 	runner.AddTask("download-ca-cert", "", &setup.DownloadCMSCert{
-		CaCertDirPath: constants.TrustedCAsStoreDir,
+		CaCertDirPath: app.configDir() + constants.TrustedCAsStoreDir,
 		ConsoleWriter: app.consoleWriter(),
 		CmsBaseURL:    viper.GetString("cms-base-url"),
 		TlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
 	})
 
 	runner.AddTask("download-cert-tls", "tls", &setup.DownloadCert{
-		KeyFile:      viper.GetString("tls-key-file"),
-		CertFile:     viper.GetString("tls-cert-file"),
+		KeyFile:      app.configDir() + constants.DefaultTLSKeyFile,
+		CertFile:     app.configDir() + constants.DefaultTLSCertFile,
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
@@ -134,7 +134,7 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 		},
 		SanList:       viper.GetString("tls-san-list"),
 		CertType:      "tls",
-		CaCertDirPath: constants.TrustedCAsStoreDir,
+		CaCertDirPath: app.configDir() + constants.TrustedCAsStoreDir,
 		ConsoleWriter: app.consoleWriter(),
 		CmsBaseURL:    viper.GetString("cms-base-url"),
 		BearerToken:   viper.GetString("bearer-token"),
@@ -148,17 +148,18 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("tenant-service-connection", "", &tasks.TenantConnection{
 		TenantConfig:  &app.Config.Endpoint,
 		ConsoleWriter: app.consoleWriter(),
+		K8SCertFile:   app.configDir() + constants.DefaultK8SCertFile,
 	})
 
 	runner.AddTask("create-signing-key", "", &tasks.CreateSigningKey{
-		PrivateKeyLocation: constants.PrivatekeyLocation,
-		PublicKeyLocation:  constants.PublickeyLocation,
+		PrivateKeyLocation: app.configDir() + constants.PrivatekeyLocation,
+		PublicKeyLocation:  app.configDir() + constants.PublickeyLocation,
 		KeyAlgorithmLength: constants.DefaultKeyLength,
 	})
 
 	runner.AddTask("download-saml-cert", "", &tasks.DownloadSamlCert{
 		AttestationConfig: &app.Config.AttestationService,
-		SamlCertPath:      constants.SamlCertFilePath,
+		SamlCertPath:      app.configDir() + constants.SamlCertFilePath,
 		ConsoleWriter:     app.consoleWriter(),
 	})
 

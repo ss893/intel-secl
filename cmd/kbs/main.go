@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
 	"os"
 	"os/user"
 	"strconv"
@@ -15,35 +16,35 @@ import (
 
 func openLogFiles() (logFile *os.File, httpLogFile *os.File, secLogFile *os.File, err error) {
 
-	logFile, err = os.OpenFile(LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	logFile, err = os.OpenFile(LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	err = os.Chmod(LogFile, 0664)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	httpLogFile, err = os.OpenFile(HttpLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	err = os.Chmod(HttpLogFile, 0664)
+	err = os.Chmod(LogFile, 0640)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	secLogFile, err = os.OpenFile(SecurityLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	httpLogFile, err = os.OpenFile(HttpLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	err = os.Chmod(SecurityLogFile, 0664)
+	err = os.Chmod(HttpLogFile, 0640)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	secLogFile, err = os.OpenFile(SecurityLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	err = os.Chmod(SecurityLogFile, 0640)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
 	// Containers are always run as non root users, does not require changing ownership of log directories
-	if _, err := os.Stat("/.container-env"); err == nil {
+	if utils.IsContainerEnv() {
 		return logFile, httpLogFile, secLogFile, nil
 	}
 

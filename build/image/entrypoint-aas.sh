@@ -1,5 +1,12 @@
 #!/bin/bash
 
+source /etc/secret-volume/secrets.txt
+export AAS_ADMIN_USERNAME
+export AAS_ADMIN_PASSWORD 
+export BEARER_TOKEN
+export AAS_DB_USERNAME
+export AAS_DB_PASSWORD
+
 USER_ID=$(id -u)
 COMPONENT_NAME=authservice
 LOG_PATH=/var/log/$COMPONENT_NAME/
@@ -18,7 +25,7 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
     chown -R $USER_ID:$USER_ID $directory
     chmod 700 $directory
   done
-  aas setup all --force
+  authservice setup all --force
   if [ $? -ne 0 ]; then
     exit 1
   fi
@@ -26,13 +33,16 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
 fi
 
 if [ ! -z $SETUP_TASK ]; then
-  IFS=',' read -ra ADDR <<< "$SETUP_TASK"
+  cp $CONFIG_PATH/config.yml /tmp/config.yml
+  IFS=',' read -ra ADDR <<<"$SETUP_TASK"
   for task in "${ADDR[@]}"; do
-    aas setup $task --force
+    authservice setup $task --force
     if [ $? -ne 0 ]; then
+      cp /tmp/config.yml $CONFIG_PATH/config.yml
       exit 1
     fi
   done
+  rm -rf /tmp/config.yml
 fi
 
-aas run
+authservice run

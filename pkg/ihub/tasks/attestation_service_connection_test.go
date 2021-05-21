@@ -43,8 +43,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"ATTESTATION_TYPE":        "HVS",
-				"ATTESTATION_SERVICE_URL": "http://localhost" + port + "/mtwilson/v2/",
+				"HVS_BASE_URL": "http://localhost" + port + "/mtwilson/v2/",
 			},
 
 			wantErr: false,
@@ -57,8 +56,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"ATTESTATION_TYPE":        "SGX",
-				"ATTESTATION_SERVICE_URL": "http://localhost" + port + "/sgx-hvs/v2/",
+				"SHVS_BASE_URL": "http://localhost" + port + "/sgx-hvs/v2/",
 			},
 
 			wantErr: false,
@@ -71,8 +69,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"ATTESTATION_TYPE":        "SKC",
-				"ATTESTATION_SERVICE_URL": "",
+				"HVS_BASE_URL": "",
 			},
 
 			wantErr: true,
@@ -132,7 +129,7 @@ func TestAttestationServiceConnectionValidate(t *testing.T) {
 			name: "attestation-service-connection-validate valid test",
 			attestationService: AttestationServiceConnection{
 				AttestationConfig: &config.AttestationConfig{
-					AttestationType: "HVS", AttestationURL: "http://localhost" + port + "/mtwilson/v2",
+					HVSBaseURL: "http://localhost" + port + "/mtwilson/v2/",
 				},
 				ConsoleWriter: os.Stdout,
 			},
@@ -143,7 +140,7 @@ func TestAttestationServiceConnectionValidate(t *testing.T) {
 			name: "attestation-service-connection-validate negative test 1",
 			attestationService: AttestationServiceConnection{
 				AttestationConfig: &config.AttestationConfig{
-					AttestationType: "HVS", AttestationURL: "",
+					HVSBaseURL: "",
 				},
 				ConsoleWriter: os.Stdout,
 			},
@@ -154,7 +151,7 @@ func TestAttestationServiceConnectionValidate(t *testing.T) {
 			name: "attestation-service-connection-validate negative test 2",
 			attestationService: AttestationServiceConnection{
 				AttestationConfig: &config.AttestationConfig{
-					AttestationType: "SKC", AttestationURL: "",
+					HVSBaseURL: "",
 				},
 				ConsoleWriter: os.Stdout,
 			},

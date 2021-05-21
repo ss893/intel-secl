@@ -35,6 +35,9 @@ build:cms:
 build:ihub:
   extends: .build-normal-components
 
+build:wpm:
+  extends: .build-normal-components
+
 build:kbs:
   extends: .build-common
   script:

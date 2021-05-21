@@ -65,7 +65,7 @@ func (fcr *FlavorCreateRequest) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &fcrKeysMap); err != nil {
 		return err
 	}
-	for k, _ := range fcrKeysMap {
+	for k := range fcrKeysMap {
 		if _, ok := validKeys[k]; !ok {
 			return errors.Errorf("Unknown key %s", k)
 		}

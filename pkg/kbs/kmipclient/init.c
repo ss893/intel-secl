@@ -29,27 +29,27 @@ int kmipw_init(const char *address, const char *port, const char *certificate, c
     }
     log_info("kmipw_init called");
 
-    if (address == NULL) {
+    if (address[0] == '\0') {
         log_error("KMIP server address is not provided.");
         goto final;
     }
 
-    if (port == NULL) {
+    if (port[0] == '\0') {
         log_error("KMIP server port is not provided.");
         goto final;
     }
 
-    if (certificate == NULL) {
+    if (certificate[0] == '\0') {
         log_error("KMIP client certificate is not provided.");
         goto final;
     }
 
-    if (key == NULL) {
+    if (key[0] == '\0') {
         log_error("KMIP client key is not provided.");
         goto final;
     }
 
-    if (ca == NULL) {
+    if (ca[0] == '\0') {
         log_error("KMIP root certificate is not provided.");
         goto final;
     }

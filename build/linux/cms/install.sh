@@ -1,5 +1,13 @@
 #!/bin/bash
 
+COMPONENT_NAME=cms
+# Upgrade if component is already installed
+if command -v $COMPONENT_NAME &>/dev/null; then
+  echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
+  ./${COMPONENT_NAME}_upgrade.sh
+  exit $?
+fi
+
 # Check OS
 OS=$(cat /etc/os-release | grep ^ID= | cut -d'=' -f2)
 temp="${OS%\"}"
@@ -35,7 +43,6 @@ echo "Installing Certificate Management Service..."
 COMPONENT_NAME=cms
 PRODUCT_HOME=/opt/$COMPONENT_NAME
 BIN_PATH=$PRODUCT_HOME/bin
-DB_SCRIPT_PATH=$PRODUCT_HOME/cacerts
 LOG_PATH=/var/log/$COMPONENT_NAME/
 CONFIG_PATH=/etc/$COMPONENT_NAME
 
@@ -46,8 +53,6 @@ mkdir -p $BIN_PATH && chown cms:cms $BIN_PATH/
 cp $COMPONENT_NAME $BIN_PATH/ && chown cms:cms $BIN_PATH/*
 chmod 750 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
-
-mkdir -p $DB_SCRIPT_PATH && chown cms:cms $DB_SCRIPT_PATH/
 
 # Create configuration directory in /etc
 mkdir -p $CONFIG_PATH && chown cms:cms $CONFIG_PATH
@@ -65,7 +70,7 @@ chmod 700 $CONFIG_PATH/intermediate-ca
 
 # Create logging dir in /var/log
 mkdir -p $LOG_PATH && chown cms:cms $LOG_PATH
-chmod 700 $LOG_PATH
+chmod 740 $LOG_PATH
 
 # Install systemd script
 cp cms.service $PRODUCT_HOME && chown cms:cms $PRODUCT_HOME/cms.service && chown cms:cms $PRODUCT_HOME

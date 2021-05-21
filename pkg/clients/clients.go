@@ -44,7 +44,6 @@ func HTTPClientWithCA(caCertificates []x509.Certificate) (*http.Client, error) {
 		RootCAs:            GetCertPool(caCertificates),
 	}
 	tr := &http.Transport{TLSClientConfig: config}
-
 	return &http.Client{Transport: tr}, nil
 }
 

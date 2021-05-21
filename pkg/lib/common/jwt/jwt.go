@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
 	"strings"
+	"sync"
 	"time"
 
 	jwt "github.com/Waterdrips/jwt-go"
@@ -117,8 +118,9 @@ type verifierKey struct {
 }
 
 type verifierPrivate struct {
-	expiration time.Time
-	pubKeyMap  map[string]verifierKey
+	expiration   time.Time
+	pubKeyMapMtx sync.RWMutex
+	pubKeyMap    map[string]verifierKey
 }
 
 type Verifier interface {
@@ -252,6 +254,8 @@ func (v *verifierPrivate) ValidateTokenAndGetClaims(tokenString string, customCl
 				return nil, fmt.Errorf("kid (key id) in jwt header is not a string : %v", keyIDValue)
 			}
 
+			v.pubKeyMapMtx.RLock()
+			defer v.pubKeyMapMtx.RUnlock()
 			if matchPubKey, found := v.pubKeyMap[keyIDString]; !found {
 				return nil, &MatchingCertNotFoundError{keyIDString}
 			} else {
@@ -362,8 +366,9 @@ func NewVerifier(signingCertPems interface{}, rootCAPems [][]byte, cacheTime tim
 		if err != nil {
 			continue
 		}
-
+		v.pubKeyMapMtx.Lock()
 		v.pubKeyMap[certHash] = verifierKey{pubKey: pubKey, expTime: cert.NotAfter}
+		v.pubKeyMapMtx.Unlock()
 		// update the validity of the object if the certificate expires before the current validity
 		// TODO: set the expiration when based on CRL when it become available
 		if v.expiration.After(cert.NotAfter) {

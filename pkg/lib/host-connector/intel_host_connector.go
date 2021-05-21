@@ -152,7 +152,20 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	}
 
 	bindingKeyCertificateBase64 := ""
-	if isWlaInstalled {
+	if hostManifest.HostInfo.IsDockerEnvironment {
+		bindingKeyBytes, _ := ic.client.GetBindingKeyCertificate()
+		if bindingKeyBytes != nil && len(bindingKeyBytes) != 0 {
+			bindingKeyCertificate, _ := pem.Decode(bindingKeyBytes)
+			if bindingKeyCertificate == nil {
+				log.Warn("intel_host_connector:GetHostManifestAcceptNonce() - " +
+					"Could not decode Binding key certificate. Unexpected response from client")
+			}
+			bindingKeyCertificateBase64 = base64.StdEncoding.EncodeToString(bindingKeyCertificate.Bytes)
+		} else {
+			log.Warn("intel_host_connector:GetHostManifestAcceptNonce() " +
+				"Empty Binding Key received")
+		}
+	} else if isWlaInstalled {
 		bindingKeyBytes, err := ic.client.GetBindingKeyCertificate()
 		if err != nil {
 			return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() "+

@@ -1,8 +1,14 @@
 #!/bin/bash
 
 COMPONENT_NAME=hvs
-
 SERVICE_USERNAME=hvs
+
+# Upgrade if component is already installed
+if command -v $COMPONENT_NAME &>/dev/null; then
+  echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
+  ./${COMPONENT_NAME}_upgrade.sh
+  exit $?
+fi
 
 if [[ $EUID -ne 0 ]]; then 
     echo "This installer must be run as root"
@@ -45,10 +51,10 @@ chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 # Copy Endorsement CA cert
-cp EndorsementCA-external.pem $CERTDIR_ENDORSEMENTCA/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $CERTDIR_ENDORSEMENTCA/EndorsementCA-external.pem
+cp *.pem $CERTDIR_ENDORSEMENTCA/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $CERTDIR_ENDORSEMENTCA/*.pem
 
-# make log files world readable
-chmod 744 $LOG_PATH
+# log file permission change
+chmod 740 $LOG_PATH
 
 # Install systemd script
 cp ${COMPONENT_NAME}.service $PRODUCT_HOME && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME/${COMPONENT_NAME}.service && chown $SERVICE_USERNAME:$SERVICE_USERNAME $PRODUCT_HOME

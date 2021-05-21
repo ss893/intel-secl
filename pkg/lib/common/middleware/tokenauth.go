@@ -74,7 +74,7 @@ func NewTokenAuth(signingCertsDir, trustedCAsDir string, fnGetJwtCerts RetriveJw
 			//        or the time has reached when we want to look at the CRL list to make sure the certificate is still
 			//        valid.
 			//        Error : VerifierExpiredError
-			//     2. There are no valid certificates (maybe all are expired) and we need to call the function that retrives
+			//     2. There are no valid certificates (maybe all are expired) and we need to call the function that retrieves
 			//        a new certificate. initJwtVerifier takes care of this scenario.
 
 			for needInit, retryNeeded, looped := jwtVerifier == nil, false, false; retryNeeded || !looped; looped = true {

@@ -6,8 +6,6 @@ package main
 
 const (
 	ServiceUserName = "ihub"
-	ServiceDir      = "ihub/"
-	LogDir          = "/var/log/" + ServiceDir
-	LogFile         = LogDir + ServiceUserName + ".log"
-	SecurityLogFile = LogDir + ServiceUserName + "-security.log"
+	LogFile         = ServiceUserName + ".log"
+	SecurityLogFile = ServiceUserName + "-security.log"
 )

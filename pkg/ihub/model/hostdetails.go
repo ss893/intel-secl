@@ -14,6 +14,7 @@ type HostDetails struct {
 	HostName          string
 	HostIP            string
 	HostID            uuid.UUID
+	AgentType         string
 	Trusted           bool
 	AssetTags         map[string]string
 	HardwareFeatures  map[string]string

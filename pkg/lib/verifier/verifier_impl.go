@@ -16,9 +16,7 @@ import (
 )
 
 type verifierImpl struct {
-	signedFlavor         *hvs.SignedFlavor
 	verifierCertificates VerifierCertificates
-	overallTrust         bool
 }
 
 func (v *verifierImpl) Verify(hostManifest *types.HostManifest, signedFlavor *hvs.SignedFlavor, skipSignedFlavorVerification bool) (*hvs.TrustReport, error) {
@@ -33,18 +31,13 @@ func (v *verifierImpl) Verify(hostManifest *types.HostManifest, signedFlavor *hv
 		return nil, errors.New("The signed flavor cannot be nil")
 	}
 
-	v.signedFlavor = signedFlavor
-
-	// default overall trust to true, change to false during rule evaluation
-	v.overallTrust = true
-
-	ruleFactory := NewRuleFactory(v.verifierCertificates, hostManifest, v.signedFlavor, skipSignedFlavorVerification)
+	ruleFactory := NewRuleFactory(v.verifierCertificates, hostManifest, signedFlavor, skipSignedFlavorVerification)
 	verificationRules, policyName, err := ruleFactory.GetVerificationRules()
 	if err != nil {
 		return nil, err
 	}
 
-	results, err := v.applyRules(verificationRules, hostManifest)
+	results, overallTrust, err := v.applyRules(verificationRules, hostManifest, signedFlavor)
 	if err != nil {
 		return nil, err
 	}
@@ -52,40 +45,43 @@ func (v *verifierImpl) Verify(hostManifest *types.HostManifest, signedFlavor *hv
 	trustReport := hvs.TrustReport{
 		PolicyName:   policyName,
 		Results:      results,
-		Trusted:      v.overallTrust,
+		Trusted:      overallTrust,
 		HostManifest: *hostManifest,
 	}
 
 	return &trustReport, nil
 }
 
-func (v *verifierImpl) applyRules(rulesToApply []rules.Rule, hostManifest *types.HostManifest) ([]hvs.RuleResult, error) {
+func (v *verifierImpl) applyRules(rulesToApply []rules.Rule, hostManifest *types.HostManifest, signedFlavor *hvs.SignedFlavor) ([]hvs.RuleResult, bool, error) {
 
 	var results []hvs.RuleResult
+
+	// default overall trust to true, change to false during rule evaluation
+	overallTrust := true
 
 	for _, rule := range rulesToApply {
 
 		log.Debugf("Applying verifier rule %T", rule)
 		result, err := rule.Apply(hostManifest)
 		if err != nil {
-			return nil, errors.Wrapf(err, "Error ocrurred applying rule type '%T'", rule)
+			return nil, overallTrust, errors.Wrapf(err, "Error ocrurred applying rule type '%T'", rule)
 		}
 
 		// if 'Apply' returned a result with any faults, then the
 		// rule is not trusted
 		if len(result.Faults) > 0 {
 			result.Trusted = false
-			v.overallTrust = false
+			overallTrust = false
 		}
 
 		// assign the flavor id to all rules
-		fId := v.signedFlavor.Flavor.Meta.ID
+		fId := signedFlavor.Flavor.Meta.ID
 		result.FlavorId = &fId
 
 		results = append(results, *result)
 	}
 
-	return results, nil
+	return results, overallTrust, nil
 }
 
 func (v *verifierImpl) GetVerifierCerts() VerifierCertificates {

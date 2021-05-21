@@ -10,7 +10,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
-	"github.com/golang/groupcache/lru"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/vcss"
 	"net/http"
 	"os"
@@ -234,7 +234,10 @@ func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataSto
 		Certificate:       &samlCert.Certificates[0],
 	}
 
-	hostQuoteTrustCache := lru.New(cfg.FVS.HostTrustCacheThreshold)
+	hostQuoteTrustCache, err := lru.New(cfg.FVS.HostTrustCacheThreshold)
+	if err != nil {
+		defaultLog.WithError(err).Fatal("Error initializing host trust cache")
+	}
 	htv := domain.HostTrustVerifierConfig{
 		FlavorStore:                     fs,
 		FlavorGroupStore:                fgs,
@@ -260,6 +263,8 @@ func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataSto
 		RetryTimeMinutes: 5,
 		HostStatusStore:  hss,
 		HostStore:        hs,
+		FlavorGroupStore: fgs,
+		FlavorStore:      fs,
 		HostTrustCache:   hostQuoteTrustCache,
 	}
 	_, hf, err := hostfetcher.NewService(c, cfg.FVS.NumberOfDataFetchers)

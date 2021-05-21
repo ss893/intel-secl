@@ -15,12 +15,11 @@ import (
 
 // This func sets the default values for viper keys
 func init() {
-	viper.SetDefault("attestation-type", constants.DefaultAttestationType)
 	viper.SetDefault("poll-interval-minutes", constants.PollingIntervalMinutes)
 
 	//Set default values for TLS
-	viper.SetDefault("tls-cert-file", constants.DefaultTLSCertFile)
-	viper.SetDefault("tls-key-file", constants.DefaultTLSKeyFile)
+	viper.SetDefault("tls-cert-file", constants.ConfigDir+constants.DefaultTLSCertFile)
+	viper.SetDefault("tls-key-file", constants.ConfigDir+constants.DefaultTLSKeyFile)
 	viper.SetDefault("tls-common-name", constants.DefaultIHUBTlsCn)
 	viper.SetDefault("tls-san-list", constants.DefaultTLSSan)
 
@@ -48,8 +47,8 @@ func defaultConfig() *config.Configuration {
 			SANList:    viper.GetString("tls-san-list"),
 		},
 		AttestationService: config.AttestationConfig{
-			AttestationType: viper.GetString("attestation-type"),
-			AttestationURL:  viper.GetString("attestation-service-url"),
+			HVSBaseURL:  viper.GetString("hvs-base-url"),
+			SHVSBaseURL: viper.GetString("shvs-base-url"),
 		},
 		Log: commConfig.LogConfig{
 			MaxLength:    viper.GetInt("log-max-length"),

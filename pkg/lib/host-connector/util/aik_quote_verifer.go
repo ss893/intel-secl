@@ -221,7 +221,6 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 			}
 		}
 	}
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() PCR concat is : %s", pcrConcat)
 	hash = sha256.New()
 	_, err = hash.Write(pcrConcat)
 	if err != nil {
@@ -361,13 +360,12 @@ func getPcrEventLog(eventLog string) (types.PcrEventLogMap, error) {
 			"unmarshalling measureLog")
 	}
 	for _, module := range measureLog.Txt.Modules.Module {
-		pcrEventLogMap = addPcrEntry(module, pcrEventLogMap)
+		addPcrEntry(&module, &pcrEventLogMap)
 	}
 	return pcrEventLogMap, nil
 }
 
-func addPcrEntry(module types.Module, eventLogMap types.PcrEventLogMap) types.PcrEventLogMap {
-
+func addPcrEntry(module *types.Module, eventLogMap *types.PcrEventLogMap) {
 	log.Trace("util/aik_quote_verifier:addPcrEntry() Entering")
 	defer log.Trace("util/aik_quote_verifier:addPcrEntry() Leaving")
 	pcrFound := false
@@ -411,7 +409,6 @@ func addPcrEntry(module types.Module, eventLogMap types.PcrEventLogMap) types.Pc
 		}
 	}
 	log.Debugf("util/aik_quote_verifier:addPcrEntry() Successfully added PCR log entries for module : %s", module.Name)
-	return eventLogMap
 }
 
 func GenerateNonce(nonceSize int) (string, error) {

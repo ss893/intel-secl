@@ -23,7 +23,7 @@ spec:
       securityContext:
         fsGroup: 1001
       containers:
-        - image: isecl/aas:v3.3.1
+        - image: <image-name>:<image-tag>
           name: aas
           imagePullPolicy: Always
           securityContext:
@@ -32,27 +32,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: aas-config
-          env:
-            - name: AAS_DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: aas-db-credentials
-                  key: AAS_DB_USERNAME
-            - name: AAS_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: aas-db-credentials
-                  key: AAS_DB_PASSWORD
-            - name: AAS_ADMIN_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: aas-service-credentials
-                  key: AAS_ADMIN_USERNAME
-            - name: AAS_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: aas-service-credentials
-                  key: AAS_ADMIN_PASSWORD
           ports:
             - containerPort: 8444
           volumeMounts:
@@ -62,6 +41,9 @@ spec:
               mountPath: /var/log/authservice/
             - name: aas-db-certs
               mountPath: /etc/postgresql/
+            - mountPath: /etc/secret-volume/
+              name: aas-credentials
+              readOnly: true              
       volumes:
         - name: aas-config-volume
           persistentVolumeClaim:
@@ -73,4 +55,7 @@ spec:
           secret:
             secretName: aas-db-certs
             defaultMode: 0640
+        - name: aas-credentials
+          secret:
+              secretName: aas-secret            
             

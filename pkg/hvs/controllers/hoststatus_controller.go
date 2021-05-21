@@ -179,7 +179,7 @@ func getHSFilterCriteria(params url.Values) (*models.HostStatusFilterCriteria, e
 	if numberOfDays != "" {
 		numDays, err := strconv.Atoi(numberOfDays)
 		if err != nil || numDays < 1 || numDays > constants.MaxNumDaysSearchLimit {
-			return nil, errors.New("numberOfDays must be an integer between 1 and " + string(constants.MaxNumDaysSearchLimit))
+			return nil, errors.New("numberOfDays must be an integer between 1 and " + strconv.Itoa(constants.MaxNumDaysSearchLimit))
 		}
 
 		// override the existing fromDate/toDate params

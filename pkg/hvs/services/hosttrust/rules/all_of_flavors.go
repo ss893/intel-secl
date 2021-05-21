@@ -68,7 +68,7 @@ func (aof *AllOfFlavors) AddFaults(report *hvs.TrustReport) (*hvs.TrustReport, e
 		}
 	}
 	if faultsExist {
-		for flvrPart, _ := range aofMissingFlavorParts {
+		for flvrPart := range aofMissingFlavorParts {
 			ruleResult := hvs.RuleResult{
 				//FlavorVerify.java 585
 				Rule:     hvs.RuleInfo{Markers: aof.Markers},

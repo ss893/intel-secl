@@ -5,9 +5,13 @@ FROM centos:8
 
 COPY cmd/hvs/hvs /usr/bin/hvs
 
-COPY build/linux/hvs/EndorsementCA-external.pem /opt/hvs/EndorsementCA-external.pem
+COPY build/linux/hvs/*.pem /tmp/
 
 COPY build/image/entrypoint-hvs.sh /entrypoint.sh
+
+RUN mkdir -p /opt/hvs/privacyca-aik-requests
+
+RUN chmod +0766 /opt/hvs/privacyca-aik-requests
 
 RUN touch /.container-env && chmod +x /entrypoint.sh
 

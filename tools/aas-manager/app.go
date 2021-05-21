@@ -74,8 +74,8 @@ type App struct {
 	InstallAdminPassword    string
 	GlobalAdminUserName     string
 	GlobalAdminPassword     string
-	CSPAdminUsername        string
-	CSPAdminUserPassword    string
+	CCCAdminUsername        string
+	CCCAdminUserPassword    string
 	HvsServiceUserName      string
 	HvsServiceUserPassword  string
 	IhubServiceUserName     string
@@ -221,16 +221,16 @@ func (a *App) GetServiceUsers() []UserAndRolesCreate {
 
 }
 
-func (a *App) GetCSPAdminUser() *UserAndRolesCreate {
+func (a *App) GetCCCAdminUser() *UserAndRolesCreate {
 
-	if a.CSPAdminUsername == "" {
+	if a.CCCAdminUsername == "" {
 		return nil
 	}
 
 	return &UserAndRolesCreate{
 		UserCreate: aas.UserCreate{
-			Name:     a.CSPAdminUsername,
-			Password: a.CSPAdminUserPassword,
+			Name:     a.CCCAdminUsername,
+			Password: a.CCCAdminUserPassword,
 		},
 		PrintBearerToken: true,
 		Roles:            []aas.RoleCreate{NewRole("AAS", "CustomClaimsCreator", "", []string{"custom_claims:create"})},
@@ -303,6 +303,8 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.ScsCN, a.ScsSanList))
 		case "SQVS":
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.SqvsCN, a.SqvsSanList))
+			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=SQVS QVL Response "+
+				"Signing Certificate;certType=Signing", nil))
 		case "SHVS":
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.ShvsCN, a.ShvsSanList))
 		case "SKC-LIBRARY":
@@ -422,8 +424,8 @@ func (a *App) LoadAllVariables(envFile string) error {
 
 		{&a.SKCLibRoleContext, "SKC_LIBRARY_KEY_TRANSFER_CONTEXT", "", "SKC Library Key Transfer Role Context", false, false},
 
-		{&a.CSPAdminUsername, "CSP_ADMIN_USERNAME", "", "CSP Admin User Name", false, false},
-		{&a.CSPAdminUserPassword, "CSP_ADMIN_PASSWORD", "", "CSP Admin User Password", false, true},
+		{&a.CCCAdminUsername, "CCC_ADMIN_USERNAME", "", "Custom Claims Creator Admin User Name", false, false},
+		{&a.CCCAdminUserPassword, "CCC_ADMIN_PASSWORD", "", "Custom Claims Creator Admin User Password", false, true},
 	}
 
 	hasError := false
@@ -684,8 +686,8 @@ func (a *App) Setup(args []string) error {
 		if glAdmin := a.GetGlobalAdminUser(); glAdmin != nil {
 			as.UsersAndRoles = append(as.UsersAndRoles, *glAdmin)
 		}
-		if cspAdmin := a.GetCSPAdminUser(); cspAdmin != nil {
-			as.UsersAndRoles = append(as.UsersAndRoles, *cspAdmin)
+		if cccAdmin := a.GetCCCAdminUser(); cccAdmin != nil {
+			as.UsersAndRoles = append(as.UsersAndRoles, *cccAdmin)
 		}
 
 	}

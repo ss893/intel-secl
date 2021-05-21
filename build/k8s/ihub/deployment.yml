@@ -32,17 +32,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: ihub-config
-          env:
-            - name: IHUB_SERVICE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: ihub-service-credentials
-                  key: IHUB_SERVICE_USERNAME
-            - name: IHUB_SERVICE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ihub-service-credentials
-                  key: IHUB_SERVICE_PASSWORD
           volumeMounts:
             - name: ihub-config-volume
               mountPath: /etc/ihub/
@@ -51,6 +40,9 @@ spec:
               subPath: apiserver.crt
             - name: ihub-logs-volume
               mountPath: /var/log/ihub/
+            - mountPath: /etc/secret-volume/
+              name: ihub-credentials
+              readOnly: true
       volumes:
         - name: ihub-k8s-certs
           secret:
@@ -62,3 +54,6 @@ spec:
         - name: ihub-config-volume
           persistentVolumeClaim:
             claimName: ihub-config-pvc
+        - name: ihub-credentials
+          secret:
+              secretName: ihub-secret

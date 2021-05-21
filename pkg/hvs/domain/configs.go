@@ -6,7 +6,7 @@
 package domain
 
 import (
-	"github.com/golang/groupcache/lru"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/saml"
@@ -40,6 +40,8 @@ type HostDataFetcherConfig struct {
 	RetryTimeMinutes      int
 	HostStatusStore       HostStatusStore
 	HostStore             HostStore
+	FlavorGroupStore      FlavorGroupStore
+	FlavorStore           FlavorStore
 	HostTrustCache        *lru.Cache
 }
 

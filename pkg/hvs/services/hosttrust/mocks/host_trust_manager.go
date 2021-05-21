@@ -21,7 +21,7 @@ func (mock *MockHostTrustManager) VerifyHost(hostId uuid.UUID, fetchHostData boo
 
 func (mock *MockHostTrustManager) VerifyHostsAsync(hostIds []uuid.UUID, fetchHostData, preferHashMatch bool) error {
 	// put in a small delay
-	time.Sleep(time.Duration(250 * time.Millisecond))
+	time.Sleep(250 * time.Millisecond)
 	return nil
 }
 

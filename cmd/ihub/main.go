@@ -6,36 +6,39 @@ package main
 
 import (
 	"fmt"
+	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/ihub"
+	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
 
 	"os"
 	"os/user"
 	"strconv"
 )
 
-func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
-
-	logFile, err = os.OpenFile(LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+func openLogFiles(logDir string) (logFile *os.File, secLogFile *os.File, err error) {
+	logFilePath := logDir + LogFile
+	securityLogFilePath := logDir + SecurityLogFile
+	logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not open/create %s", LogFile)
 	}
-	err = os.Chmod(LogFile, 0664)
+	err = os.Chmod(logFilePath, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error in setting file permission for file : %s", LogFile)
 	}
 
-	secLogFile, err = os.OpenFile(SecurityLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	secLogFile, err = os.OpenFile(securityLogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not open/create %s", SecurityLogFile)
 	}
-	err = os.Chmod(SecurityLogFile, 0664)
+	err = os.Chmod(securityLogFilePath, 0640)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error in setting file permission for file : %s", SecurityLogFile)
 	}
 
 	// Containers are always run as non root users, does not require changing ownership of log directories
-	if _, err := os.Stat("/.container-env"); err == nil {
+	if utils.IsContainerEnv() {
 		return logFile, secLogFile, nil
 	}
 
@@ -54,11 +57,11 @@ func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
 		return nil, nil, fmt.Errorf("could not parse ihub group id '%s'", ihubUser.Gid)
 	}
 
-	err = os.Chown(SecurityLogFile, uid, gid)
+	err = os.Chown(securityLogFilePath, uid, gid)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not change file ownership for file: '%s'", SecurityLogFile)
 	}
-	err = os.Chown(LogFile, uid, gid)
+	err = os.Chown(logFilePath, uid, gid)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not change file ownership for file: '%s'", LogFile)
 	}
@@ -68,11 +71,15 @@ func openLogFiles() (logFile *os.File, secLogFile *os.File, err error) {
 
 func main() {
 	var app *ihub.App
-	logFile, secLogFile, err := openLogFiles()
+	instanceName, configDir, logDir := getAppSubConfig(os.Args)
+	logFile, secLogFile, err := openLogFiles(logDir)
 	if err != nil {
 		fmt.Println("Error in setting up Log files :", err.Error())
 		app = &ihub.App{
-			LogWriter: os.Stdout,
+			LogWriter:    os.Stdout,
+			ConfigDir:    configDir,
+			LogDir:       logDir,
+			InstanceName: instanceName,
 		}
 	} else {
 		defer func() {
@@ -81,6 +88,9 @@ func main() {
 		app = &ihub.App{
 			LogWriter:    logFile,
 			SecLogWriter: secLogFile,
+			ConfigDir:    configDir,
+			LogDir:       logDir,
+			InstanceName: instanceName,
 		}
 	}
 
@@ -90,6 +100,32 @@ func main() {
 		closeLogFiles(logFile, secLogFile)
 		os.Exit(1)
 	}
+}
+
+func getAppSubConfig(args []string) (string, string, string) {
+	instanceName := ""
+	configDir := ""
+	logDir := ""
+	for i, flag := range args {
+		if flag == "-i" || flag == "--instance" {
+			if i+1 < len(args) {
+				instanceName = args[i+1]
+				configDir = constants.SysConfigDir + instanceName + "/"
+				logDir = constants.SysLogDir + instanceName + "/"
+				break
+			}
+		}
+	}
+	if instanceName == "" {
+		instanceName = constants.ServiceName
+	}
+	if configDir == "" {
+		configDir = constants.ConfigDir
+	}
+	if logDir == "" {
+		logDir = constants.LogDir
+	}
+	return instanceName, configDir, logDir
 }
 
 func closeLogFiles(logFile, secLogFile *os.File) {

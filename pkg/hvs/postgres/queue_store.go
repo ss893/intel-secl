@@ -57,7 +57,7 @@ func (qr *QueueStore) Retrieve(id uuid.UUID) (*models.Queue, error) {
 	row := qr.store.Db.Model(&queue{}).Where(&queue{Id: id}).Row()
 	q := models.Queue{}
 	if err := row.Scan(&q.Id, &q.Action, (*PGJsonStrMap)(&q.Params), &q.Created, &q.Updated, &q.State, &q.Message); err != nil {
-		return nil, errors.Wrap(err, "postgres/queue_store:Retrieve() - Could not scan record ")
+		return nil, errors.Wrap(err, "postgres/queue_store:Retrieve() - Could not scan record")
 	}
 
 	return &q, nil
@@ -113,7 +113,7 @@ func (qr *QueueStore) Update(q *models.Queue) error {
 		UpdatedAt: time.Now().UTC(),
 	}
 	if q.Params != nil {
-		dbq.Params = PGJsonStrMap(q.Params)
+		dbq.Params = q.Params
 	}
 	if db := qr.store.Db.Model(&dbq).Updates(&dbq); db.Error != nil || db.RowsAffected != 1 {
 		if db.Error != nil {

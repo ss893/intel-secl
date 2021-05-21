@@ -34,6 +34,7 @@ BIO* initialize_tls_connection(SSL_CTX *ctx) {
     SSL *ssl = NULL;
     OPENSSL_init_ssl(0, NULL);
     ctx = SSL_CTX_new(TLS_client_method());
+    X509 *cert;
 
     log_info("Loading the client certificate: %s", client_certificate);
     if(SSL_CTX_use_certificate_file(ctx, client_certificate, SSL_FILETYPE_PEM) != 1)
@@ -67,6 +68,7 @@ BIO* initialize_tls_connection(SSL_CTX *ctx) {
     SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
     BIO_set_conn_hostname(bio, server_address);
     BIO_set_conn_port(bio, server_port);
+    
     if(BIO_do_connect(bio) != 1)
     {
         log_error("BIO_do_connect failed");
@@ -74,6 +76,22 @@ BIO* initialize_tls_connection(SSL_CTX *ctx) {
         bio = NULL;
         goto final;
     }
+    cert = SSL_get_peer_certificate(ssl);
+    if (cert == NULL){
+        log_error("There is no peer certificate");
+        BIO_free_all(bio);
+        bio = NULL;
+        goto final;
+    }
+
+    if (SSL_get_verify_result(ssl) != X509_V_OK)
+    {
+      log_error("Certificate validation failed");
+      BIO_free_all(bio);
+      X509_free(cert);
+      bio = NULL;
+      goto final;
+   }
 final:
     ERR_print_errors_fp(log_fp);
     SSL_CTX_free(ctx);

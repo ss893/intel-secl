@@ -6,6 +6,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -58,6 +59,13 @@ func (ktpc KeyTransferPolicyController) Create(responseWriter http.ResponseWrite
 	if requestPolicy.SGXEnclaveIssuerAnyof == nil || requestPolicy.SGXEnclaveIssuerProductIDAnyof == nil {
 		secLog.Errorf("controllers/key_transfer_policy_controller:Create() %s : sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id_anyof must be specified", commLogMsg.InvalidInputBadParam)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id_anyof must be specified"}
+	}
+
+	for _, enclaveIssuer := range requestPolicy.SGXEnclaveIssuerAnyof {
+		if err := validation.ValidateMrSignerString(enclaveIssuer); err != nil {
+			defaultLog.WithError(err).Error("controllers/key_transfer_policy_controller:Create() Input validation failed for sgx enclave issuer anyof")
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Input validation failed for sgx enclave issuer anyof"}
+		}
 	}
 
 	createdPolicy, err := ktpc.policyStore.Create(&requestPolicy)

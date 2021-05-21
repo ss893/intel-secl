@@ -23,7 +23,10 @@ import (
 	model "github.com/intel-secl/intel-secl/v3/pkg/model/wlagent"
 )
 
-var defaultLog = log.GetDefaultLogger()
+var (
+	defaultLog = log.GetDefaultLogger()
+	pattern    = regexp.MustCompile(`( *)<`)
+)
 
 //IsTrustedByHvs verifies if the client can be trusted for transfer
 func IsTrustedByHvs(saml string, samlReport *samlLib.Saml, keyId uuid.UUID, config domain.KeyControllerConfig, remoteManager *keymanager.RemoteManager) (bool, *x509.Certificate) {
@@ -43,7 +46,6 @@ func IsTrustedByHvs(saml string, samlReport *samlLib.Saml, keyId uuid.UUID, conf
 	}
 
 	//Remove Indentation from Request body
-	pattern := regexp.MustCompile(`( *)<`)
 	saml = pattern.ReplaceAllString(saml, "<")
 	verified := verifySamlSignature(saml, config.SamlCertsDir, config.TrustedCaCertsDir)
 	if !verified {

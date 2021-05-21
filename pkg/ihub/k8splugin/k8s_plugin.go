@@ -35,7 +35,7 @@ import (
 	"encoding/base64"
 )
 
-//KubernetesDetails for getting hosts and updating CRD
+// KubernetesDetails for getting hosts and updating CRD
 type KubernetesDetails struct {
 	Config             *config.Configuration
 	AuthToken          string
@@ -47,9 +47,13 @@ type KubernetesDetails struct {
 	SamlCertFilePath   string
 }
 
-var log = commonLog.GetDefaultLogger()
+var (
+	log            = commonLog.GetDefaultLogger()
+	osRegexEpcSize = regexp.MustCompile(constants.RegexEpcSize)
+	rgx            = regexp.MustCompile(constants.RegexNonStandardChar)
+)
 
-//GetHosts Getting Hosts From Kubernetes
+// GetHosts Getting Hosts From Kubernetes
 func GetHosts(k8sDetails *KubernetesDetails) error {
 	log.Trace("k8splugin/k8s_plugin:GetHosts() Entering")
 	defer log.Trace("k8splugin/k8s_plugin:GetHosts() Leaving")
@@ -124,7 +128,7 @@ func GetHosts(k8sDetails *KubernetesDetails) error {
 	return nil
 }
 
-//FilterHostReports Get Filtered Host Reports from HVS
+// FilterHostReports Get Filtered Host Reports from HVS
 func FilterHostReports(k8sDetails *KubernetesDetails, hostDetails *types.HostDetails, trustedCaDir, samlCertPath string) error {
 
 	log.Trace("k8splugin/k8s_plugin:FilterHostReports() Entering")
@@ -165,7 +169,7 @@ func FilterHostReports(k8sDetails *KubernetesDetails, hostDetails *types.HostDet
 	return nil
 }
 
-//GetSignedTrustReport Creates a Signed trust-report based on the host details
+// GetSignedTrustReport Creates a Signed trust-report based on the host details
 func GetSignedTrustReport(hostList model.Host, k8sDetails *KubernetesDetails, attestationType string) (string, error) {
 	log.Trace("k8splugin/k8s_plugin:GetSignedTrustReport() Entering")
 	defer log.Trace("k8splugin/k8s_plugin:GetSignedTrustReport() Leaving")
@@ -208,7 +212,7 @@ func GetSignedTrustReport(hostList model.Host, k8sDetails *KubernetesDetails, at
 
 }
 
-//UpdateCRD Updates the Kubernetes CRD with details from the host report
+// UpdateCRD Updates the Kubernetes CRD with details from the host report
 func UpdateCRD(k8sDetails *KubernetesDetails) error {
 
 	log.Trace("k8splugin/k8s_plugin:UpdateCRD() Entering")
@@ -279,7 +283,6 @@ func UpdateCRD(k8sDetails *KubernetesDetails) error {
 }
 
 func populateHostDetailsInCRD(k8sDetails *KubernetesDetails) ([]model.Host, error) {
-	config := k8sDetails.Config
 	var hostList []model.Host
 
 	for key := range k8sDetails.HostDetailsMap {
@@ -290,7 +293,7 @@ func populateHostDetailsInCRD(k8sDetails *KubernetesDetails) ([]model.Host, erro
 		t := time.Now().UTC()
 		host.Updated = new(time.Time)
 		*host.Updated = t
-		if config.AttestationService.AttestationType == "HVS" {
+		if reportHostDetails.AgentType != "tee" {
 			host.AssetTags = reportHostDetails.AssetTags
 			host.HardwareFeatures = reportHostDetails.HardwareFeatures
 			host.Trusted = new(bool)
@@ -303,7 +306,8 @@ func populateHostDetailsInCRD(k8sDetails *KubernetesDetails) ([]model.Host, erro
 			}
 			host.HvsSignedTrustReport = signedtrustReport
 
-		} else if config.AttestationService.AttestationType == "SGX" {
+		}
+		if reportHostDetails.AgentType == "tee" || reportHostDetails.AgentType == "both" {
 			host.EpcSize = strings.Replace(reportHostDetails.EpcSize, " ", "", -1)
 			host.FlcEnabled = strconv.FormatBool(reportHostDetails.FlcEnabled)
 			host.SgxEnabled = strconv.FormatBool(reportHostDetails.SgxEnabled)
@@ -323,7 +327,7 @@ func populateHostDetailsInCRD(k8sDetails *KubernetesDetails) ([]model.Host, erro
 	return hostList, nil
 }
 
-//PutCRD PUT request call to update existing CRD
+// PutCRD PUT request call to update existing CRD
 func PutCRD(k8sDetails *KubernetesDetails, crd *model.CRD) error {
 
 	log.Trace("k8splugin/k8s_plugin:PutCRD() Entering")
@@ -366,7 +370,7 @@ func PutCRD(k8sDetails *KubernetesDetails, crd *model.CRD) error {
 	return nil
 }
 
-//PostCRD POST request call to create new CRD
+// PostCRD POST request call to create new CRD
 func PostCRD(k8sDetails *KubernetesDetails, crd *model.CRD) error {
 
 	log.Trace("k8splugin/k8s_plugin:PostCRD() Starting")
@@ -400,7 +404,7 @@ func PostCRD(k8sDetails *KubernetesDetails, crd *model.CRD) error {
 	return nil
 }
 
-//SendDataToEndPoint pushes host trust data to Kubernetes
+// SendDataToEndPoint pushes host trust data to Kubernetes
 func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 
 	log.Trace("k8splugin/k8s_plugin:SendDataToEndPoint() Entering")
@@ -413,51 +417,60 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 		return errors.Wrap(err, "k8splugin/k8s_plugin:SendDataToEndPoint() Error in getting the Hosts from kubernetes")
 	}
 
-	if kubernetes.Config.AttestationService.AttestationType == "HVS" {
-		for key := range kubernetes.HostDetailsMap {
-			hostDetails := kubernetes.HostDetailsMap[key]
+	for key := range kubernetes.HostDetailsMap {
+		hvsFail := true
+		shvsFail := true
+
+		hostDetails := kubernetes.HostDetailsMap[key]
+
+		if kubernetes.Config.AttestationService.HVSBaseURL != "" {
 			err := FilterHostReports(&kubernetes, &hostDetails, kubernetes.TrustedCAsStoreDir, kubernetes.SamlCertFilePath)
 			if err != nil {
-				log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Error in Filtering Report for Hosts")
-				//host doesn't exist remove from the map
-				delete(kubernetes.HostDetailsMap, key)
-				continue
+				log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Error in Filtering Report for Hosts")
+			} else {
+				hvsFail = false
+				// mark Trust Agent as running on this host
+				hostDetails.AgentType = "ta"
 			}
-			kubernetes.HostDetailsMap[key] = hostDetails
 		}
-	} else if kubernetes.Config.AttestationService.AttestationType == "SGX" {
-		for key := range kubernetes.HostDetailsMap {
-			hostDetails := kubernetes.HostDetailsMap[key]
+		if kubernetes.Config.AttestationService.SHVSBaseURL != "" {
 			platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostName, kubernetes.Config, kubernetes.TrustedCAsStoreDir)
 			if err != nil {
-				log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Host %s doesn't exist in SHVS: removing from map", hostDetails.HostID)
-				//host doesn't exist remove from the map
-				delete(kubernetes.HostDetailsMap, key)
-				continue
-			}
+				log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Host %s doesn't exist in SHVS", hostDetails.HostID)
+			} else {
+				shvsFail = false
+				// mark TEE agent as running on this host
+				hostDetails.AgentType = "tee"
+				err = json.Unmarshal(platformData, &sgxData)
+				if err != nil {
+					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() SGX Platform data unmarshal failed")
+					continue
+				}
 
-			err = json.Unmarshal(platformData, &sgxData)
-			if err != nil {
-				log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() SGX Platform data unmarshal failed")
-				continue
+				// need to validate contents of EpcSize
+				if !osRegexEpcSize.MatchString(sgxData[0].EpcSize) {
+					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
+					continue
+				}
+				hostDetails.EpcSize = sgxData[0].EpcSize
+				hostDetails.FlcEnabled = sgxData[0].FlcEnabled
+				hostDetails.SgxEnabled = sgxData[0].SgxEnabled
+				hostDetails.SgxSupported = sgxData[0].SgxSupported
+				hostDetails.TcbUpToDate = sgxData[0].TcbUpToDate
+				util.EvaluateValidTo(sgxData[0].ValidTo, kubernetes.Config.PollIntervalMinutes)
+				hostDetails.ValidTo = sgxData[0].ValidTo
 			}
-
-			// need to validate contents of EpcSize
-			if !regexp.MustCompile(constants.RegexEpcSize).MatchString(sgxData[0].EpcSize) {
-				log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
-				continue
-			}
-			hostDetails.EpcSize = sgxData[0].EpcSize
-			hostDetails.FlcEnabled = sgxData[0].FlcEnabled
-			hostDetails.SgxEnabled = sgxData[0].SgxEnabled
-			hostDetails.SgxSupported = sgxData[0].SgxSupported
-			hostDetails.TcbUpToDate = sgxData[0].TcbUpToDate
-			util.EvaluateValidTo(sgxData[0].ValidTo, kubernetes.Config.PollIntervalMinutes)
-			hostDetails.ValidTo = sgxData[0].ValidTo
+		}
+		if !hvsFail && !shvsFail {
+			// both TEE agent and Trust agent are running on same host
+			hostDetails.AgentType = "both"
+		}
+		// cannot find this host in HVS or SHVS, remove host from map
+		if hvsFail && shvsFail {
+			delete(kubernetes.HostDetailsMap, key)
+		} else {
 			kubernetes.HostDetailsMap[key] = hostDetails
 		}
-	} else {
-		return errors.New("k8splugin/k8s_plugin:SendDataToEndPoint() Given Attestation type is invalid")
 	}
 
 	if len(kubernetes.HostDetailsMap) > 0 {

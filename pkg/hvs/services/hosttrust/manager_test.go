@@ -8,8 +8,8 @@ package hosttrust_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang/groupcache/lru"
 	"github.com/google/uuid"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
@@ -29,6 +29,8 @@ import (
 var (
 	qs             domain.QueueStore
 	hs             *mocks.MockHostStore
+	fs             *mocks.MockFlavorStore
+	fgs            *mocks.MockFlavorgroupStore
 	hss            *mocks.MockHostStatusStore
 	cfg            domain.HostDataFetcherConfig
 	ht             domain.HostTrustManager
@@ -44,6 +46,8 @@ var (
 func SetupManagerTests() {
 	qs = mocks.NewQueueStore()
 	hs = mocks.NewMockHostStore()
+	fs = mocks.NewMockFlavorStore()
+	fgs = mocks.NewFakeFlavorgroupStore()
 	hss = mocks.NewMockHostStatusStore()
 	hcs = mocks.NewMockHostCredentialStore()
 
@@ -57,6 +61,8 @@ func SetupManagerTests() {
 		Id:               hostId,
 	})
 
+	flavorCache, _ := lru.New(5)
+
 	cfg = domain.HostDataFetcherConfig{
 		HostConnectorProvider: mocks2.MockHostConnectorFactory{},
 		HostConnectionConfig: domain.HostConnectionConfig{
@@ -67,7 +73,9 @@ func SetupManagerTests() {
 		RetryTimeMinutes: 7,
 		HostStatusStore:  hss,
 		HostStore:        hs,
-		HostTrustCache:   lru.New(5),
+		FlavorGroupStore: fgs,
+		FlavorStore:      fs,
+		HostTrustCache:   flavorCache,
 	}
 
 	_, f, _ = hostfetcher.NewService(cfg, 5)
@@ -107,6 +115,7 @@ func SetupManagerTests() {
 		"../../../lib/verifier/test_data/intel20/tag-cacerts.pem")
 
 	flvrVerifier, _ := libVerifier.NewVerifier(*verifierCertificates)
+	htvTrustCache, _ := lru.New(5)
 
 	htv := domain.HostTrustVerifierConfig{
 		FlavorStore:                     flavorStore,
@@ -116,7 +125,7 @@ func SetupManagerTests() {
 		FlavorVerifier:                  flvrVerifier,
 		SamlIssuerConfig:                *getIssuer(),
 		SkipFlavorSignatureVerification: true,
-		HostTrustCache:                  lru.New(5),
+		HostTrustCache:                  htvTrustCache,
 	}
 	v = hosttrust.NewVerifier(htv)
 
@@ -152,7 +161,7 @@ func TestHostTrustManagerNewService(t *testing.T) {
 
 	err = ht.VerifyHostsAsync([]uuid.UUID{newHost.Id}, true, false)
 	assert.NoError(t, err)
-	time.Sleep(time.Duration(5 * time.Second))
+	time.Sleep(5 * time.Second)
 
 	qrecs, err := qs.Search(&models.QueueFilterCriteria{})
 	assert.NoError(t, err)

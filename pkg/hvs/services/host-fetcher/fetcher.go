@@ -7,8 +7,9 @@ package hostfetcher
 
 import (
 	"context"
-	"github.com/golang/groupcache/lru"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models/taskstage"
+	"golang.org/x/sync/syncmap"
 	"reflect"
 	"sync"
 	"time"
@@ -26,7 +27,6 @@ import (
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -60,9 +60,7 @@ type Service struct {
 	// map that holds all hosts that need to be fetched.
 	// The reason this is a map is that redundant requests can come in
 	// that could theoretically be consolidated
-	workMap map[uuid.UUID][]*fetchRequest
-	// map is not protected access concurrent goroutine access. need a lock
-	wmLock sync.Mutex
+	workMap syncmap.Map
 	// waitgroup used to wait for workers to finish up when signal for shutdown comes in
 	wg sync.WaitGroup
 
@@ -73,6 +71,8 @@ type Service struct {
 	hcf               hc.HostConnectorProvider
 	hss               domain.HostStatusStore
 	hs                domain.HostStore
+	fgs               domain.FlavorGroupStore
+	fs                domain.FlavorStore
 	hostTrustCache    *lru.Cache
 }
 
@@ -82,13 +82,15 @@ func NewService(cfg domain.HostDataFetcherConfig, workers int) (*Service, domain
 
 	// setting size of channel to the same as number of workers.
 	// this way, go routine can start work as soon as a current work is done
-	svc := &Service{workMap: make(map[uuid.UUID][]*fetchRequest),
+	svc := &Service{workMap: syncmap.Map{},
 		quit:              make(chan struct{}),
 		hcf:               cfg.HostConnectorProvider,
 		retryIntervalMins: cfg.RetryTimeMinutes,
 		hss:               cfg.HostStatusStore,
 		hcCfg:             cfg.HostConnectionConfig,
 		hs:                cfg.HostStore,
+		fgs:               cfg.FlavorGroupStore,
+		fs:                cfg.FlavorStore,
 		hostTrustCache:    cfg.HostTrustCache,
 	}
 	if svc.hss == nil {
@@ -173,20 +175,21 @@ func (svc *Service) addWorkToMap(wrk interface{}) interface{} {
 
 	switch v := wrk.(type) {
 	case *fetchRequest:
-
-		svc.wmLock.Lock()
-		if _, ok := svc.workMap[v.host.Id]; !ok {
-			svc.workMap[v.host.Id] = append(svc.workMap[v.host.Id], v)
+		workEntry, ok := svc.workMap.Load(v.host.Id)
+		if ok {
+			//Why this is required?
+			work := workEntry.([]*fetchRequest)
+			work = append(work, v)
+			svc.workMap.Store(v.host.Id, work)
 		} else {
-			svc.workMap[v.host.Id] = []*fetchRequest{v}
+			svc.workMap.Store(v.host.Id, []*fetchRequest{v})
 		}
-		svc.wmLock.Unlock()
 		return v.host.Id
 
 	case retryRequest:
 		return v.hostId
 	default:
-		log.Error("unexpected type in request channel")
+		defaultLog.Error("unexpected type in request channel")
 		return nil
 	}
 
@@ -210,30 +213,33 @@ func (svc *Service) doWork() {
 			return
 		case id := <-svc.workChan:
 			hId, ok := id.(uuid.UUID)
+			defaultLog.Debugf("hostfetcher/fetcher:doWork() host - %s", hId.String())
 			var connUrl string
 			if !ok {
 				defaultLog.Error("hostfetcher:doWork:expecting uuid from channel - but got different type")
 			}
 			// iterate through work requests for this host. Usually, there will only be a single element in the
 			// work list.
-			svc.wmLock.Lock()
-			frs := svc.workMap[hId]
-			connUrl = frs[0].host.ConnectionString
-			preferHashMatch := frs[0].preferHashMatch
+			var preferHashMatch bool
 			getData := false
-			for i, req := range frs {
-				select {
-				// remove the requests that have already been cancelled.
-				case <-req.ctx.Done():
-					frs = append(frs[:i], frs[i+1:]...)
-					continue
-				default:
-					getData = true
-					taskstage.StoreInContext(req.ctx, taskstage.GetHostDataStarted)
+			workEntry, ok := svc.workMap.Load(hId)
+			if ok {
+				frs := workEntry.([]*fetchRequest)
+				connUrl = frs[0].host.ConnectionString
+				preferHashMatch = frs[0].preferHashMatch
+				for i, req := range frs {
+					select {
+					// remove the requests that have already been cancelled.
+					case <-req.ctx.Done():
+						frs = append(frs[:i], frs[i+1:]...)
+						continue
+					default:
+						getData = true
+						taskstage.StoreInContext(req.ctx, taskstage.GetHostDataStarted)
+					}
 				}
+				svc.workMap.Store(hId, frs)
 			}
-			svc.workMap[hId] = frs
-			svc.wmLock.Unlock()
 
 			if getData {
 				svc.FetchDataAndRespond(hId, connUrl, preferHashMatch)
@@ -292,16 +298,17 @@ func (svc *Service) FetchDataAndRespond(hId uuid.UUID, connUrl string, preferHas
 	defaultLog.Trace("hostfetcher/Service:FetchDataAndRespond() Entering")
 	defer defaultLog.Trace("hostfetcher/Service:FetchDataAndRespond() Leaving")
 
+	defaultLog.Debugf("hostfetcher/fetcher:FetchDataAndRespond()  start for host - %s", hId.String())
+
 	trustPcrList := svc.getTrustPcrListFromCache(hId)
 	hostData, err := svc.GetHostData(connUrl, trustPcrList)
 	if err != nil {
-		defaultLog.WithError(err).Errorf("hostfetcher/Service:FetchDataAndRespond() Failed to get data	")
+		defaultLog.WithError(err).Errorf("hostfetcher/Service:FetchDataAndRespond() Failed to get data for host %s", hId.String())
 		// we have an error. Make sure that the host still exists.
 		if hosts, err := svc.hs.Search(&models.HostFilterCriteria{Id: hId}, nil); err == nil && len(hosts) == 0 {
-			svc.wmLock.Lock()
-			frs := svc.workMap[hId]
-			delete(svc.workMap, hId)
-			svc.wmLock.Unlock()
+			workEntry, _ := svc.workMap.Load(hId)
+			frs := workEntry.([]*fetchRequest)
+			svc.workMap.Delete(hId)
 			for _, fr := range frs {
 				select {
 				case <-fr.ctx.Done():
@@ -311,7 +318,7 @@ func (svc *Service) FetchDataAndRespond(hId uuid.UUID, connUrl string, preferHas
 				for _, rcv := range fr.rcvrs {
 					err = rcv.ProcessHostData(fr.ctx, fr.host, nil, preferHashMatch, errors.New("Host does not exist"))
 					if err != nil {
-						defaultLog.WithError(err).Errorf("could not process host data")
+						defaultLog.WithError(err).Error("could not process host data for host", hId.String())
 					}
 				}
 
@@ -333,17 +340,19 @@ func (svc *Service) FetchDataAndRespond(hId uuid.UUID, connUrl string, preferHas
 			},
 		})
 		if err != nil {
-			defaultLog.WithError(err).Errorf("could not persist host status")
+			defaultLog.WithError(err).Errorf("could not persist host status for host %s", hId.String())
 		}
 		return
 	}
 
-	log.Debug(" data for ", hId, "using connection string", connUrl)
+	defaultLog.Debug(" data for ", hId, "using connection string", connUrl)
 	// work is done. get the list of callbacks and delete the entry.
-	svc.wmLock.Lock()
-	frs := svc.workMap[hId]
-	delete(svc.workMap, hId)
-	svc.wmLock.Unlock()
+	workEntry, _ := svc.workMap.Load(hId)
+	var frs = []*fetchRequest{}
+	if workEntry != nil {
+		frs = workEntry.([]*fetchRequest)
+	}
+	svc.workMap.Delete(hId)
 	svc.updateMissingHostDetails(hId, hostData)
 	err = svc.hss.Persist(&hvs.HostStatus{
 		HostID: hId,
@@ -354,7 +363,7 @@ func (svc *Service) FetchDataAndRespond(hId uuid.UUID, connUrl string, preferHas
 		HostManifest: *hostData,
 	})
 	if err != nil {
-		defaultLog.WithError(err).Errorf("could not persist host status")
+		defaultLog.WithError(err).Errorf("could not persist host status for host %s", hId.String())
 	}
 
 	for _, fr := range frs {
@@ -366,7 +375,7 @@ func (svc *Service) FetchDataAndRespond(hId uuid.UUID, connUrl string, preferHas
 		for _, rcv := range fr.rcvrs {
 			err = rcv.ProcessHostData(fr.ctx, fr.host, hostData, preferHashMatch, err)
 			if err != nil {
-				defaultLog.WithError(err).Errorf("could not process host data")
+				defaultLog.WithError(err).Errorf("could not process host data for host %s", hId.String())
 			}
 		}
 
@@ -378,6 +387,8 @@ func (svc *Service) getTrustPcrListFromCache(hId uuid.UUID) []int {
 	defaultLog.Trace("hostfetcher/Service:getTrustPcrListFromCache() Entering")
 	defer defaultLog.Trace("hostfetcher/Service:getTrustPcrListFromCache() Leaving")
 
+	defaultLog.Debugf("hostfetcher/fetcher:getTrustPcrListFromCache()  start for host - %s", hId.String())
+
 	var trustPcrList []int
 	cacheEntry, ok := svc.hostTrustCache.Get(hId)
 	if ok {
@@ -385,13 +396,15 @@ func (svc *Service) getTrustPcrListFromCache(hId uuid.UUID) []int {
 		trustPcrList = cachedQuote.TrustPcrList
 	}
 
-	defaultLog.Infof("hostfetcher/Service:getTrustPcrListFromCache() PCR List %v for host %v ", hId, trustPcrList)
+	defaultLog.Infof("hostfetcher/Service:getTrustPcrListFromCache() PCR List %v for host %v ", trustPcrList, hId)
 	return trustPcrList
 }
 
 func (svc *Service) GetHostData(connUrl string, pcrList []int) (*types.HostManifest, error) {
 	defaultLog.Trace("hostfetcher/Service:GetHostData() Entering")
 	defer defaultLog.Trace("hostfetcher/Service:GetHostData() Leaving")
+
+	defaultLog.Debugf("hostfetcher/fetcher:GetHostData()  start for conn url - %s", connUrl)
 
 	//get the host data
 	connectionString, _, err := controllers.GenerateConnectionString(connUrl, svc.hcCfg.ServiceUsername,
@@ -422,12 +435,40 @@ func (svc *Service) updateMissingHostDetails(hostId uuid.UUID, manifest *types.H
 			return
 		}
 		hostInfo := manifest.HostInfo
-		// Link to default software and workload groups if host is linux
-		if utils.IsLinuxHost(&hostInfo) {
-			defaultLog.Debug("hostfetcher/Service:updateMissingHostDetails() Host is linux, associating with default software flavorgroups")
-			swFgs := utils.GetDefaultSoftwareFlavorGroups(hostInfo.InstalledComponents)
-			host.FlavorgroupNames = append(host.FlavorgroupNames, swFgs...)
+		// During host registration, if flavorgroup-names were not provided and the host was not connected, the default flavorgroups cannot be added.
+		// Check to see if the host has any flavorgroups and if not, assign the defaults
+		fgs, err := svc.hs.SearchFlavorgroups(hostId)
+		if err != nil {
+			defaultLog.Info("hostfetcher/Service:updateMissingHostDetails() Failed to get flavorgroups associated with the host")
+			return
 		}
+		// if no flavorgroups are associated with the host, assign default flavorgroups
+		if len(fgs) == 0 {
+			defaultLog.Info("hostfetcher/Service:updateMissingHostDetails() Associating hosts with flavorgroup, since no flavorgroups were associated during host registration due to host connection issues")
+			// associate the host with automatic flavorgroup
+			host.FlavorgroupNames = append(host.FlavorgroupNames, models.FlavorGroupsAutomatic.String())
+			// Link to default software and workload groups if host is linux
+			if utils.IsLinuxHost(&hostInfo) {
+				defaultLog.Debug("hostfetcher/Service:updateMissingHostDetails() Host is linux, associating with default software flavorgroups")
+				swFgs := utils.GetDefaultSoftwareFlavorGroups(hostInfo.InstalledComponents)
+				host.FlavorgroupNames = append(host.FlavorgroupNames, swFgs...)
+			}
+			// get flavorgroupID to create host-flavorgroup links
+			var fgIDs []uuid.UUID
+			for _, fgName := range host.FlavorgroupNames {
+				existingFlavorGroups, _ := svc.fgs.Search(&models.FlavorGroupFilterCriteria{
+					NameEqualTo: fgName,
+				})
+				fgIDs = append(fgIDs, existingFlavorGroups[0].ID)
+			}
+			// add host-flavorgroup link
+			err = svc.hs.AddFlavorgroups(hostId, fgIDs)
+			if err != nil {
+				defaultLog.Error("hostfetcher/Service:updateMissingHostDetails() Failed to create host-flavorgroup links")
+				return
+			}
+		}
+
 		if manifest.HostInfo.HardwareUUID != "" {
 			hwUuid, err := uuid.Parse(manifest.HostInfo.HardwareUUID)
 			if err == nil {
@@ -437,6 +478,32 @@ func (svc *Service) updateMissingHostDetails(hostId uuid.UUID, manifest *types.H
 		err = svc.hs.Update(host)
 		if err != nil {
 			defaultLog.Info("hostfetcher/Service:updateMissingHostDetails() Failed to updated host information while Verifying host details")
+		}
+		// If host was unreachable during registration, the host-unique flavors are not associated with it at the time of registration
+		// check if host has any host_unique flavors and associate them
+		defaultLog.Info("hostfetcher/Service:updateMissingHostDetails() Checking if host has an host_unique flavors and associating them")
+		if manifest.HostInfo.HardwareUUID != "" {
+			signedFlavors, err := svc.fs.Search(&models.FlavorVerificationFC{
+				FlavorFC: models.FlavorFilterCriteria{
+					Key:   "hardware_uuid",
+					Value: manifest.HostInfo.HardwareUUID,
+				},
+			})
+			if err != nil {
+				defaultLog.Errorf("hostfetcher/Service:updateMissingHostDetails() Failed to search host_unique flavors for host with hardware UUID %s", manifest.HostInfo.HardwareUUID)
+				return
+			}
+
+			var flavorIds []uuid.UUID
+			for _, signedFlavor := range signedFlavors {
+				flavorIds = append(flavorIds, signedFlavor.Flavor.Meta.ID)
+			}
+			if len(flavorIds) > 0 {
+				if _, err := svc.hs.AddHostUniqueFlavors(hostId, flavorIds); err != nil {
+					defaultLog.Errorf("hostfetcher/Service:updateMissingHostDetails() Could not create host-unique flavors link")
+					return
+				}
+			}
 		}
 	}
 }

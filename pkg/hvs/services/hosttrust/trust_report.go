@@ -61,7 +61,7 @@ func getMissingRequiredFlavorPartsWithLatest(hostId uuid.UUID, reqs flvGrpHostTr
 	defaultLog.Trace("hosttrust/trust_report:getMissingRequiredFlavorPartsWithLatest() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:getMissingRequiredFlavorPartsWithLatest() Leaving")
 	missingRequiredFlavorPartsWithLatest := make(map[cf.FlavorPart]bool)
-	for flavorPart, _ := range reqAndDefFlavorTypes {
+	for flavorPart := range reqAndDefFlavorTypes {
 		defaultLog.Debugf("hosttrust/trust_report:getMissingRequiredFlavorPartsWithLatest() Checking if required flavor type %s for host %s is missing", flavorPart.String(), hostId.String())
 		if areRequiredFlavorsMissing(cachedTrustReport, flavorPart) {
 			defaultLog.Debugf("hosttrust/trust_report:getMissingRequiredFlavorPartsWithLatest() Required flavor type %s for host %s is missing", flavorPart.String(), hostId.String())
@@ -86,7 +86,7 @@ func (v *Verifier) createTrustReport(hostId uuid.UUID, hostData *types.HostManif
 	defer defaultLog.Trace("hosttrust/trust_report:createTrustReport() Leaving")
 
 	flavorParts := []cf.FlavorPart{}
-	for flavorPart, _ := range latestReqAndDefFlavorTypes {
+	for flavorPart := range latestReqAndDefFlavorTypes {
 		flavorParts = append(flavorParts, flavorPart)
 	}
 
@@ -106,7 +106,7 @@ func (v *Verifier) createTrustReport(hostId uuid.UUID, hostData *types.HostManif
 		trustReport.AddResults(trustCache.trustReport.Results)
 	}
 
-	for flavorPart, _ := range reqs.DefinedAndRequiredFlavorTypes {
+	for flavorPart := range reqs.DefinedAndRequiredFlavorTypes {
 		rule := rules.NewRequiredFlavorTypeExists(flavorPart)
 		trustReport = rule.Apply(*trustReport)
 	}
@@ -296,7 +296,8 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 					})
 				}
 				if !reflect.DeepEqual(hostInfo.HardwareFeatures, taModel.HardwareFeatures{}) {
-					if hostInfo.HardwareFeatures.CBNT != nil {
+					if hostInfo.HardwareFeatures.CBNT != nil &&
+						hostInfo.HardwareFeatures.CBNT.Meta.Profile != "BTGP0" {
 						pfQueryAttrs = append(pfQueryAttrs, models.FlavorMetaKv{
 							Key:   "hardware.feature.CBNT.enabled",
 							Value: hostInfo.HardwareFeatures.CBNT.Enabled,
