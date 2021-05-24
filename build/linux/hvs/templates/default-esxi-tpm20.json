@@ -13,7 +13,7 @@
                 {
                     "pcr": {
                         "index": 0,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_equals": {}
@@ -21,7 +21,7 @@
                 {
                     "pcr": {
                         "index": 17,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_equals": {}
@@ -29,7 +29,7 @@
                 {
                     "pcr": {
                         "index": 18,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_equals": {}
@@ -44,7 +44,7 @@
                 {
                     "pcr": {
                         "index": 19,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_equals": {}
@@ -52,7 +52,7 @@
                 {
                     "pcr": {
                         "index": 20,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "eventlog_equals": {
                         "excluding_tags": [
@@ -64,7 +64,7 @@
                 {
                     "pcr": {
                         "index": 21,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "eventlog_equals": {
                         "excluding_tags": [
@@ -82,7 +82,7 @@
                 {
                     "pcr": {
                         "index": 20,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "eventlog_includes": [
                         "componentName.imgdb.tgz",
@@ -92,7 +92,7 @@
                 {
                     "pcr": {
                         "index": 21,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "eventlog_includes": [
                         "commandLine."

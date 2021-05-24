@@ -16,7 +16,7 @@
                 {
                     "pcr": {
                         "index": 0,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_includes": [

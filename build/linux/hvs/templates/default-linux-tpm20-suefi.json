@@ -15,56 +15,56 @@
                 {
                     "pcr": {
                         "index": 0,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 1,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 2,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 3,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 4,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 5,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 6,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 7,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 }

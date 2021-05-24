@@ -15,14 +15,14 @@
                 {
                     "pcr": {
                         "index": 0,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 7,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 }

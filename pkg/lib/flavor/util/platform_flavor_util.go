@@ -222,6 +222,9 @@ func (pfutil PlatformFlavorUtil) GetHardwareSectionDetails(hostManifest *hcTypes
 	if hostManifest.PcrManifest.Sha256Pcrs != nil {
 		tpm.Meta.PCRBanks = append(tpm.Meta.PCRBanks, string(hcTypes.SHA256))
 	}
+	if hostManifest.PcrManifest.Sha384Pcrs != nil {
+		tpm.Meta.PCRBanks = append(tpm.Meta.PCRBanks, string(hcTypes.SHA384))
+	}
 	feature.TPM = tpm
 
 	txt := fm.HardwareFeature{}

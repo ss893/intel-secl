@@ -122,6 +122,7 @@ func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationRe
 	var pcrManifest types.PcrManifest
 	pcrManifest.Sha256Pcrs = []types.HostManifestPcrs{}
 	pcrManifest.Sha1Pcrs = []types.HostManifestPcrs{}
+	pcrManifest.Sha384Pcrs = []types.HostManifestPcrs{}
 	var pcrEventLogMap types.PcrEventLogMap
 	cumulativePcrsValue := ""
 
@@ -147,7 +148,13 @@ func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationRe
 				Value:   intArrayToHexString(pcrDetails.DigestValue),
 				PcrBank: shaAlgorithm,
 			})
-		} else {
+		} else if strings.EqualFold(pcrDetails.DigestMethod, "SHA384") {
+			pcrManifest.Sha384Pcrs = append(pcrManifest.Sha384Pcrs, types.HostManifestPcrs{
+				Index:   pcrIndex,
+				Value:   intArrayToHexString(pcrDetails.DigestValue),
+				PcrBank: shaAlgorithm,
+			})
+		}else {
 			log.Warn("vmware_host_connector:createPCRManifest() Result PCR invalid")
 		}
 	}
@@ -176,6 +183,7 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 	eventLogMap.Sha1EventLogs = []types.TpmEventLog{}
 	eventLogMap.Sha256EventLogs = []types.TpmEventLog{}
+	eventLogMap.Sha384EventLogs = []types.TpmEventLog{}
 
 	for _, eventLogEntry := range hostTpmEventLogEntry {
 		pcrFound := false
@@ -230,6 +238,24 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 			} else {
 				eventLogMap.Sha256EventLogs[index].TpmEvent = append(eventLogMap.Sha256EventLogs[index].TpmEvent, eventLog)
 			}
+		} else if len(parsedEventLogEntry.EventDetails.DataHash) == 48 {
+			parsedEventLogEntry.EventDetails.DataHashMethod = constants.SHA384
+			for _, entry := range eventLogMap.Sha384EventLogs {
+				if entry.Pcr.Index == parsedEventLogEntry.PcrIndex {
+					pcrFound = true
+					break
+				}
+				index++
+			}
+
+			eventLog := getEventLogInfo(parsedEventLogEntry)
+
+			if !pcrFound {
+				eventLogMap.Sha384EventLogs = append(eventLogMap.Sha384EventLogs,
+					types.TpmEventLog{Pcr: types.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []types.EventLog{eventLog}})
+			} else {
+				eventLogMap.Sha384EventLogs[index].TpmEvent = append(eventLogMap.Sha384EventLogs[index].TpmEvent, eventLog)
+			}
 		}
 
 	}
@@ -241,6 +267,10 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 	sort.SliceStable(eventLogMap.Sha256EventLogs[:], func(i, j int) bool {
 		return string(eventLogMap.Sha256EventLogs[i].Pcr.Index) < string(eventLogMap.Sha256EventLogs[j].Pcr.Index)
+	})
+
+	sort.SliceStable(eventLogMap.Sha384EventLogs[:], func(i, j int) bool {
+		return string(eventLogMap.Sha384EventLogs[i].Pcr.Index) < string(eventLogMap.Sha384EventLogs[j].Pcr.Index)
 	})
 
 	log.Debug("vmware_host_connector:getPcrEventLog() PCR event log created")

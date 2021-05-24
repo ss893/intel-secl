@@ -28,7 +28,7 @@
             "maximum": 23
         },
         "digest_algorithm": {
-            "type": "string",
+            "type": "array",
             "enum": [
                 "SHA1",
                 "SHA256",
