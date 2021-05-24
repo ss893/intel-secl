@@ -169,7 +169,7 @@ main() {
   if [ "$UPGRADE_VERSION" = "$COMPONENT_VERSION" ]; then
     echo "Installed component is already up to date, no need of upgrade"
     echo "Exiting upgrade"
-    exit 0
+    exit 125
   fi
 
   UPGRADE_MANIFEST="./manifest/supported_versions"
