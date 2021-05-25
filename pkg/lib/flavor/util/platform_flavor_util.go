@@ -216,13 +216,13 @@ func (pfutil PlatformFlavorUtil) GetHardwareSectionDetails(hostManifest *hcTypes
 
 	tpm.Meta.TPMVersion = hostInfo.HardwareFeatures.TPM.Meta.TPMVersion
 	// populate tpm.Pcrbanks by checking the contents of PcrManifest
-	if hostManifest.PcrManifest.Sha1Pcrs != nil && len(hostManifest.PcrManifest.Sha1Pcrs) >0 {
+	if hostManifest.PcrManifest.Sha1Pcrs != nil && len(hostManifest.PcrManifest.Sha1Pcrs) > 0 {
 		tpm.Meta.PCRBanks = append(tpm.Meta.PCRBanks, string(hcTypes.SHA1))
 	}
-	if hostManifest.PcrManifest.Sha256Pcrs != nil && len(hostManifest.PcrManifest.Sha256Pcrs) >0 {
+	if hostManifest.PcrManifest.Sha256Pcrs != nil && len(hostManifest.PcrManifest.Sha256Pcrs) > 0 {
 		tpm.Meta.PCRBanks = append(tpm.Meta.PCRBanks, string(hcTypes.SHA256))
 	}
-	if hostManifest.PcrManifest.Sha384Pcrs != nil && len(hostManifest.PcrManifest.Sha384Pcrs) >0 {
+	if hostManifest.PcrManifest.Sha384Pcrs != nil && len(hostManifest.PcrManifest.Sha384Pcrs) > 0 {
 		tpm.Meta.PCRBanks = append(tpm.Meta.PCRBanks, string(hcTypes.SHA384))
 	}
 	feature.TPM = tpm
@@ -280,7 +280,7 @@ func (pfutil PlatformFlavorUtil) GetPcrDetails(pcrManifest hcTypes.PcrManifest, 
 		// based on the bank priority get the value of PCR index from host manifest
 		for _, bank = range rules.PcrBank {
 			pcrInfo, _ = pcrManifest.GetPcrValue(hcTypes.SHAAlgorithm(bank), pI)
-			if(pcrInfo != nil && pcrInfo.Value != "") {
+			if pcrInfo != nil && pcrInfo.Value != "" {
 				break
 			}
 		}

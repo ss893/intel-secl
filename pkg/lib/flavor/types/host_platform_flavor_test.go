@@ -116,7 +116,7 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 
 	testPcrList := make(map[int]hvs.PcrListRules)
 	testPcrList[17] = hvs.PcrListRules{
-		PcrBank: []string{"SHA384", "SHA256", "SHA1"},
+		PcrBank:    []string{"SHA384", "SHA256", "SHA1"},
 		PcrMatches: true,
 		PcrEquals: hvs.PcrEquals{
 			IsPcrEquals:   false,
@@ -125,7 +125,7 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 	}
 
 	testPcrList[18] = hvs.PcrListRules{
-		PcrBank: []string{"SHA384", "SHA256", "SHA1"},
+		PcrBank:    []string{"SHA384", "SHA256", "SHA1"},
 		PcrMatches: true,
 		PcrEquals: hvs.PcrEquals{
 			IsPcrEquals: false,

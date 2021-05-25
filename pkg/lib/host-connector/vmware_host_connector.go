@@ -154,7 +154,7 @@ func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationRe
 				Value:   intArrayToHexString(pcrDetails.DigestValue),
 				PcrBank: shaAlgorithm,
 			})
-		}else {
+		} else {
 			log.Warn("vmware_host_connector:createPCRManifest() Result PCR invalid")
 		}
 	}
