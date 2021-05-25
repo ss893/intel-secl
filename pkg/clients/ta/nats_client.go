@@ -9,13 +9,13 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
 	"net/url"
 	"strings"
 	"time"
 
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 )
