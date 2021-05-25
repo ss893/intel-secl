@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 

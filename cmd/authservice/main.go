@@ -6,9 +6,9 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/intel-secl/intel-secl/v3/docs/shared/aas"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
+	_ "github.com/intel-secl/intel-secl/v4/docs/shared/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
 	"os"
 	"os/user"
 	"strconv"

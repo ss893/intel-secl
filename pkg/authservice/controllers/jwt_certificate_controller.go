@@ -5,14 +5,14 @@
 package controllers
 
 import (
-	consts "github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 )
 
 type JwtCertificateController struct {

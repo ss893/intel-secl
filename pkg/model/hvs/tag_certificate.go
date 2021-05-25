@@ -8,7 +8,7 @@ import (
 	"crypto"
 	"encoding/base64"
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"time"
 )
 

@@ -5,9 +5,9 @@
 package types
 
 import (
-	cf "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	cm "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	hcConstants "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/constants"
+	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	cm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	hcConstants "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
 	"github.com/pkg/errors"
 )
 

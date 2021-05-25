@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/tasks"
-	e "github.com/intel-secl/intel-secl/v3/pkg/lib/common/exec"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/tasks"
+	e "github.com/intel-secl/intel-secl/v4/pkg/lib/common/exec"
 	"github.com/pkg/errors"
 )
 

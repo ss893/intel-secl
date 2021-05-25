@@ -5,16 +5,16 @@
 package router
 
 import (
-	jwtauth "github.com/intel-secl/intel-secl/v3/pkg/lib/common/jwt"
+	jwtauth "github.com/intel-secl/intel-secl/v4/pkg/lib/common/jwt"
 	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	cmw "github.com/intel-secl/intel-secl/v3/pkg/lib/common/middleware"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	cmw "github.com/intel-secl/intel-secl/v4/pkg/lib/common/middleware"
 )
 
 var defaultLog = log.GetDefaultLogger()

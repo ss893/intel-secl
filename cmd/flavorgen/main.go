@@ -9,10 +9,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/flavorgen"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	commLogInt "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/flavorgen"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	commLogInt "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/setup"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

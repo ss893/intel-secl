@@ -8,9 +8,9 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/router"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/router"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,10 +20,10 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/gorilla/handlers"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
 	stdlog "log"
 
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 )
 
 var defaultLog = commLog.GetDefaultLogger()

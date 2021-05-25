@@ -6,7 +6,7 @@ package constants
 
 import (
 	"crypto"
-	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	ct "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"time"
 )
 

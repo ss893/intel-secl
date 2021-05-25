@@ -8,13 +8,13 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	dm "github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	fm "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/util"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	dm "github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	fm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/util"
 )
 
 type ManifestsController struct {

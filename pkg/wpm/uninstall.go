@@ -6,8 +6,8 @@ package wpm
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/exec"
-	"github.com/intel-secl/intel-secl/v3/pkg/wpm/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/exec"
+	"github.com/intel-secl/intel-secl/v4/pkg/wpm/constants"
 	"os"
 )
 

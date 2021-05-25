@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NEW_EXEC_NAME="wpm"
-CURRENT_VERSION=v3.6.0
+CURRENT_VERSION=v4.0.0
 BACKUP_PATH=${BACKUP_PATH:-"/tmp/"}
 INSTALLED_EXEC_PATH="/opt/workload-policy-manager/bin/$NEW_EXEC_NAME"
 CONFIG_PATH="/etc/workload-policy-manager"

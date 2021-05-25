@@ -6,7 +6,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
 )
 
 func SetVersionRoutes(router *mux.Router) *mux.Router {

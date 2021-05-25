@@ -4,10 +4,10 @@
  */
 package vmware
 
-//go:generate mockgen -destination=mock_client.go -package=vmware github.com/intel-secl/intel-secl/v3/pkg/lib/clients/vmware VMWareClient
+//go:generate mockgen -destination=mock_client.go -package=vmware github.com/intel-secl/intel-secl/v4/pkg/lib/clients/vmware VMWareClient
 
 import (
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"

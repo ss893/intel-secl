@@ -14,13 +14,13 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/keymanager"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/privacyca"
-	samlLib "github.com/intel-secl/intel-secl/v3/pkg/lib/saml"
-	model "github.com/intel-secl/intel-secl/v3/pkg/model/wlagent"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/keymanager"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/privacyca"
+	samlLib "github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/wlagent"
 )
 
 var (

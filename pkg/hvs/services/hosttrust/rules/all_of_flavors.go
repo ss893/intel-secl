@@ -6,12 +6,12 @@
 package rules
 
 import (
-	constants "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	flavorVerifier "github.com/intel-secl/intel-secl/v3/pkg/lib/verifier"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	flavorVerifier "github.com/intel-secl/intel-secl/v4/pkg/lib/verifier"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 

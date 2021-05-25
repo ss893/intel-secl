@@ -5,8 +5,8 @@
 package controllers
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/version"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"net/http"
 )
 

@@ -7,7 +7,7 @@ package hvs
 import (
 	"fmt"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/version"
 )
 
 const helpStr = `Usage:

@@ -12,7 +12,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"errors"
-	hc "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector"
+	hc "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
 	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"

@@ -6,8 +6,8 @@ package controllers_test
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	hvsRoutes "github.com/intel-secl/intel-secl/v3/pkg/hvs/router"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	hvsRoutes "github.com/intel-secl/intel-secl/v4/pkg/hvs/router"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"

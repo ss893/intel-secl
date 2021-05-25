@@ -6,18 +6,18 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	jwtauth "github.com/intel-secl/intel-secl/v3/pkg/lib/common/jwt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	aasModel "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	jwtauth "github.com/intel-secl/intel-secl/v4/pkg/lib/common/jwt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	aasModel "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"time"
 
-	authcommon "github.com/intel-secl/intel-secl/v3/pkg/authservice/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
+	authcommon "github.com/intel-secl/intel-secl/v4/pkg/authservice/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
 	"net/http"
 
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 )
 
 type roleClaims struct {

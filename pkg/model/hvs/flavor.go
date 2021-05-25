@@ -5,7 +5,7 @@
 package hvs
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 )
 
 // Flavor sourced from the lib/flavor - this is a external request/response on the HVS API

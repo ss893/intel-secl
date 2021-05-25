@@ -5,7 +5,7 @@
 package utils
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"math/big"

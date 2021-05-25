@@ -5,7 +5,7 @@
 package mock
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
 )
 
 type MockRoleStore struct {

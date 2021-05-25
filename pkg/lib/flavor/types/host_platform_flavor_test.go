@@ -14,11 +14,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	cm "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	hcTypes "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	cm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	hcTypes "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 )
 
 const (

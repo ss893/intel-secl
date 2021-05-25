@@ -7,7 +7,7 @@ package tasks
 
 import (
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/config"
 	"io/ioutil"
 	"os"
 	"testing"

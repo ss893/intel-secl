@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/vs"
-	vsPlugin "github.com/intel-secl/intel-secl/v3/pkg/ihub/attestationPlugin"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
-	testutility "github.com/intel-secl/intel-secl/v3/pkg/ihub/test"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/vs"
+	vsPlugin "github.com/intel-secl/intel-secl/v4/pkg/ihub/attestationPlugin"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
+	testutility "github.com/intel-secl/intel-secl/v4/pkg/ihub/test"
 	"github.com/spf13/viper"
 )
 

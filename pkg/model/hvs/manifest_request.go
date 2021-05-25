@@ -7,7 +7,7 @@ package hvs
 
 import (
 	"github.com/google/uuid"
-	model "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 )
 
 type ManifestRequest struct {

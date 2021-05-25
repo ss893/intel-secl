@@ -8,7 +8,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
 	"github.com/spf13/viper"
 )
 

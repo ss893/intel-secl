@@ -15,8 +15,8 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	openstackClient "github.com/intel-secl/intel-secl/v3/pkg/clients/openstack"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
+	openstackClient "github.com/intel-secl/intel-secl/v4/pkg/clients/openstack"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
 )
 
 //IhubServiceUserName sample user name

@@ -7,15 +7,15 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	authcommon "github.com/intel-secl/intel-secl/v3/pkg/authservice/common"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/auth"
-	comctx "github.com/intel-secl/intel-secl/v3/pkg/lib/common/context"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	aasModel "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	authcommon "github.com/intel-secl/intel-secl/v4/pkg/authservice/common"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/auth"
+	comctx "github.com/intel-secl/intel-secl/v4/pkg/lib/common/context"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	aasModel "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
@@ -23,7 +23,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 )
 
 type UsersController struct {

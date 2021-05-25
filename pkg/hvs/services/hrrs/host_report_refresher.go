@@ -9,8 +9,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 
 	"github.com/pkg/errors"
 )

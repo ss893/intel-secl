@@ -7,10 +7,10 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	jwtauth "github.com/intel-secl/intel-secl/v3/pkg/lib/common/jwt"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	jwtauth "github.com/intel-secl/intel-secl/v4/pkg/lib/common/jwt"
 )
 
 func SetJwtTokenRoutes(r *mux.Router, db domain.AASDatabase, tokFactory *jwtauth.JwtFactory) *mux.Router {

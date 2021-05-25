@@ -10,8 +10,8 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"github.com/pkg/errors"
 )
 

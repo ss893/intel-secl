@@ -6,12 +6,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
 	"os"
 	"os/user"
 	"strconv"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs"
 )
 
 func openLogFiles() (logFile *os.File, httpLogFile *os.File, secLogFile *os.File, err error) {

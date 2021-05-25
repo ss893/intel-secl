@@ -8,9 +8,9 @@ package controllers
 import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/mocks"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/mocks"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

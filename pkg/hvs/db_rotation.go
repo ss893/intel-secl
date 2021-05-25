@@ -8,8 +8,8 @@ package hvs
 import (
 	"fmt"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
 	"github.com/pkg/errors"
 )
 

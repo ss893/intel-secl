@@ -6,15 +6,15 @@ package cms
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/config"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/config"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"os"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/tasks"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/tasks"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )

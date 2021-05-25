@@ -8,7 +8,7 @@ package hvs
 import (
 	"encoding/json"
 	"github.com/google/uuid"
-	cf "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
+	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
 )
 
 type FlavorgroupCollection struct {

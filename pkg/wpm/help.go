@@ -7,7 +7,7 @@ package wpm
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/wpm/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/wpm/version"
 )
 
 const helpStr = `

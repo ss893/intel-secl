@@ -5,7 +5,7 @@
 package util
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"time"
 )
 

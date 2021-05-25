@@ -7,17 +7,17 @@ package util
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/wpm/config"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/wpm/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/wpm/config"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/wpm/constants"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/url"
 	"regexp"
 	"strings"
 
-	kbsc "github.com/intel-secl/intel-secl/v3/pkg/clients/kbs"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+	kbsc "github.com/intel-secl/intel-secl/v4/pkg/clients/kbs"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	"github.com/pkg/errors"
 )
 

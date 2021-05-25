@@ -8,11 +8,11 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/domain/models"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain/models"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
 	"github.com/pkg/errors"
 )
 

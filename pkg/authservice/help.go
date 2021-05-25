@@ -6,7 +6,7 @@ package authservice
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/version"
 )
 
 const helpStr = `Usage:

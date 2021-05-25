@@ -9,8 +9,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	cf "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
+	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/stretchr/testify/assert"
 )
 

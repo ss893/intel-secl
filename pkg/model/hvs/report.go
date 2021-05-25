@@ -7,8 +7,8 @@ package hvs
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"time"
 )
 

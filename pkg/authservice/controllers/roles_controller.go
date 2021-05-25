@@ -7,18 +7,18 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	aasModel "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	aasModel "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 )
 
 type RolesController struct {

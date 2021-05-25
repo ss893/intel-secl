@@ -5,8 +5,8 @@
 package postgres
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/pkg/errors"
 )
 

@@ -11,9 +11,9 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	constants "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	ta "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	ta "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/stretchr/testify/assert"
 )
 

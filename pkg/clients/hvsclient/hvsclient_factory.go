@@ -5,8 +5,8 @@
 package hvsclient
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"github.com/pkg/errors"
 	"net/http"
 	"net/url"

@@ -14,14 +14,14 @@ K8S_TARGETS = cms kbs ihub hvs authservice
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct \
-		go build -ldflags "-X github.com/intel-secl/intel-secl/v3/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v3/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v3/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
+		go build -ldflags "-X github.com/intel-secl/intel-secl/v4/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v4/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v4/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 kbs:
 	mkdir -p installer
 	cp /usr/local/lib/libkmip.so.0.2 installer/libkmip.so.0.2
 	cd cmd/kbs && env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct \
 		go build -gcflags=all="-N -l" \
-		-ldflags "-X github.com/intel-secl/intel-secl/v3/pkg/kbs/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v3/pkg/kbs/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v3/pkg/kbs/version.GitHash=$(GITCOMMIT)" -o kbs
+		-ldflags "-X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.GitHash=$(GITCOMMIT)" -o kbs
 
 flavorgen-installer:
 	mkdir -p installer
@@ -29,7 +29,7 @@ flavorgen-installer:
 	cp build/linux/flavorgen/install.sh installer/
 	chmod +x installer/install.sh
 	cd cmd/flavorgen && env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct \
-		go build -ldflags "-X github.com/intel-secl/intel-secl/v3/pkg/flavorgen/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v3/pkg/flavorgen/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v3/pkg/flavorgen/version.GitHash=$(GITCOMMIT)" -o flavorgen
+		go build -ldflags "-X github.com/intel-secl/intel-secl/v4/pkg/flavorgen/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v4/pkg/flavorgen/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v4/pkg/flavorgen/version.GitHash=$(GITCOMMIT)" -o flavorgen
 	cp cmd/flavorgen/flavorgen installer/flavorgen
 	makeself installer deployments/installer/flavorgen-$(VERSION).bin "flavorgen $(VERSION)" ./install.sh
 	rm -rf installer

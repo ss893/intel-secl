@@ -6,11 +6,11 @@ package cms
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io"
@@ -18,8 +18,8 @@ import (
 	"os/exec"
 	"time"
 
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogInt "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/setup"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogInt "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/setup"
 	"github.com/pkg/errors"
 )
 

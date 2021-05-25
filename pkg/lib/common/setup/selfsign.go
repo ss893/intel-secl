@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"github.com/pkg/errors"
 )
 

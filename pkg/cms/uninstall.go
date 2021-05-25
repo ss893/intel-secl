@@ -6,10 +6,10 @@ package cms
 
 import (
 	"fmt"
-	e "github.com/intel-secl/intel-secl/v3/pkg/lib/common/exec"
+	e "github.com/intel-secl/intel-secl/v4/pkg/lib/common/exec"
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
 )
 
 func (a *App) executablePath() string {

@@ -5,7 +5,7 @@
 package mock
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
 )
 
 type MockDatabase struct {

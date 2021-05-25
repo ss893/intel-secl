@@ -5,9 +5,9 @@
 package rules
 
 import (
-	asset_tag "github.com/intel-secl/intel-secl/v3/pkg/lib/asset-tag"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/util"
+	asset_tag "github.com/intel-secl/intel-secl/v4/pkg/lib/asset-tag"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
 )
 
 const (

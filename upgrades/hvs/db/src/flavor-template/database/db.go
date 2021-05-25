@@ -10,10 +10,10 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
-	hvsconfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
-	flavorModel "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v3/upgrades/hvs/db/src/flavor-template/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
+	hvsconfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	flavorModel "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/upgrades/hvs/db/src/flavor-template/model"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 )

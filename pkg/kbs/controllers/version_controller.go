@@ -7,8 +7,8 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/version"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 )
 
 var defaultLog = log.GetDefaultLogger()

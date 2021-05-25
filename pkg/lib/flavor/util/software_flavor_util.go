@@ -5,8 +5,8 @@
 package util
 
 import (
-	cm "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	cm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"strings"
 )
 

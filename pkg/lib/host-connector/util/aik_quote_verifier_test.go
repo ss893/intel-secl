@@ -13,7 +13,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -7,7 +7,7 @@ package model
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 )
 
 // OldFlavorPart is a list of SignedFlavor objects

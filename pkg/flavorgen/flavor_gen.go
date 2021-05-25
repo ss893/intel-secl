@@ -15,11 +15,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/flavorgen/version"
-	controller "github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/types"
-	hcType "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/flavorgen/version"
+	controller "github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/types"
+	hcType "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 
 	"github.com/antchfx/jsonquery"

@@ -5,10 +5,10 @@
 package verifier
 
 //
-// Run unit tests: go test github.com/intel-secl/intel-secl/v3/pkg/lib/verifier
+// Run unit tests: go test github.com/intel-secl/intel-secl/v4/pkg/lib/verifier
 //
 // coverage report...
-// go test github.com/intel-secl/intel-secl/v3/pkg/lib/verifier -v -coverpkg=github.com/intel-secl/intel-secl/v3/pkg/lib/verifier -coverprofile cover.out
+// go test github.com/intel-secl/intel-secl/v4/pkg/lib/verifier -v -coverpkg=github.com/intel-secl/intel-secl/v4/pkg/lib/verifier -coverprofile cover.out
 // go tool cover -func cover.out
 //
 import (
@@ -16,11 +16,11 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 

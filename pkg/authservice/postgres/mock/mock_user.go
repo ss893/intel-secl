@@ -5,8 +5,8 @@
 package mock
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
-	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
+	ct "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 )
 
 type MockUserStore struct {

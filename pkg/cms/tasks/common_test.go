@@ -6,7 +6,7 @@
 package tasks
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
 	"os"
 )
 

@@ -1,4 +1,4 @@
-module github.com/intel-secl/intel-secl/v3
+module github.com/intel-secl/intel-secl/v4
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1

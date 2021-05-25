@@ -12,8 +12,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/vs"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/vs"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
 	"github.com/pkg/errors"
 )
 

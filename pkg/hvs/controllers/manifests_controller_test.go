@@ -10,10 +10,10 @@ import (
 	"net/http/httptest"
 
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/mocks"
-	hvsRoutes "github.com/intel-secl/intel-secl/v3/pkg/hvs/router"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/mocks"
+	hvsRoutes "github.com/intel-secl/intel-secl/v4/pkg/hvs/router"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

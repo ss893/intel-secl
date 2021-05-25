@@ -5,7 +5,7 @@
 package types
 
 import (
-	. "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	. "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"time"
 )
 

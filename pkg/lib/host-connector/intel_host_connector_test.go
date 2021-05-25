@@ -13,9 +13,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/ta"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

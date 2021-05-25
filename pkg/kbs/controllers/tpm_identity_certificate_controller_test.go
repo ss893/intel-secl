@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/domain/mocks"
-	kbsRoutes "github.com/intel-secl/intel-secl/v3/pkg/kbs/router"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain/mocks"
+	kbsRoutes "github.com/intel-secl/intel-secl/v4/pkg/kbs/router"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

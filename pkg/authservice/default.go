@@ -5,9 +5,9 @@
 package authservice
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/spf13/viper"
 	"os"
 )

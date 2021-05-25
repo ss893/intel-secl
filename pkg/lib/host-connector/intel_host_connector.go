@@ -11,10 +11,10 @@ import (
 	"encoding/json"
 	"encoding/pem"
 
-	client "github.com/intel-secl/intel-secl/v3/pkg/clients/ta"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/util"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	client "github.com/intel-secl/intel-secl/v4/pkg/clients/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 	"github.com/vmware/govmomi/vim25/mo"
 )

@@ -9,11 +9,11 @@ package verifier
 //
 
 import (
-	hvsconstants "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/verifier/rules"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	hvsconstants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier/rules"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
 type ruleBuilderVMWare20 struct {

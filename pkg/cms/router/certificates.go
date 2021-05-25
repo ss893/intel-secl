@@ -7,8 +7,8 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/controllers"
 	log "github.com/sirupsen/logrus"
 )
 

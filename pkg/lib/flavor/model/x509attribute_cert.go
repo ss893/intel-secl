@@ -9,8 +9,8 @@ import (
 	"crypto/x509"
 	"encoding/asn1"
 	"encoding/base64"
-	asset_tag "github.com/intel-secl/intel-secl/v3/pkg/lib/asset-tag"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
+	asset_tag "github.com/intel-secl/intel-secl/v4/pkg/lib/asset-tag"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"github.com/pkg/errors"
 	"time"
 )

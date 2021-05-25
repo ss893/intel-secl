@@ -4,7 +4,7 @@
  */
 package kbs
 
-import "github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+import "github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 
 // Session request payload
 // swagger:parameters SessionManagementAttributes

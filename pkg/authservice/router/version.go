@@ -7,7 +7,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/controllers"
 )
 
 func SetVersionRoutes(r *mux.Router) *mux.Router {

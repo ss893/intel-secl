@@ -31,7 +31,7 @@ const (
 	DefaultIHUBTlsCn            = "Integration Hub TLS Certificate"
 	K8sTenant                   = "KUBERNETES"
 	OpenStackTenant             = "OPENSTACK"
-	HTTP                        = "HTTP"
+	HTTP                        = "http"
 	OpenStackAuthenticationAPI  = "v3/auth/tokens"
 	KubernetesNodesAPI          = "api/v1/nodes"
 	KubernetesCRDAPI            = "apis/crd.isecl.intel.com/v1beta1/namespaces/default/hostattributes/"

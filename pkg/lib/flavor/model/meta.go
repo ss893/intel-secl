@@ -6,7 +6,7 @@ package model
 
 import (
 	"github.com/google/uuid"
-	hcConstants "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/constants"
+	hcConstants "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
 )
 
 /**

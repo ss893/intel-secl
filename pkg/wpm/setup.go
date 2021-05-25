@@ -7,9 +7,9 @@ package wpm
 import (
 	"crypto/x509/pkix"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
-	"github.com/intel-secl/intel-secl/v3/pkg/wpm/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/wpm/tasks"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/wpm/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/wpm/tasks"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"strings"

@@ -7,8 +7,8 @@ package utils
 import (
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	hcUtil "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/util"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	hcUtil "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
 	"github.com/pkg/errors"
 )
 
