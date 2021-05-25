@@ -74,14 +74,14 @@ type EventLogEqual struct {
 }
 
 type PcrEventLogMap struct {
-	Sha1EventLogs   []TpmEventLog `json:"SHA1"`
-	Sha256EventLogs []TpmEventLog `json:"SHA256"`
-	Sha384EventLogs []TpmEventLog `json:"SHA384"`
+	Sha1EventLogs   []TpmEventLog `json:"SHA1,omitempty"`
+	Sha256EventLogs []TpmEventLog `json:"SHA256,omitempty"`
+	Sha384EventLogs []TpmEventLog `json:"SHA384,omitempty"`
 }
 type PcrManifest struct {
-	Sha1Pcrs       []HostManifestPcrs `json:"sha1pcrs"`
-	Sha256Pcrs     []HostManifestPcrs `json:"sha2pcrs"`
-	Sha384Pcrs     []HostManifestPcrs `json:"sha3pcrs"`
+	Sha1Pcrs       []HostManifestPcrs `json:"sha1pcrs,omitempty"`
+	Sha256Pcrs     []HostManifestPcrs `json:"sha2pcrs,omitempty"`
+	Sha384Pcrs     []HostManifestPcrs `json:"sha3pcrs,omitempty"`
 	PcrEventLogMap PcrEventLogMap     `json:"pcr_event_log_map"`
 }
 

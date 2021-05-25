@@ -13,7 +13,7 @@ type PCR struct {
 	// Valid PCR index is from 0 to 23.
 	Index int `json:"index"`
 	// Valid PCR banks are SHA1, SHA256, SHA384 and SHA512.
-	Bank string `json:"bank"`
+	Bank []string `json:"bank"`
 }
 
 // EventlogEquals key needs to be included when equals rule has to be applied for the particular PCR. Sample value: "eventlog_equals": {"excluding_tags": ["LCP_CONTROL_HASH","initrd","vmlinuz"]}
@@ -54,6 +54,7 @@ type FlavorTemplate struct {
 }
 
 type PcrListRules struct {
+	PcrBank     []string
 	PcrMatches  bool
 	PcrEquals   PcrEquals
 	PcrIncludes map[string]bool

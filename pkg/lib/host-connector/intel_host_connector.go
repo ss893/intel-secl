@@ -78,7 +78,7 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 			"host details from TA")
 	}
 
-	tpmQuoteResponse, err := ic.client.GetTPMQuote(nonce, pcrList, nil)
+	tpmQuoteResponse, err := ic.client.GetTPMQuote(nonce, pcrList, []string{})
 	if err != nil {
 		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error getting TPM "+
 			"quote response")
