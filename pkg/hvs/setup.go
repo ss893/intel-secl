@@ -189,6 +189,7 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		},
 		DefaultPort:   constants.DefaultHVSListenerPort,
 		AppConfig:     &a.Config,
+		NatServers:    viper.GetString("nat-servers"),
 		ConsoleWriter: a.consoleWriter(),
 	})
 	runner.AddTask("download-cert-saml", "saml", a.downloadCertTask("saml"))

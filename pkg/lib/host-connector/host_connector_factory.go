@@ -23,10 +23,11 @@ type HostConnectorProvider interface {
 type HostConnectorFactory struct {
 	aasApiUrl      string
 	trustedCaCerts []x509.Certificate
+	natsServers    []string
 }
 
-func NewHostConnectorFactory(aasApiUrl string, trustedCaCerts []x509.Certificate) *HostConnectorFactory {
-	return &HostConnectorFactory{aasApiUrl, trustedCaCerts}
+func NewHostConnectorFactory(aasApiUrl string, trustedCaCerts []x509.Certificate, natsServers []string) *HostConnectorFactory {
+	return &HostConnectorFactory{aasApiUrl, trustedCaCerts, natsServers}
 }
 
 func (htcFactory *HostConnectorFactory) NewHostConnector(connectionString string) (HostConnector, error) {
@@ -42,7 +43,7 @@ func (htcFactory *HostConnectorFactory) NewHostConnector(connectionString string
 	switch vendorConnector.Vendor {
 	case constants.VendorIntel, constants.VendorMicrosoft:
 		log.Debug("host_connector/host_connector_factory:NewHostConnector() Connector type for provided connection string is INTEL")
-		connectorFactory = &IntelConnectorFactory{}
+		connectorFactory = &IntelConnectorFactory{htcFactory.natsServers}
 	case constants.VendorVMware:
 		log.Debug("host_connector/host_connector_factory:NewHostConnector() Connector type for provided connection string is VMWARE")
 		connectorFactory = &VmwareConnectorFactory{}

@@ -16,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io"
+	"strings"
 )
 
 type UpdateServiceConfig struct {
@@ -24,6 +25,7 @@ type UpdateServiceConfig struct {
 	AppConfig     **config.Configuration
 	ServerConfig  commConfig.ServerConfig
 	DefaultPort   int
+	NatServers    string
 	ConsoleWriter io.Writer
 }
 
@@ -48,6 +50,7 @@ var envHelp = map[string]string{
 	"SERVER_WRITE_TIMEOUT":                   "Request Write Timeout Duration in Seconds",
 	"SERVER_IDLE_TIMEOUT":                    "Request Idle Timeout in Seconds",
 	"SERVER_MAX_HEADER_BYTES":                "Max Length Of Request Header in Bytes",
+	"NAT_SERVERS":                            "List of NATs servers to establish connection with outbound TAs",
 }
 
 func (uc UpdateServiceConfig) Run() error {
@@ -88,6 +91,11 @@ func (uc UpdateServiceConfig) Run() error {
 		HostTrustCacheThreshold:         viper.GetInt(constants.FvsHostTrustCacheThreshold),
 	}
 
+	if uc.NatServers != "" {
+		(*uc.AppConfig).NATS = config.NatsConfig{
+			Servers: strings.Split(uc.NatServers, ","),
+		}
+	}
 	return nil
 }
 

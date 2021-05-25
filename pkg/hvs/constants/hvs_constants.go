@@ -50,6 +50,9 @@ const (
 
 	TrustedKeysDir = ConfigDir + "trusted-keys/"
 
+	// NatsCredentials path
+	NatsCredentials = ConfigDir + "credentials/isecl-hvs.creds"
+
 	// saml key and cert
 	SAMLCertFile = TrustedCaCertsDir + "saml-cert.pem"
 	SAMLKeyFile  = TrustedKeysDir + "saml.key"
