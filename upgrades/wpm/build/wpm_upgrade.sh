@@ -14,3 +14,4 @@ if [ -d "/opt/workload-policy-manager/secure-docker-daemon" ]; then
 fi
 
 ./upgrade.sh -v $CURRENT_VERSION -e $INSTALLED_EXEC_PATH -c $CONFIG_PATH -n $NEW_EXEC_NAME -o $OLD_EXEC_NAME -b $BACKUP_PATH |& tee -a $LOG_FILE
+exit ${PIPESTATUS[0]}
