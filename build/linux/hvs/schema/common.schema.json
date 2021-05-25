@@ -13,7 +13,10 @@
                     "$ref": "#/definitions/pcr_index"
                 },
                 "bank": {
-                    "$ref": "#/definitions/digest_algorithm"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/digest_algorithm"
+                    }
                 }
             },
             "additionalItems": false,
@@ -28,7 +31,7 @@
             "maximum": 23
         },
         "digest_algorithm": {
-            "type": "array",
+            "type": "string",
             "enum": [
                 "SHA1",
                 "SHA256",
