@@ -199,6 +199,14 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		CmsBaseURL:    viper.GetString("cms-base-url"),
 		BearerToken:   viper.GetString("bearer-token"),
 	})
+	runner.AddTask("create-credentials", "", &tasks.CreateCredentials{
+		CreateCredentials: viper.GetBool("create-credentials"),
+		NatsConfig: config.NatsConfig{
+			OperatorName: viper.GetString("nats-operator-name"),
+			AccountName:  viper.GetString("nats-account-name"),
+		},
+		ConsoleWriter: a.consoleWriter(),
+	})
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: a.consoleWriter(),
 		ServerConfig: commConfig.ServerConfig{

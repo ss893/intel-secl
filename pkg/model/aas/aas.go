@@ -74,3 +74,12 @@ type CustomClaims struct {
 	ValiditySecs int                    `json:"validity_seconds"`
 	Claims       map[string]interface{} `json:"claims"`
 }
+
+type CreateCredentialsReq struct {
+	ComponentType string      `json:"type"`
+	Parameters    *Parameters `json:"parameters,omitempty"`
+}
+
+type Parameters struct {
+	HostId *string `json:"host-id,omitempty"`
+}

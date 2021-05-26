@@ -11,11 +11,12 @@ import (
 )
 
 const (
-	HomeDir       = "/opt/authservice/"
-	ConfigDir     = "/etc/authservice/"
-	ExecutableDir = "/opt/authservice/bin/"
-	ExecLinkPath  = "/usr/bin/authservice"
-	RunDirPath    = "/run/authservice"
+	HomeDir         = "/opt/authservice/"
+	ConfigDir       = "/etc/authservice/"
+	ExecLinkPath    = "/usr/bin/authservice"
+	RunDirPath      = "/run/authservice"
+	NatsDirPath     = ConfigDir + "nats/"
+	NatsNkeyDirPath = NatsDirPath + "nkeys/"
 
 	LogDir = "/var/log/authservice/"
 
@@ -26,8 +27,13 @@ const (
 	TokenSignKeyFile        = TokenSignKeysAndCertDir + "jwt.key"
 	TokenSignCertFile       = TokenSignKeysAndCertDir + "jwtsigncert.pem"
 
+	OperatorSeedFile         = NatsNkeyDirPath + "operator-seed.txt"
+	AccountSeedFile          = NatsNkeyDirPath + "account-seed.txt"
+	AccountConfigurationFile = NatsDirPath + "server.conf"
+	ComponentTypeHvs         = "HVS"
+	ComponentTypeTa          = "TA"
+
 	TrustedCAsStoreDir = ConfigDir + "certs/trustedca/"
-	PIDFile            = "authservice.pid"
 	ServiceRemoveCmd   = "systemctl disable authservice"
 	HashingAlgorithm   = crypto.SHA384
 
@@ -83,14 +89,11 @@ const (
 	DefaultMaxHeaderBytes    = 1 << 20
 )
 
-// State represents whether or not a daemon is running or not
-type State bool
-
+//NATS Entity Types
 const (
-	// Stopped is the default nil value, indicating not running
-	Stopped State = false
-	// Running means the daemon is active
-	Running State = true
+	Operator = "operator"
+	Account  = "account"
+	User     = "user"
 )
 
 var DefaultRoles = [5]string{Administrator, RoleManager, UserManager, UserRoleManager, CustomClaimsCreator}

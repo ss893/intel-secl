@@ -26,6 +26,7 @@ type Configuration struct {
 	JWT              JWT                      `yaml:"jwt" mapstructure:"jwt"`
 	TLS              commConfig.TLSCertConfig `yaml:"tls" mapstructure:"tls"`
 	Server           commConfig.ServerConfig  `yaml:"server" mapstructure:"server"`
+	Nats             NatsConfig               `yaml:"nats" mapstructure:"nats"`
 }
 
 type AASConfig struct {
@@ -43,6 +44,12 @@ type AuthDefender struct {
 	MaxAttempts         int `yaml:"max-attempts" mapstructure:"max-attempts"`
 	IntervalMins        int `yaml:"interval-mins" mapstructure:"interval-mins"`
 	LockoutDurationMins int `yaml:"lockout-duration-mins" mapstructure:"lockout-duration-mins"`
+}
+
+type NatsConfig struct {
+	OperatorName string `yaml:"operator-name" mapstructure:"operator-name"`
+	AccountName  string `yaml:"account-name" mapstructure:"account-name"`
+	HvsUserName  string `yaml:"hvs-user-name" mapstructure:"hvs-user-name"`
 }
 
 // this function sets the configuration file name and type

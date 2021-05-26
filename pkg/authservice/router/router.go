@@ -59,6 +59,7 @@ func defineSubRoutes(router *mux.Router, service string, cfg *config.Configurati
 	subRouter = SetRolesRoutes(subRouter, dataStore)
 	subRouter = SetUsersRoutes(subRouter, dataStore)
 	subRouter = SetAuthJwtTokenRoutes(subRouter, dataStore, tokenFactory)
+	subRouter = SetCredentialsRoutes(subRouter, cfg.Nats.HvsUserName)
 
 }
 

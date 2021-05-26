@@ -52,6 +52,11 @@ func init() {
 	viper.SetDefault("auth-defender-interval-mins", constants.DefaultAuthDefendIntervalMins)
 	viper.SetDefault("auth-defender-lockout-duration-mins", constants.DefaultAuthDefendLockoutMins)
 
+	viper.SetDefault("create-credentials", false)
+	viper.SetDefault("nats-operator-name", "ISecL-operator")
+	viper.SetDefault("nats-account-name", "ISecL-account")
+	viper.SetDefault("nats-hvs-user-name", "ISecL-HVS")
+
 }
 
 func defaultConfig() *config.Configuration {
@@ -80,6 +85,11 @@ func defaultConfig() *config.Configuration {
 			MaxAttempts:         viper.GetInt("auth-defender-max-attempts"),
 			IntervalMins:        viper.GetInt("auth-defender-interval-mins"),
 			LockoutDurationMins: viper.GetInt("auth-defender-lockout-duration-mins"),
+		},
+		Nats: config.NatsConfig{
+			OperatorName: viper.GetString("nats-operator-name"),
+			AccountName:  viper.GetString("nats-account-name"),
+			HvsUserName:  viper.GetString("nats-hvs-user-name"),
 		},
 	}
 }

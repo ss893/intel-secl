@@ -43,8 +43,8 @@ var envHelp = map[string]string{
 }
 
 func (uc UpdateServiceConfig) Run() error {
-	defaultLog.Trace("tasks/update_config:Run() Entering")
-	defer defaultLog.Trace("tasks/update_config:Run() Leaving")
+	defaultLog.Trace("tasks/update_service_config:Run() Entering")
+	defer defaultLog.Trace("tasks/update_service_config:Run() Leaving")
 	(*uc.AppConfig).Log = commConfig.LogConfig{
 		MaxLength:    viper.GetInt("log-max-length"),
 		EnableStdout: viper.GetBool("log-enable-stdout"),

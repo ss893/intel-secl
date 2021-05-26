@@ -283,11 +283,11 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=HVS Flavor Signing Certificate;certType=Signing", nil))
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.HvsCN, a.HvsSanList))
 			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=HVS SAML Certificate;certType=Signing", nil))
+			urc.Roles = append(urc.Roles, NewRole("AAS", "CredentialCreator", "type=HVS", []string{"credential:create:*"}))
 		case "TA":
 			urc.Roles = append(urc.Roles, NewRole("HVS", "AttestationRegister", "",
-				[]string{"host_tls_policies:create:*", "hosts:create:*", "hosts:store:*", "hosts:search:*",
-					"host_unique_flavors:create:*", "flavors:search:*", "tpm_passwords:retrieve:*",
-					"tpm_passwords:create:*", "host_aiks:certify:*", "tpm_endorsements:create:*", "tpm_endorsements:search:*"}))
+				[]string{"hosts:store:*", "hosts:search:*", "host_unique_flavors:create:*", "flavors:search:*",
+					"host_aiks:certify:*", "tpm_endorsements:create:*", "tpm_endorsements:search:*"}))
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.TaCN, a.TaSanList))
 		case "IHUB", "SIH":
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.IhubCN, a.IhubSanList))

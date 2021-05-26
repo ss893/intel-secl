@@ -23,4 +23,8 @@ const (
 	UserRoleDelete   = "user_roles:delete"
 
 	CustomClaimsCreate = "custom_claims:create"
+
+	CredentialCreate = "credential:create"
+
+	CredentialCreatorRoleName = "CredentialCreator"
 )
