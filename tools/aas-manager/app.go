@@ -69,6 +69,8 @@ type App struct {
 	SqvsCN      string
 	SqvsSanList string
 	SkcLibCN    string
+	NatsSanList string
+	NatsCN      string
 
 	InstallAdminUserName    string
 	InstallAdminPassword    string
@@ -309,6 +311,8 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.ShvsCN, a.ShvsSanList))
 		case "SKC-LIBRARY":
 			urc.Roles = append(urc.Roles, MakeTlsClientCertificateRole(a.SkcLibCN))
+		case "NATS":
+			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.NatsCN, a.NatsSanList))
 
 		}
 	}
@@ -391,6 +395,9 @@ func (a *App) LoadAllVariables(envFile string) error {
 		{&a.ShvsSanList, "SHVS_CERT_SAN_LIST", "", "SGX Host Verification Service TLS Certificate SAN LIST", false, false},
 
 		{&a.SkcLibCN, "SKC_LIBRARY_CERT_COMMON_NAME", "skcuser", "SKC Library TLS Client Certificate Common Name", false, false},
+
+		{&a.NatsCN, "NATS_CERT_COMMON_NAME", "NATS TLS Certificate", "Nats Server TLS Certificate Common Name", false, false},
+		{&a.NatsSanList, "NATS_CERT_SAN_LIST", "", "Nats Server TLS Certificate SAN LIST", false, false},
 
 		{&a.GlobalAdminUserName, "GLOBAL_ADMIN_USERNAME", "", "Global Admin User Name", false, false},
 		{&a.GlobalAdminPassword, "GLOBAL_ADMIN_PASSWORD", "", "Global Admin User Password", false, true},
