@@ -104,6 +104,40 @@ func (c *JwtClient) FetchTokenForUser(username string) ([]byte, error) {
 	return token, nil
 }
 
+//Fetch custom claims token using JWT
+func (c *JwtClient) FetchCCTUsingJWT(bearerToken string, customClaims types.CustomClaims) ([]byte, error) {
+
+	var err error
+
+	customClaimsUrl := clients.ResolvePath(c.BaseURL, "custom-claims-token")
+	buf := new(bytes.Buffer)
+	err = json.NewEncoder(buf).Encode(customClaims)
+	if err != nil {
+		return nil, err
+	}
+	req, _ := http.NewRequest("POST", customClaimsUrl, buf)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/jwt")
+	req.Header.Set("Authorization", "Bearer "+bearerToken)
+
+	if c.HTTPClient == nil {
+		return nil, errors.New("clients/aas/jwt: FetchCCTUsingJWT() HTTPClient should not be null")
+	}
+	rsp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if rsp.StatusCode != http.StatusOK {
+		ErrHTTPFetchJWTToken.RetCode = rsp.StatusCode
+		return nil, ErrHTTPFetchJWTToken
+	}
+	jwtToken, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return jwtToken, nil
+}
+
 func (c *JwtClient) fetchToken(userCred *types.UserCred) ([]byte, error) {
 
 	var err error

@@ -13,23 +13,26 @@ import (
 	claas "github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"github.com/joho/godotenv"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"math/big"
 	"os"
+	"strconv"
 	"strings"
 )
 
 const (
-	HELP_NOSETUP          = "Don't add users, roles and user-roles to the Authentication Service"
-	HELP_ANSWERFILE       = `Answer file constaining user input`
-	HELP_USE_JSON         = "Use Json file as input instead of parsing env file"
-	HELP_IN_JSON_FILE     = "Input Json file name - identical to use_json flag but can specify a different file name "
-	HELP_OUT_JSON_FILE    = "Output json file name - identical to output_json flag but can specify a different file name"
-	HELP_OUTPUT_JSON      = "Boolean value to indicate if the users and roles should be written to a output file"
-	HELP_GENPASSWORD      = "Generate passwords if not specified"
-	HELP_REGEN_TOKEN_ONLY = "Generate token only"
-	HELP_HELP             = "Show Usage - if specified, all other options will be ignored"
+	HELP_NOSETUP                      = "Don't add users, roles and user-roles to the Authentication Service"
+	HELP_ANSWERFILE                   = `Answer file constaining user input`
+	HELP_USE_JSON                     = "Use Json file as input instead of parsing env file"
+	HELP_IN_JSON_FILE                 = "Input Json file name - identical to use_json flag but can specify a different file name "
+	HELP_OUT_JSON_FILE                = "Output json file name - identical to output_json flag but can specify a different file name"
+	HELP_OUTPUT_JSON                  = "Boolean value to indicate if the users and roles should be written to a output file"
+	HELP_GENPASSWORD                  = "Generate passwords if not specified"
+	HELP_REGEN_TOKEN_ONLY             = "Generate token only"
+	HELP_GEN_CUSTOM_CLAIMS_TOKEN_ONLY = "Generate token only"
+	HELP_HELP                         = "Show Usage - if specified, all other options will be ignored"
 
 	PASSWORD_SIZE = 20
 )
@@ -77,7 +80,7 @@ type App struct {
 	GlobalAdminUserName     string
 	GlobalAdminPassword     string
 	CCCAdminUsername        string
-	CCCAdminUserPassword    string
+	CCCAdminPassword        string
 	HvsServiceUserName      string
 	HvsServiceUserPassword  string
 	IhubServiceUserName     string
@@ -98,9 +101,14 @@ type App struct {
 	SKCLibUserPassword      string
 	SKCLibRoleContext       string
 
-	Components     map[string]bool
-	GenPassword    bool
-	RegenTokenOnly bool
+	Components                    map[string]bool
+	GenPassword                   bool
+	RegenTokenOnly                bool
+	GenerateCustomClaimsTokenOnly bool
+	CustomClaimsComponents        map[string]bool
+	CustomClaimsTokenValiditySecs string
+	CredentialCreatorRoleContext  string
+	TaFqdn                        string
 
 	ConsoleWriter io.Writer
 }
@@ -232,7 +240,7 @@ func (a *App) GetCCCAdminUser() *UserAndRolesCreate {
 	return &UserAndRolesCreate{
 		UserCreate: aas.UserCreate{
 			Name:     a.CCCAdminUsername,
-			Password: a.CCCAdminUserPassword,
+			Password: a.CCCAdminPassword,
 		},
 		PrintBearerToken: true,
 		Roles:            []aas.RoleCreate{NewRole("AAS", "CustomClaimsCreator", "", []string{"custom_claims:create"})},
@@ -285,7 +293,7 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=HVS Flavor Signing Certificate;certType=Signing", nil))
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.HvsCN, a.HvsSanList))
 			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=HVS SAML Certificate;certType=Signing", nil))
-			urc.Roles = append(urc.Roles, NewRole("AAS", "CredentialCreator", "type=HVS", []string{"credential:create:*"}))
+			urc.Roles = append(urc.Roles, NewRole("AAS", "CredentialCreatorHVS", "type=HVS", []string{"credential:create:*"}))
 		case "TA":
 			urc.Roles = append(urc.Roles, NewRole("HVS", "AttestationRegister", "",
 				[]string{"hosts:store:*", "hosts:search:*", "host_unique_flavors:create:*", "flavors:search:*",
@@ -316,9 +324,48 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 
 		}
 	}
-
 	return urc
+}
 
+func (a *App) GetCustomClaimsTokenMap() (map[string]string, error) {
+
+	customClaimsMap := make(map[string]string)
+	bearerTokenBytes, err := a.GetUserToken(a.AasAPIUrl, a.CCCAdminUsername, a.CCCAdminPassword)
+
+	var customClaims aas.CustomClaims
+
+	validitySecs, err := strconv.Atoi(a.CustomClaimsTokenValiditySecs)
+	if err != nil {
+		return nil, errors.Wrap(err, "Invalid custom claims token validity provided")
+	}
+
+	for k, _ := range a.CustomClaimsComponents {
+		switch k {
+		case "TA":
+			if strings.TrimSpace(a.TaFqdn) == "" {
+				fmt.Println("TA_FQDN not set. Skipping custom claims token creation for TA...")
+				continue
+			}
+			customClaims.Subject = "TA"
+			claims := `{"roles": [{"service": "HVS","name": "AttestationRegisterOutbound"},{"service": "AAS","name": 
+"CredentialCreator","context": "type=TA.` + a.TaFqdn + `"}],"permissions": [{"service": "HVS","rules": ["host_aiks:certify:*", 
+"tpm_endorsements:create:*", "tpm_endorsements:search:*"]},{"service": "AAS","rules": ["credential:create:*"]}]}`
+			customClaims.ValiditySecs = validitySecs
+
+			err = json.Unmarshal([]byte(claims), &customClaims.Claims)
+			if err != nil {
+				return nil, errors.Wrap(err, "Error unmarshalling claims")
+			}
+			cct, err := a.GetCustomClaimsToken(a.AasAPIUrl, string(bearerTokenBytes), customClaims)
+			if err != nil {
+				return nil, errors.Wrap(err, "Error getting custom claims token")
+			}
+			customClaimsMap["TA"] = cct
+		default:
+			fmt.Printf("Custom Claims Generation is NOT supported for component %s\n", k)
+		}
+	}
+	return customClaimsMap, nil
 }
 
 func SetVariable(variable *string, envVarName string, defaultVal string, desc string, mandatory bool, secret bool) error {
@@ -350,6 +397,7 @@ func (a *App) LoadAllVariables(envFile string) error {
 	// mandatory variables
 
 	var installComps string
+	var customClaimsComponent string
 
 	type envDesc struct {
 		variable    *string
@@ -432,7 +480,11 @@ func (a *App) LoadAllVariables(envFile string) error {
 		{&a.SKCLibRoleContext, "SKC_LIBRARY_KEY_TRANSFER_CONTEXT", "", "SKC Library Key Transfer Role Context", false, false},
 
 		{&a.CCCAdminUsername, "CCC_ADMIN_USERNAME", "", "Custom Claims Creator Admin User Name", false, false},
-		{&a.CCCAdminUserPassword, "CCC_ADMIN_PASSWORD", "", "Custom Claims Creator Admin User Password", false, true},
+		{&a.CCCAdminPassword, "CCC_ADMIN_PASSWORD", "", "Custom Claims Creator Admin User Password", false, true},
+
+		{&customClaimsComponent, "CUSTOM_CLAIMS_COMPONENTS", "", "Component List For Custom Claims Creation", false, false},
+		{&a.CustomClaimsTokenValiditySecs, "CUSTOM_CLAIMS_TOKEN_VALIDITY_SECS", "172800", "Custom Claims Token Validity In Seconds", false, false},
+		{&a.TaFqdn, "TA_FQDN", "", "FQDN for TA Host", false, false},
 	}
 
 	hasError := false
@@ -453,8 +505,13 @@ func (a *App) LoadAllVariables(envFile string) error {
 		a.Components[strings.TrimSpace(slc[i])] = true
 	}
 
+	// set up the app map with components that need custom claims token
+	ccc := strings.Split(customClaimsComponent, ",")
+	a.CustomClaimsComponents = make(map[string]bool)
+	for i := range ccc {
+		a.CustomClaimsComponents[strings.TrimSpace(ccc[i])] = true
+	}
 	return nil
-
 }
 
 func (a *App) LoadUserAndRolesJson(file string) (*AasUsersAndRolesSetup, error) {
@@ -559,6 +616,19 @@ func (a *App) GetUserToken(apiUrl, apiUserName, apiUserPass string) ([]byte, err
 	return token, nil
 }
 
+func (a *App) GetCustomClaimsToken(apiUrl, bearerToken string, customClaims aas.CustomClaims) (string, error) {
+
+	jwtcl := claas.NewJWTClient(apiUrl)
+	jwtcl.HTTPClient = clients.HTTPClientTLSNoVerify()
+
+	cct, err := jwtcl.FetchCCTUsingJWT(bearerToken, customClaims)
+	if err != nil {
+		return "", fmt.Errorf("Could not obtain custom claims token from %s - err - %s", apiUrl, err)
+	}
+
+	return string(cct), nil
+}
+
 func (a *App) PrintUserTokens(asr *AasUsersAndRolesSetup) error {
 
 	for _, user := range asr.UsersAndRoles {
@@ -587,7 +657,6 @@ func (a *App) AddUsersAndRoles(asr *AasUsersAndRolesSetup) error {
 	}
 	aascl := &claas.Client{asr.AasApiUrl, token, clients.HTTPClientTLSNoVerify()}
 
-	//fmt.Println("BEARER_TOKEN="+string(token))
 	for idx, _ := range asr.UsersAndRoles {
 		userid := ""
 		if a.RegenTokenOnly && !asr.UsersAndRoles[idx].PrintBearerToken {
@@ -653,6 +722,7 @@ func (a *App) Setup(args []string) error {
 	fs.BoolVar(&outputJson, "output_json", false, HELP_OUTPUT_JSON)
 	fs.BoolVar(&a.GenPassword, "genpassword", false, HELP_GENPASSWORD)
 	fs.BoolVar(&a.RegenTokenOnly, "regen_token_only", false, HELP_REGEN_TOKEN_ONLY)
+	fs.BoolVar(&a.GenerateCustomClaimsTokenOnly, "gen_custom_claims_token_only", false, HELP_GEN_CUSTOM_CLAIMS_TOKEN_ONLY)
 	fs.BoolVar(&printHelp, "help", false, HELP_HELP)
 
 	err = fs.Parse(args[1:])
@@ -696,14 +766,13 @@ func (a *App) Setup(args []string) error {
 		if cccAdmin := a.GetCCCAdminUser(); cccAdmin != nil {
 			as.UsersAndRoles = append(as.UsersAndRoles, *cccAdmin)
 		}
-
 	}
 
 	if noSetup {
 		setup = false
 	}
 
-	if setup {
+	if setup && !a.GenerateCustomClaimsTokenOnly {
 		if !a.RegenTokenOnly {
 			fmt.Println("\n\nAdding Users and Roles\n======================")
 		}
@@ -715,6 +784,23 @@ func (a *App) Setup(args []string) error {
 			return err
 		}
 
+	}
+
+	if len(a.CustomClaimsComponents) != 0 {
+		if strings.TrimSpace(a.CCCAdminUsername) != "" && strings.TrimSpace(a.CCCAdminPassword) != "" {
+			if strings.TrimSpace(a.AasAPIUrl) == "" {
+				return errors.New("AAS_API_URL is not set")
+			}
+			cctMap, err := a.GetCustomClaimsTokenMap()
+			if err != nil {
+				return err
+			}
+			for component, token := range cctMap {
+				fmt.Printf("Custom Claims Token For %s:\n%s", component, token)
+			}
+		} else {
+			return errors.New("CCC_ADMIN_USERNAME and/or CCC_ADMIN_PASSWORD is not set")
+		}
 	}
 
 	if outputJson || jsonOut != "" {
