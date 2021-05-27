@@ -553,21 +553,23 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 		roots = ecPool
 	}
 	inters := x509.NewCertPool()
-	leafcerts := []*x509.Certificate{}
+	var lc *x509.Certificate
 
 	// split into root and intermediate CAs
 	for _, cert := range certchain {
 		if cert.IsCA {
+			// root certs have issuer == subject
 			if cert.Subject.String() == cert.Issuer.String() {
 				roots.AddCert(cert)
 				continue
 			} else {
+				// intermediate certs have distinct issuers and subjects
 				inters.AddCert(cert)
 				continue
 			}
 		} else {
-			// everything else is a leaf
-			leafcerts = append(leafcerts, cert)
+			// leaf cert
+			lc = cert
 		}
 	}
 
@@ -578,27 +580,53 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
 	}
 
-	// verify all leaf certs
-	for _, lc := range leafcerts {
-		lc.UnhandledCriticalExtensions = []asn1.ObjectIdentifier{}
-		_, err := lc.Verify(vopts)
-		if err != nil {
-			return errors.Wrapf(err, "lib/common/crypt/x509/VerifyX509CertChain: cert %v "+
-				"failed verification", lc.Subject)
+	// verify leaf cert
+	validExtKeyUsage := false
+	// check if the leaf cert has extended key usage 2.23.133.8.1 required for TPM EK Certs
+	// http://oid-info.com/get/2.23.133.8.1
+	for _, eku := range lc.UnknownExtKeyUsage {
+		if strings.Contains(eku.String(), "2.23.133.8.1") {
+			validExtKeyUsage = true
+			break
 		}
-		if enableRevCheck {
-			isRevoked, isOk := revoke.VerifyCertificate(lc)
-			if isOk {
-				if isRevoked {
-					return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert %v was "+
-						"revoked", lc.Subject)
-				}
-			} else {
-				return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: revocation check "+
-					"failed for cert %v", lc.Subject)
+	}
+	if !validExtKeyUsage {
+		return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert %v "+
+			"EK cert key usage is not valid", lc.Subject.CommonName)
+	}
+
+	removeCritExt := false
+	// TPM EK Certs contain critical extensions like 2.5.29.17 which cannot be handled by Go's x509 package
+	// these need to be removed before the verification process
+	if len(lc.UnhandledCriticalExtensions) > 0 {
+		for _, uhce := range lc.UnhandledCriticalExtensions {
+			if strings.Contains(uhce.String(), "2.5.29.17") {
+				removeCritExt = true
+				break
 			}
 		}
-		return nil
+	}
+	if removeCritExt {
+		// strip unhandled critical extensions list
+		// go x509 does not support these since this will cause Verify to fail
+		lc.UnhandledCriticalExtensions = []asn1.ObjectIdentifier{}
+	}
+	_, err := lc.Verify(vopts)
+	if err != nil {
+		return errors.Wrapf(err, "lib/common/crypt/x509/VerifyX509CertChain: cert %v "+
+			"failed verification", lc.Subject)
+	}
+	if enableRevCheck {
+		isRevoked, isOk := revoke.VerifyCertificate(lc)
+		if isOk {
+			if isRevoked {
+				return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert %v was "+
+					"revoked", lc.Subject)
+			}
+		} else {
+			return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: revocation check "+
+				"failed for cert %v", lc.Subject)
+		}
 	}
 
 	return nil
