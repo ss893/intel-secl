@@ -120,10 +120,13 @@ func (certifyHostAiksController *CertifyHostAiksController) GetEkCerts(decrypted
 		return nil, nil, nil, errors.Wrapf(err, "controllers/certify_host_aiks_controller:GetEkCerts() Unable to read file %s", ekcertFile)
 	}
 
-	ekx509Cert, err := x509.ParseCertificate(ekCert)
+	ekx509Certs, err := x509.ParseCertificates(ekCert)
 	if err != nil {
 		return nil, nil, nil, errors.Wrap(err, "controllers/certify_host_aiks_controller:GetEkCerts() Unable to parse certificate")
 	}
+	var ekx509Cert *x509.Certificate
+	// since the EK certificate may have multiple levels, we need to extract the leaf
+	ekx509Cert = crypt.GetLeafCert(ekx509Certs)
 
 	optionsFile := certifyHostAiksController.AikRequestsDirPath + fileName + ".opt"
 	challengeFile := certifyHostAiksController.AikRequestsDirPath + fileName

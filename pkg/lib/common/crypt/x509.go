@@ -543,6 +543,16 @@ func GetCertExtension(cert *x509.Certificate, oid asn1.ObjectIdentifier) []byte 
 	return nil
 }
 
+func GetLeafCert(certchain []*x509.Certificate) *x509.Certificate {
+	var cert *x509.Certificate
+	for _, cert = range certchain {
+		if !cert.IsCA {
+			break
+		}
+	}
+	return cert
+}
+
 // VerifyX509CertChain verifies a cert chain for validity and ensures no certs have been
 // revoked
 func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecPool *x509.CertPool) error {
