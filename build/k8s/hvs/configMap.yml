@@ -17,3 +17,4 @@ data:
   HVS_DB_SSLCERTSRC: /etc/postgresql/server.crt
   HVS_DB_PORT: "5432"
   HVS_DB_SSLMODE: verify-full
+  NATS_SERVERS:
