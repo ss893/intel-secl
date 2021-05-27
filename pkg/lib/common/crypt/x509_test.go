@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/asn1"
 	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"
@@ -78,6 +79,11 @@ func TestVerifyX509CertChainGoodChain(t *testing.T) {
 	t.Log(err)
 
 	ekCertx509, err := x509.ParseCertificate(ekCertificateBytes)
+
+	// since go packages cannot handle this extension, this field will be set
+	extKeyUsage := asn1.ObjectIdentifier{2, 23, 133, 8, 1}
+	ekCertx509.UnknownExtKeyUsage = append(ekCertx509.UnknownExtKeyUsage, extKeyUsage)
+
 	t.Log(err)
 
 	// combine all certs
@@ -85,6 +91,7 @@ func TestVerifyX509CertChainGoodChain(t *testing.T) {
 	allCerts = append(allCerts, rootCertx509, intermediate1Certx509, ekCertx509)
 
 	assert.NoError(t, VerifyX509CertChain(true, allCerts, nil))
+	assert.NoError(t, VerifyX509CertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
 }
 
 func TestVerifyX509CertChainExpired(t *testing.T) {
@@ -175,9 +182,21 @@ func TestVerifyX509CertChainExpired(t *testing.T) {
 
 	ekCertx509, err := x509.ParseCertificate(ekCertificateBytes)
 	t.Log(err)
+	// since go packages cannot handle this extension, this field will be set
+	extKeyUsage := asn1.ObjectIdentifier{2, 23, 133, 8, 1}
+	ekCertx509.UnknownExtKeyUsage = append(ekCertx509.UnknownExtKeyUsage, extKeyUsage)
+	ekCertx509.UnknownExtKeyUsage = nil
+
 	// combine all certs
 	var allCerts []*x509.Certificate
 	allCerts = append(allCerts, rootCertx509, intermediate1Certx509, ekCertx509)
 
 	assert.Error(t, VerifyX509CertChain(true, allCerts, nil))
+	assert.Error(t, VerifyX509CertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
+
+	// unset the EK cert usage
+	ekCertx509.UnknownExtKeyUsage = nil
+	assert.Error(t, VerifyX509CertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
+	assert.Error(t, VerifyX509CertChain(false, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
+
 }
