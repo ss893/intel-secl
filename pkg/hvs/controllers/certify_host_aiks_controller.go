@@ -220,22 +220,6 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 	return proofReq, http.StatusOK, nil
 }
 
-func (certifyHostAiksController *CertifyHostAiksController) isEkCertificateVerifiedByAuthority(cert *x509.Certificate, authority *x509.Certificate) bool {
-	defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAuthority() Entering")
-	defer defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAuthority() Leaving")
-	if authority.Raw == nil {
-		return false
-	}
-
-	err := cert.CheckSignatureFrom(authority)
-	if err != nil {
-		defaultLog.Debugf("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAuthority() %v", err)
-		return false
-	}
-
-	return true
-}
-
 func (certifyHostAiksController *CertifyHostAiksController) IdentityRequestSubmitChallengeResponse(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/certify_host_aiks_controller:IdentityRequestSubmitChallengeResponse() Entering")
 	defer defaultLog.Trace("controllers/certify_host_aiks_controller:IdentityRequestSubmitChallengeResponse() Leaving")
