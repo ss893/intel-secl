@@ -266,7 +266,7 @@ func (pfutil PlatformFlavorUtil) GetHardwareSectionDetails(hostManifest *hcTypes
 
 // GetPcrDetails extracts Pcr values and Event Logs from the HostManifest/PcrManifest and  returns
 // in a format suitable for inserting into the flavor
-func (pfutil PlatformFlavorUtil) GetPcrDetails(pcrManifest hcTypes.PcrManifest, pcrList map[int]hvs.PcrListRules) []hcTypes.FlavorPcrs {
+func (pfutil PlatformFlavorUtil) GetPcrDetails(pcrManifest hcTypes.PcrManifest, pcrList map[hcTypes.PcrIndex]hvs.PcrListRules) []hcTypes.FlavorPcrs {
 	log.Trace("flavor/util/platform_flavor_util:GetPcrDetails() Entering")
 	defer log.Trace("flavor/util/platform_flavor_util:GetPcrDetails() Leaving")
 
@@ -274,7 +274,7 @@ func (pfutil PlatformFlavorUtil) GetPcrDetails(pcrManifest hcTypes.PcrManifest, 
 
 	// pull out the logs for the required PCRs from both banks
 	for index, rules := range pcrList {
-		pI := hcTypes.PcrIndex(index)
+		pI := index
 		var pcrInfo *hcTypes.HostManifestPcrs
 		var bank string
 		// based on the bank priority get the value of PCR index from host manifest
@@ -287,7 +287,7 @@ func (pfutil PlatformFlavorUtil) GetPcrDetails(pcrManifest hcTypes.PcrManifest, 
 
 		if pcrInfo != nil {
 			var currPcrEx hcTypes.FlavorPcrs
-			currPcrEx.Pcr.Index = index
+			currPcrEx.Pcr.Index = int(index)
 			currPcrEx.Pcr.Bank = bank
 			currPcrEx.Measurement = pcrInfo.Value
 			if rules.PcrMatches {
@@ -452,11 +452,11 @@ func (pfutil PlatformFlavorUtil) GetSignedFlavor(unsignedFlavor *hvs.Flavor, pri
 
 // GetPcrRulesMap Helper function to calculate the list of PCRs for the flavor part specified based
 // on the version of the TPM hardware.
-func (pfutil PlatformFlavorUtil) GetPcrRulesMap(flavorPart cf.FlavorPart, flavorTemplates []hvs.FlavorTemplate) (map[int]hvs.PcrListRules, error) {
+func (pfutil PlatformFlavorUtil) GetPcrRulesMap(flavorPart cf.FlavorPart, flavorTemplates []hvs.FlavorTemplate) (map[hcTypes.PcrIndex]hvs.PcrListRules, error) {
 	log.Trace("flavor/util/platform_flavor_util:getPcrRulesMap() Entering")
 	defer log.Trace("flavor/util/platform_flavor_util:getPcrRulesMap() Leaving")
 
-	pcrRulesForFlavorPart := make(map[int]hvs.PcrListRules)
+	pcrRulesForFlavorPart := make(map[hcTypes.PcrIndex]hvs.PcrListRules)
 	var err error
 	for _, flavorTemplate := range flavorTemplates {
 		switch flavorPart {
@@ -484,7 +484,7 @@ func (pfutil PlatformFlavorUtil) GetPcrRulesMap(flavorPart cf.FlavorPart, flavor
 	return pcrRulesForFlavorPart, nil
 }
 
-func getPcrRulesForFlavorPart(flavorPart *hvs.FlavorPart, pcrList map[int]hvs.PcrListRules) (map[int]hvs.PcrListRules, error) {
+func getPcrRulesForFlavorPart(flavorPart *hvs.FlavorPart, pcrList map[hcTypes.PcrIndex]hvs.PcrListRules) (map[hcTypes.PcrIndex]hvs.PcrListRules, error) {
 	log.Trace("flavor/util/platform_flavor_util:getPcrRulesForFlavorPart() Entering")
 	defer log.Trace("flavor/util/platform_flavor_util:getPcrRulesForFlavorPart() Leaving")
 
@@ -493,13 +493,13 @@ func getPcrRulesForFlavorPart(flavorPart *hvs.FlavorPart, pcrList map[int]hvs.Pc
 	}
 
 	if pcrList == nil {
-		pcrList = make(map[int]hvs.PcrListRules)
+		pcrList = make(map[hcTypes.PcrIndex]hvs.PcrListRules)
 	}
 
 	for _, pcrRule := range flavorPart.PcrRules {
 		var rulesList hvs.PcrListRules
 
-		if rules, ok := pcrList[pcrRule.Pcr.Index]; ok {
+		if rules, ok := pcrList[hcTypes.PcrIndex(pcrRule.Pcr.Index)]; ok {
 			rulesList = rules
 		}
 		rulesList.PcrBank = pcrRule.Pcr.Bank
@@ -533,7 +533,7 @@ func getPcrRulesForFlavorPart(flavorPart *hvs.FlavorPart, pcrList map[int]hvs.Pc
 				}
 			}
 		}
-		pcrList[pcrRule.Pcr.Index] = rulesList
+		pcrList[hcTypes.PcrIndex(pcrRule.Pcr.Index)] = rulesList
 	}
 
 	return pcrList, nil

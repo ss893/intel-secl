@@ -114,7 +114,7 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 		fmt.Println("flavor/util/host_platform_flavor_test:TestLinuxPlatformFlavor_GetPcrDetails() failed to unmarshall tagcertificate : ", err)
 	}
 
-	testPcrList := make(map[int]hvs.PcrListRules)
+	testPcrList := make(map[hcTypes.PcrIndex]hvs.PcrListRules)
 	testPcrList[17] = hvs.PcrListRules{
 		PcrBank:    []string{"SHA384", "SHA256", "SHA1"},
 		PcrMatches: true,
@@ -141,7 +141,7 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 	}
 	type args struct {
 		pcrManifest     hcTypes.PcrManifest
-		pcrList         map[int]hvs.PcrListRules
+		pcrList         map[hcTypes.PcrIndex]hvs.PcrListRules
 		includeEventLog bool
 	}
 
