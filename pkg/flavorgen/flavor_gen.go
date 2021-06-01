@@ -31,7 +31,7 @@ var flavortemplateargs Templates
 
 type Templates []string
 
-//Schema location constansts
+//Schema location constants
 const (
 	commonDefinitionsSchema = "/etc/flavorgen/schema/common.schema.json"
 	flavorTemplateSchema    = "/etc/flavorgen/schema/flavor-template.json"
