@@ -127,6 +127,9 @@ func (certifyHostAiksController *CertifyHostAiksController) GetEkCerts(decrypted
 	var ekx509Cert *x509.Certificate
 	// since the EK certificate may have multiple levels, we need to extract the leaf
 	ekx509Cert = crypt.GetLeafCert(ekx509Certs)
+	if ekx509Cert == nil {
+		return nil, nil, nil, errors.New("controllers/certify_host_aiks_controller:GetEkCerts() EK leaf cert missing from chain")
+	}
 
 	optionsFile := certifyHostAiksController.AikRequestsDirPath + fileName + ".opt"
 	challengeFile := certifyHostAiksController.AikRequestsDirPath + fileName
