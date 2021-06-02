@@ -56,4 +56,3 @@ if [ ! -z $SETUP_TASK ]; then
 fi
 
 hvs run
-
