@@ -556,6 +556,10 @@ func GetLeafCert(certchain []*x509.Certificate) *x509.Certificate {
 // VerifyX509CertChain verifies a cert chain for validity and ensures no certs have been
 // revoked
 func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecPool *x509.CertPool) error {
+	if certchain == nil {
+		return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert chain is empty")
+	}
+
 	var roots *x509.CertPool
 	if ecPool == nil {
 		roots = x509.NewCertPool()
@@ -592,6 +596,11 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 
 	// verify leaf cert
 	validExtKeyUsage := false
+
+	if lc == nil {
+		return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: leaf cert is missing from chain")
+	}
+
 	// check if the leaf cert has extended key usage 2.23.133.8.1 required for TPM EK Certs
 	// http://oid-info.com/get/2.23.133.8.1
 	for _, eku := range lc.UnknownExtKeyUsage {

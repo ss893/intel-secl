@@ -192,7 +192,17 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 	}
 	endorsementCerts := (*certifyHostAiksController.CertStore)[models.CaCertTypesEndorsementCa.String()].Certificates
 
-	if err = crypt.VerifyX509CertChain(false, ekCertChain, crypt.GetCertPool(endorsementCerts)); err != nil {
+	// extract the leaf certificate
+	ekLeafCert := crypt.GetLeafCert(ekCertChain)
+
+	if ekLeafCert == nil {
+		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC chain is missing leaf cert")
+		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is missing leaf certificate")
+	}
+
+	// verify the complete certificate chain OR
+	// check if the certificate is already present in the ECStore
+	if err = crypt.VerifyX509CertChain(certifyHostAiksController.EnableEkCertRevokeChecks, ekCertChain, crypt.GetCertPool(endorsementCerts)); !certifyHostAiksController.isEkCertRegistered(ekLeafCert) && err != nil {
 		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted, Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is not registered with hvs")
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
 	}
