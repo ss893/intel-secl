@@ -202,12 +202,10 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 
 	// verify the complete certificate chain OR
 	// check if the certificate is already present in the ECStore
-	if err = crypt.VerifyX509CertChain(certifyHostAiksController.EnableEkCertRevokeChecks, ekCertChain, crypt.GetCertPool(endorsementCerts)); !certifyHostAiksController.isEkCertRegistered(ekLeafCert) && err != nil {
+	if err = crypt.VerifyX509CertChain(false, ekCertChain, crypt.GetCertPool(endorsementCerts)); !certifyHostAiksController.isEkCertRegistered(ekLeafCert) && err != nil {
 		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted, Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is not registered with hvs")
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
 	}
-
-	ekLeafCert := ekCertChain[len(ekCertChain)-1]
 
 	identityRequestChallenge, err := crypt.GetRandomBytes(32)
 	if err != nil {
@@ -372,16 +370,4 @@ func (certifyHostAiksController *CertifyHostAiksController) isEkCertRegistered(c
 		return false
 	}
 	return true
-}
-
-func (certifyHostAiksController *CertifyHostAiksController) isEkCertificateVerifiedByAnyAuthority(cert *x509.Certificate, certs []x509.Certificate) bool {
-	defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAnyAuthority() Entering")
-	defer defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAnyAuthority() Leaving")
-
-	for _, authority := range certs {
-		if certifyHostAiksController.isEkCertificateVerifiedByAuthority(cert, &authority) {
-			return true
-		}
-	}
-	return false
 }
