@@ -117,11 +117,11 @@ authservice-k8s: authservice-oci-archive aas-manager
 	cp -r build/k8s/aas deployments/k8s/
 	cp tools/aas-manager/populate-users deployments/k8s/aas/populate-users
 	cp tools/aas-manager/populate-users.env deployments/k8s/aas/populate-users.env
-	 
 k8s: $(patsubst %, %-k8s, $(K8S_TARGETS))
 
 %-k8s:  %-oci-archive
 	cp -r build/k8s/$* deployments/k8s/
+	cp tools/download-tls-certs.sh deployments/k8s/
 
 all: clean installer test k8s
 
