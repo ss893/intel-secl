@@ -17,9 +17,10 @@ ENDORSEMENTS_CA_DIR=${CERTS_DIR}/endorsement
 PRIVACY_CA_DIR=${TRUSTED_CERTS}/privacy-ca
 TRUSTED_KEYS_DIR=${CONFIG_PATH}/trusted-keys
 CERTDIR_TRUSTEDJWTCERTS=${CERTS_DIR}/trustedjwt
+CREDENTIAL_PATH=$CONFIG_PATH/credentials
 
 if [ ! -f $CONFIG_PATH/.setup_done ]; then
-  for directory in $LOG_PATH $CONFIG_PATH $CERTS_DIR $TRUSTED_CERTS $ROOT_CA_DIR $ENDORSEMENTS_CA_DIR $PRIVACY_CA_DIR $TRUSTED_KEYS_DIR $CERTDIR_TRUSTEDJWTCERTS ; do
+  for directory in $LOG_PATH $CONFIG_PATH $CERTS_DIR $TRUSTED_CERTS $ROOT_CA_DIR $ENDORSEMENTS_CA_DIR $PRIVACY_CA_DIR $TRUSTED_KEYS_DIR $CERTDIR_TRUSTEDJWTCERTS $CREDENTIAL_PATH ; do
     mkdir -p $directory
     if [ $? -ne 0 ]; then
       echo "Cannot create directory: $directory"
@@ -29,6 +30,11 @@ if [ ! -f $CONFIG_PATH/.setup_done ]; then
     chmod 700 $directory
   done
   mv /tmp/*.pem $ENDORSEMENTS_CA_DIR/
+  # Copy Schema files
+  cp -r /tmp/schema $CONFIG_PATH/
+  # Copy template files
+  cp -r /tmp/templates $CONFIG_PATH/
+
   hvs setup all --force
   if [ $? -ne 0 ]; then
     exit 1
@@ -50,3 +56,4 @@ if [ ! -z $SETUP_TASK ]; then
 fi
 
 hvs run
+
