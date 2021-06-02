@@ -54,9 +54,7 @@ func NewVSClientFactoryWithUserCredentials(baseURL, aasApiUrl, username, passwor
 		return nil, errors.New("One or more parameters among aasApiUrl, baseURL, username, password and caCertsDir path is empty")
 	}
 
-	if strings.HasSuffix(baseURL, "/") {
-		baseURL = baseURL
-	} else {
+	if !strings.HasSuffix(baseURL, "/") {
 		baseURL = baseURL + "/"
 	}
 	cfg := hvsClientConfig{BaseURL: baseURL, AasAPIUrl: aasApiUrl, UserName: username, Password: password, CaCertsDir: caCertsDir}

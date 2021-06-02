@@ -85,13 +85,11 @@ func processJsonFile(manifestFilepath string, flavorTemplates []string) (hcType.
 
 	err = json.Unmarshal(hostManifestJSON, &hostManifest)
 	if err != nil {
-		fmt.Errorf("Could not unmarshal host manifest json %s", err)
 		return hcType.HostManifest{}, nil, errors.New("flavorgen/flavor_gen:processJsonFile() Could not unmarshal host manifest json")
 	}
 
 	manifest, err := jsonquery.Parse(bytes.NewReader(hostManifestJSON))
 	if err != nil {
-		fmt.Errorf("Could not parse host manifest json %s", err)
 		return hcType.HostManifest{}, nil, errors.Wrap(err, "flavorgen/flavor_gen:processJsonFile() Could not parse host manifest json")
 	}
 
