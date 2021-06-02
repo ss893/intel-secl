@@ -557,7 +557,7 @@ func GetLeafCert(certchain []*x509.Certificate) *x509.Certificate {
 // revoked
 func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecPool *x509.CertPool) error {
 	if certchain == nil {
-		return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert chain is empty")
+		return errors.New("crypt/x509/VerifyX509CertChain: cert chain is empty")
 	}
 
 	var roots *x509.CertPool
@@ -598,7 +598,7 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 	validExtKeyUsage := false
 
 	if lc == nil {
-		return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: leaf cert is missing from chain")
+		return errors.Errorf("crypt/x509/VerifyX509CertChain: leaf cert is missing from chain")
 	}
 
 	// check if the leaf cert has extended key usage 2.23.133.8.1 required for TPM EK Certs
@@ -610,7 +610,7 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 		}
 	}
 	if !validExtKeyUsage {
-		return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert %v "+
+		return errors.Errorf("crypt/x509/VerifyX509CertChain: cert %v "+
 			"EK cert key usage is not valid", lc.Subject.CommonName)
 	}
 
@@ -632,18 +632,18 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 	}
 	_, err := lc.Verify(vopts)
 	if err != nil {
-		return errors.Wrapf(err, "lib/common/crypt/x509/VerifyX509CertChain: cert %v "+
+		return errors.Wrapf(err, "crypt/x509/VerifyX509CertChain: cert %v "+
 			"failed verification", lc.Subject)
 	}
 	if enableRevCheck {
 		isRevoked, isOk := revoke.VerifyCertificate(lc)
 		if isOk {
 			if isRevoked {
-				return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: cert %v was "+
+				return errors.Errorf("crypt/x509/VerifyX509CertChain: cert %v was "+
 					"revoked", lc.Subject)
 			}
 		} else {
-			return errors.Errorf("lib/common/crypt/x509/VerifyX509CertChain: revocation check "+
+			return errors.Errorf("crypt/x509/VerifyX509CertChain: revocation check "+
 				"failed for cert %v", lc.Subject)
 		}
 	}
