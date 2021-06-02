@@ -32,14 +32,13 @@ import (
 )
 
 type CertifyHostAiksController struct {
-	CertStore                *models.CertificatesStore
-	ECStore                  domain.TpmEndorsementStore
-	AikCertValidity          int
-	AikRequestsDirPath       string
-	EnableEkCertRevokeChecks bool
+	CertStore          *models.CertificatesStore
+	ECStore            domain.TpmEndorsementStore
+	AikCertValidity    int
+	AikRequestsDirPath string
 }
 
-func NewCertifyHostAiksController(certStore *models.CertificatesStore, ecstore domain.TpmEndorsementStore, aikCertValidity int, aikReqsDir string, enableEkCertRevokeChecks bool) *CertifyHostAiksController {
+func NewCertifyHostAiksController(certStore *models.CertificatesStore, ecstore domain.TpmEndorsementStore, aikCertValidity int, aikReqsDir string) *CertifyHostAiksController {
 	defaultLog.Trace("controllers/certify_host_aiks_controller:NewCertifyHostAiksController() Entering")
 	defer defaultLog.Trace("controllers/certify_host_aiks_controller:NewCertifyHostAiksController() Leaving")
 	// CertStore should have an entry for Privacyca key
@@ -55,7 +54,7 @@ func NewCertifyHostAiksController(certStore *models.CertificatesStore, ecstore d
 		return nil
 	}
 
-	return &CertifyHostAiksController{CertStore: certStore, ECStore: ecstore, AikCertValidity: aikCertValidity, AikRequestsDirPath: aikReqsDir, EnableEkCertRevokeChecks: enableEkCertRevokeChecks}
+	return &CertifyHostAiksController{CertStore: certStore, ECStore: ecstore, AikCertValidity: aikCertValidity, AikRequestsDirPath: aikReqsDir}
 }
 
 func (certifyHostAiksController *CertifyHostAiksController) StoreEkCerts(identityRequestChallenge, ekCertBytes []byte, identityChallengePayload taModel.IdentityChallengePayload) error {
@@ -190,7 +189,7 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 	}
 	endorsementCerts := (*certifyHostAiksController.CertStore)[models.CaCertTypesEndorsementCa.String()].Certificates
 
-	if err = crypt.VerifyX509CertChain(certifyHostAiksController.EnableEkCertRevokeChecks, ekCertChain, crypt.GetCertPool(endorsementCerts)); err != nil {
+	if err = crypt.VerifyX509CertChain(false, ekCertChain, crypt.GetCertPool(endorsementCerts)); err != nil {
 		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted, Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is not registered with hvs")
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
 	}
@@ -351,4 +350,41 @@ func (certifyHostAiksController *CertifyHostAiksController) CertifyAik(aikPubKey
 		return nil, errors.Wrap(err, "Error while Signing and generation Aik Certificate")
 	}
 	return aikCert, nil
+}
+
+func (certifyHostAiksController *CertifyHostAiksController) isEkCertRegistered(cert *x509.Certificate) bool {
+	defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertRegistered() Entering")
+	defer defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertRegistered() Leaving")
+	certDigest, err := crypt.GetCertHashInHex(cert, crypto.SHA384)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error while creating digest for EC")
+		return false
+	}
+	registeredCerts, err := certifyHostAiksController.ECStore.Search(&models.TpmEndorsementFilterCriteria{CertificateDigestEqualTo: certDigest})
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error while searching registered EC for issuer %s", cert.Issuer)
+		return false
+	}
+	if len(registeredCerts.TpmEndorsement) == 0 {
+		defaultLog.Debugf("There is no EC present for given issuer %s", cert.Issuer)
+		return false
+	}
+
+	if registeredCerts.TpmEndorsement[0].Revoked {
+		defaultLog.Debugf("EC for given issuer %s is revoked", cert.Issuer)
+		return false
+	}
+	return true
+}
+
+func (certifyHostAiksController *CertifyHostAiksController) isEkCertificateVerifiedByAnyAuthority(cert *x509.Certificate, certs []x509.Certificate) bool {
+	defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAnyAuthority() Entering")
+	defer defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAnyAuthority() Leaving")
+
+	for _, authority := range certs {
+		if certifyHostAiksController.isEkCertificateVerifiedByAuthority(cert, &authority) {
+			return true
+		}
+	}
+	return false
 }

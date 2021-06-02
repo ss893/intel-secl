@@ -29,10 +29,9 @@ type Configuration struct {
 	SAML          SAMLConfig                   `yaml:"saml" mapstructure:"saml"`
 	FlavorSigning commConfig.SigningCertConfig `yaml:"flavor-signing" mapstructure:"flavor-signing"`
 
-	PrivacyCA                commConfig.SelfSignedCertConfig `yaml:"privacy-ca" mapstructure:"privacy-ca"`
-	EndorsementCA            commConfig.SelfSignedCertConfig `yaml:"endorsement-ca" mapstructure:"endorsement-ca"`
-	EnableEkCertRevokeChecks bool                            `yaml:"enable-ekcert-revoke-checks" mapstructure:"enable-ekcert-revoke-checks"`
-	TagCA                    commConfig.SelfSignedCertConfig `yaml:"tag-ca" mapstructure:"tag-ca"`
+	PrivacyCA     commConfig.SelfSignedCertConfig `yaml:"privacy-ca" mapstructure:"privacy-ca"`
+	EndorsementCA commConfig.SelfSignedCertConfig `yaml:"endorsement-ca" mapstructure:"endorsement-ca"`
+	TagCA         commConfig.SelfSignedCertConfig `yaml:"tag-ca" mapstructure:"tag-ca"`
 
 	Dek             string `yaml:"data-encryption-key" mapstructure:"data-encryption-key"`
 	AikCertValidity int    `yaml:"aik-certificate-validity-years" mapstructure:"aik-certificate-validity-years"`
@@ -71,7 +70,7 @@ type VCSSConfig struct {
 }
 
 type NatsConfig struct {
-	Servers []string `yaml:"servers" mapstructure: "servers"`
+	Servers []string `yaml:"servers" mapstructure:"servers"`
 }
 
 // this function sets the configure file name and type

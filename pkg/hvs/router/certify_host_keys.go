@@ -26,12 +26,12 @@ func SetCertifyHostKeysRoutes(router *mux.Router, certStore *models.Certificates
 	return router
 }
 
-func SetCertifyAiksRoutes(router *mux.Router, store *postgres.DataStore, certStore *models.CertificatesStore, aikCertValidity int, enableEkCertRevokeChecks bool) *mux.Router {
+func SetCertifyAiksRoutes(router *mux.Router, store *postgres.DataStore, certStore *models.CertificatesStore, aikCertValidity int) *mux.Router {
 	defaultLog.Trace("router/certify_host_aiks:SetCertifyAiksRoutes() Entering")
 	defer defaultLog.Trace("router/certify_host_aiks:SetCertifyAiksRoutes() Leaving")
 
 	tpmEndorsementStore := postgres.NewTpmEndorsementStore(store)
-	certifyHostAiksController := controllers.NewCertifyHostAiksController(certStore, tpmEndorsementStore, aikCertValidity, consts.AikRequestsDir, enableEkCertRevokeChecks)
+	certifyHostAiksController := controllers.NewCertifyHostAiksController(certStore, tpmEndorsementStore, aikCertValidity, consts.AikRequestsDir)
 	if certifyHostAiksController != nil {
 		router.Handle("/privacyca/identity-challenge-request", ErrorHandler(permissionsHandler(JsonResponseHandler(certifyHostAiksController.IdentityRequestGetChallenge),
 			[]string{consts.CertifyAik}))).Methods("POST")
