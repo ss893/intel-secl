@@ -13,6 +13,7 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/controllers"
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/keymanager"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/kmipclient"
 	kbsRoutes "github.com/intel-secl/intel-secl/v4/pkg/kbs/router"
 	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
@@ -34,8 +35,13 @@ var _ = Describe("SKCKeyTransferController", func() {
 	var remoteManager *keymanager.RemoteManager
 	var skcController *controllers.SKCController
 	var kbsConfig *config.Configuration
-	var cert *x509.Certificate
-	var cs tls.ConnectionState
+
+	certPem, _ := ioutil.ReadFile(skcClientCertPath)
+	cert, _ := crypt.GetCertFromPem(certPem)
+	cs := tls.ConnectionState{PeerCertificates: []*x509.Certificate{cert}}
+
+	mockClient := kmipclient.NewMockKmipClient()
+	keyManager := keymanager.NewKmipManager(mockClient)
 
 	BeforeEach(func() {
 		router = mux.NewRouter()
@@ -54,11 +60,6 @@ var _ = Describe("SKCKeyTransferController", func() {
 			},
 		}
 
-		certPem, _ := ioutil.ReadFile(skcClientCertPath)
-		cert, _ = crypt.GetCertFromPem(certPem)
-		cs.PeerCertificates = append(cs.PeerCertificates, cert)
-
-		keyManager := &keymanager.DirectoryManager{}
 		remoteManager = keymanager.NewRemoteManager(keyStore, keyManager, endpointUrl)
 		skcController = controllers.NewSKCController(remoteManager, policyStore, kbsConfig, trustedCaCertsDir)
 		setupServer(server)

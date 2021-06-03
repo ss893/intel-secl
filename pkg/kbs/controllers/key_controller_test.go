@@ -22,6 +22,7 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/keymanager"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/kmipclient"
 	kbsRoutes "github.com/intel-secl/intel-secl/v4/pkg/kbs/router"
 	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/context"
@@ -29,6 +30,7 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
 )
 
 const (
@@ -71,20 +73,24 @@ var _ = Describe("KeyController", func() {
 	validSamlReport, _ := ioutil.ReadFile(validSamlReportPath)
 	invalidSamlReport, _ := ioutil.ReadFile(invalidSamlReportPath)
 
+	mockClient := kmipclient.NewMockKmipClient()
+	mockClient.On("CreateSymmetricKey", mock.Anything, mock.Anything).Return("1", nil)
+	mockClient.On("DeleteKey", mock.Anything).Return(nil)
+	mockClient.On("GetKey", mock.Anything).Return([]byte(""), nil)
+	keyManager := keymanager.NewKmipManager(mockClient)
+
+	newId, _ := uuid.NewRandom()
+	keyControllerConfig = domain.KeyControllerConfig{
+		SamlCertsDir:            samlCertsDir,
+		TrustedCaCertsDir:       trustedCaCertsDir,
+		TpmIdentityCertsDir:     tpmIdentityCertsDir,
+		DefaultTransferPolicyId: newId,
+	}
+
 	BeforeEach(func() {
 		router = mux.NewRouter()
 		keyStore = mocks.NewFakeKeyStore()
 		policyStore = mocks.NewFakeKeyTransferPolicyStore()
-		newId, err := uuid.NewRandom()
-		Expect(err).NotTo(HaveOccurred())
-		keyControllerConfig = domain.KeyControllerConfig{
-			SamlCertsDir:            samlCertsDir,
-			TrustedCaCertsDir:       trustedCaCertsDir,
-			TpmIdentityCertsDir:     tpmIdentityCertsDir,
-			DefaultTransferPolicyId: newId,
-		}
-
-		keyManager := &keymanager.DirectoryManager{}
 		remoteManager = keymanager.NewRemoteManager(keyStore, keyManager, endpointUrl)
 		keyController = controllers.NewKeyController(remoteManager, policyStore, keyControllerConfig)
 	})
@@ -290,7 +296,7 @@ var _ = Describe("KeyController", func() {
 								"key_information": {
 									"algorithm": "AES",
 									"key_length": 256,
-									"key_string": "oyGHF9EkKCp44KKADUhR/cNeSB8NJE7kazhNX/x5eio="
+									"kmip_key_id": "1"
 								}
 							}`
 
