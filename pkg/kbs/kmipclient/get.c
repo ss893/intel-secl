@@ -20,88 +20,6 @@
 extern FILE *log_fp;
 
 /*
-* get:
-*
-* @id: unique identifier of the object to be retrieved
-*
-* @kbs_key: buffer which will contain the output key
-*/
-int kmipw_get(char *id, char *kbs_key, char *algorithm, int kmip_version)
-{
-    log_fp = configure_logger();
-    if (log_fp == NULL)
-    {
-        printf("Failed to configure logger\n");
-        return RESULT_FAILED;
-    }
-    log_info("kmipw_get called");
-    log_debug("get key for id: %s", id);
-
-    SSL_CTX *ctx = NULL;
-    BIO *bio = NULL;
-    bio = initialize_tls_connection(ctx);
-    if (bio == NULL)
-    {
-        log_error("BIO_new_ssl_connect failed");
-        ERR_print_errors_fp(log_fp);
-        fclose(log_fp);
-        return RESULT_FAILED;
-    }
-    /* Set up the KMIP context. */
-    KMIP kmip_ctx = {0};
-
-    kmip_init(&kmip_ctx, NULL, 0, kmip_version);
-
-    char *key = NULL;
-    int key_size = 0;
-    size_t id_size = kmip_strnlen_s(id, ID_MAX_LENGTH);
-
-    /* Send the request message. */
-    int result = kmip_bio_get_key_with_context(&kmip_ctx, bio, id, id_size, &key, &key_size, algorithm);
-
-    free_tls_connection(bio, ctx);
-
-    /* Handle the response results. */
-    if (result < RESULT_SUCCESS)
-    {
-        log_error("An error occurred while retrieving the  key.");
-        log_error("Error Code: %d", result);
-        kmip_print_error_string(log_fp, result);
-        log_error("Context Error: %s", kmip_ctx.error_message);
-        log_error("Stack trace:");
-        kmip_print_stack_trace(log_fp, &kmip_ctx);
-    }
-    else if (result >= RESULT_SUCCESS)
-    {
-        log_info("The KMIP operation was executed with no errors.");
-        log_info("Result: ");
-        kmip_print_result_status_enum(log_fp, result);
-
-        if (result == KMIP_STATUS_SUCCESS)
-        {
-            log_debug(" Key ID: %s", id);
-            log_debug(" Key Size: %d bits", key_size * 8);
-            log_debug(" Key: ");
-            kmip_print_buffer(log_fp, key, key_size);
-        }
-    }
-
-    kmip_memset(kbs_key, 0, key_size);
-    kmip_memcpy(NULL, kbs_key, key, key_size);
-
-    if (key != NULL)
-    {
-        kmip_memset(key, 0, key_size);
-        kmip_free(NULL, key);
-    }
-
-    /* Clean up the KMIP context and return the results. */
-    fclose(log_fp);
-    kmip_destroy(&kmip_ctx);
-    return result;
-}
-
-/*
  This method will constuct the request message and decode the response to get symmetric and asymmetric keys.
  Note : This method is added to override the method kmip_bio_get_symmetric_key_with_context 
  to include changes for retrieving asymmetric key
@@ -394,4 +312,86 @@ int kmip_bio_get_key_with_context(KMIP *ctx, BIO *bio,
     kmip_set_buffer(ctx, NULL, 0);
 
     return (result);
+}
+
+/*
+* get:
+*
+* @id: unique identifier of the object to be retrieved
+*
+* @kbs_key: buffer which will contain the output key
+*/
+int kmipw_get(char *id, char *kbs_key, char *algorithm, int kmip_version)
+{
+    log_fp = configure_logger();
+    if (log_fp == NULL)
+    {
+        printf("Failed to configure logger\n");
+        return RESULT_FAILED;
+    }
+    log_info("kmipw_get called");
+    log_debug("get key for id: %s", id);
+
+    SSL_CTX *ctx = NULL;
+    BIO *bio = NULL;
+    bio = initialize_tls_connection(ctx);
+    if (bio == NULL)
+    {
+        log_error("BIO_new_ssl_connect failed");
+        ERR_print_errors_fp(log_fp);
+        fclose(log_fp);
+        return RESULT_FAILED;
+    }
+    /* Set up the KMIP context. */
+    KMIP kmip_ctx = {0};
+
+    kmip_init(&kmip_ctx, NULL, 0, kmip_version);
+
+    char *key = NULL;
+    int key_size = 0;
+    size_t id_size = kmip_strnlen_s(id, ID_MAX_LENGTH);
+
+    /* Send the request message. */
+    int result = kmip_bio_get_key_with_context(&kmip_ctx, bio, id, id_size, &key, &key_size, algorithm);
+
+    free_tls_connection(bio, ctx);
+
+    /* Handle the response results. */
+    if (result < RESULT_SUCCESS)
+    {
+        log_error("An error occurred while retrieving the  key.");
+        log_error("Error Code: %d", result);
+        kmip_print_error_string(log_fp, result);
+        log_error("Context Error: %s", kmip_ctx.error_message);
+        log_error("Stack trace:");
+        kmip_print_stack_trace(log_fp, &kmip_ctx);
+    }
+    else if (result >= RESULT_SUCCESS)
+    {
+        log_info("The KMIP operation was executed with no errors.");
+        log_info("Result: ");
+        kmip_print_result_status_enum(log_fp, result);
+
+        if (result == KMIP_STATUS_SUCCESS)
+        {
+            log_debug(" Key ID: %s", id);
+            log_debug(" Key Size: %d bits", key_size * 8);
+            log_debug(" Key: ");
+            kmip_print_buffer(log_fp, key, key_size);
+        }
+    }
+
+    kmip_memset(kbs_key, 0, key_size);
+    kmip_memcpy(NULL, kbs_key, key, key_size);
+
+    if (key != NULL)
+    {
+        kmip_memset(key, 0, key_size);
+        kmip_free(NULL, key);
+    }
+
+    /* Clean up the KMIP context and return the results. */
+    fclose(log_fp);
+    kmip_destroy(&kmip_ctx);
+    return result;
 }

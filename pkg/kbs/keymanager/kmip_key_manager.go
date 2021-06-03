@@ -19,6 +19,10 @@ type KmipManager struct {
 	client kmipclient.KmipClient
 }
 
+func NewKmipManager(c kmipclient.KmipClient) *KmipManager {
+	return &KmipManager{c}
+}
+
 func (km *KmipManager) CreateKey(request *kbs.KeyRequest) (*models.KeyAttributes, error) {
 	defaultLog.Trace("keymanager/kmip_key_manager:CreateKey() Entering")
 	defer defaultLog.Trace("keymanager/kmip_key_manager:CreateKey() Leaving")
