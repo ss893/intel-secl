@@ -415,7 +415,7 @@ func TestPlatformFlavorFactory_GetGenericPlatformFlavor(t *testing.T) {
 
 	pffactory, err = NewPlatformFlavorProvider(hm, tagCert, getFlavorTemplates(hm.HostInfo.OSName, FlavorTemplatePath))
 	var vendor hcConstants.Vendor
-	_ = (&vendor).GetVendorFromOSName(hm.HostInfo.OSName)
+	_ = (&vendor).GetVendorFromOSType(hm.HostInfo.OSType)
 	// get the flavor
 	pflavor, err := pffactory.GetGenericPlatformFlavor(vendor)
 	assert.NoError(t, err, "Error initializing GenericPlatformFlavor")
@@ -437,7 +437,7 @@ func TestPlatformFlavorFactory_GetGenericPlatformFlavorFault(t *testing.T) {
 
 	pffactory, err = NewPlatformFlavorProvider(hm, nil, getFlavorTemplates(hm.HostInfo.OSName, FlavorTemplatePath))
 	var vendor hcConstants.Vendor
-	_ = (&vendor).GetVendorFromOSName(hm.HostInfo.OSName)
+	_ = (&vendor).GetVendorFromOSType(hm.HostInfo.OSType)
 	// get the flavor
 	_, err = pffactory.GetGenericPlatformFlavor(vendor)
 	assert.Error(t, err, "Error initializing GenericPlatformFlavor")

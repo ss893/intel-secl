@@ -69,7 +69,7 @@ func (pf HostPlatformFlavor) GetFlavorPartRaw(name cf.FlavorPart) ([]cm.Flavor, 
 	case cf.FlavorPartHostUnique:
 		return pf.getHostUniqueFlavor()
 	case cf.FlavorPartSoftware:
-		if strings.ToUpper(pf.HostManifest.HostInfo.OSName) == constants.OsLinux {
+		if pf.HostManifest.HostInfo.OSType == taModel.OsTypeLinux {
 			return pf.getDefaultSoftwareFlavor()
 		} else {
 			return nil, cf.UNKNOWN_FLAVOR_PART()
@@ -400,7 +400,7 @@ func UpdateMetaSectionDetails(flavorPart cf.FlavorPart, newMeta *cm.Meta, flavor
 //getVendorName This method is used to get the vendor name
 func (pf HostPlatformFlavor) getVendorName() hcConstants.Vendor {
 	var vendorName hcConstants.Vendor
-	if strings.ToUpper(pf.HostManifest.HostInfo.OSName) == constants.OsLinux {
+	if strings.ToLower(pf.HostManifest.HostInfo.OSType) == taModel.OsTypeLinux {
 		vendorName = hcConstants.VendorIntel
 	} else {
 		vendorName = hcConstants.VendorVMware

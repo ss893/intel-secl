@@ -90,6 +90,7 @@ func (vc *vmwareClient) GetHostInfo() (taModel.HostInfo, error) {
 	hostInfo.VMMName = vc.hostReference.Config.Product.Name
 	hostInfo.OSName = vc.hostReference.Config.Product.Name
 	hostInfo.OSVersion = vc.hostReference.Config.Product.Version
+	hostInfo.OSType = taModel.OsTypeVMWare
 	hostInfo.VMMVersion = vc.hostReference.Config.Product.Build
 	hostInfo.BiosName = vc.hostReference.Hardware.SystemInfo.Vendor
 	hostInfo.BiosVersion = vc.hostReference.Hardware.BiosInfo.BiosVersion

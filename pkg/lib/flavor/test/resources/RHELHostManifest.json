@@ -3,6 +3,7 @@
     "host_info": {
         "os_name": "RedHatEnterprise",
         "os_version": "8.1",
+        "os_type": "linux",
         "bios_version": "SE5C610.86B.01.01.0016.033120161139",
         "vmm_name": "",
         "vmm_version": "",
