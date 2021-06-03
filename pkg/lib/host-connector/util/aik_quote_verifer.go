@@ -44,8 +44,10 @@ const (
 	PCR_VALUE_UNTAINT         = "[^0-9a-fA-F]"
 	SHA1                      = "SHA1"
 	SHA256                    = "SHA256"
+	SHA384                    = "SHA384"
 	EVENT_LOG_DIGEST_SHA1     = "com.intel.mtwilson.core.common.model.MeasurementSha1"
 	EVENT_LOG_DIGEST_SHA256   = "com.intel.mtwilson.core.common.model.MeasurementSha256"
+	EVENT_LOG_DIGEST_SHA384   = "com.intel.mtwilson.core.common.model.MeasurementSha384"
 	EVENT_NAME                = "OpenSource.EventName"
 )
 
@@ -208,9 +210,11 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 					buffer.WriteString(fmt.Sprintf("%2d ", pcr))
 				} else if hashAlg == TPM_API_ALG_ID_SHA256 {
 					buffer.WriteString(fmt.Sprintf("%2d_SHA256 ", pcr))
+				} else if hashAlg == TPM_API_ALG_ID_SHA384 {
+					buffer.WriteString(fmt.Sprintf("%2d_SHA384 ", pcr))
 				}
-				//Ignore the pcr banks other than SHA1 and SHA256
-				if hashAlg == TPM_API_ALG_ID_SHA1 || hashAlg == TPM_API_ALG_ID_SHA256 {
+				//Ignore the pcr banks other than SHA1 SHA256 and SHA384
+				if hashAlg == TPM_API_ALG_ID_SHA1 || hashAlg == TPM_API_ALG_ID_SHA256 || hashAlg == TPM_API_ALG_ID_SHA384 {
 					for i := 0; i < pcrSize; i++ {
 						buffer.WriteString(fmt.Sprintf("%02x", pcrs[pcrPos+i]))
 					}
@@ -289,6 +293,7 @@ func createPCRManifest(pcrList []string, eventLog string) (types.PcrManifest, er
 	var err error
 	pcrManifest.Sha256Pcrs = []types.HostManifestPcrs{}
 	pcrManifest.Sha1Pcrs = []types.HostManifestPcrs{}
+	pcrManifest.Sha384Pcrs = []types.HostManifestPcrs{}
 
 	for _, pcrString := range pcrList {
 		parts := strings.Split(strings.TrimSpace(pcrString), " ")
@@ -329,6 +334,12 @@ func createPCRManifest(pcrList []string, eventLog string) (types.PcrManifest, er
 					})
 				} else if strings.EqualFold(pcrBank, "SHA1") {
 					pcrManifest.Sha1Pcrs = append(pcrManifest.Sha1Pcrs, types.HostManifestPcrs{
+						Index:   pcrIndex,
+						Value:   pcrValue,
+						PcrBank: shaAlgorithm,
+					})
+				} else if strings.EqualFold(pcrBank, "SHA384") {
+					pcrManifest.Sha384Pcrs = append(pcrManifest.Sha384Pcrs, types.HostManifestPcrs{
 						Index:   pcrIndex,
 						Value:   pcrValue,
 						PcrBank: shaAlgorithm,
@@ -407,6 +418,25 @@ func addPcrEntry(module types.MeasureLog, eventLogMap *types.PcrEventLogMap) {
 				eventLog := types.EventLog{Measurement: events.Measurement,
 					Tags: events.Tags, TypeID: events.TypeID, TypeName: events.TypeName}
 				eventLogMap.Sha256EventLogs[index].TpmEvent = append(eventLogMap.Sha256EventLogs[index].TpmEvent, eventLog)
+			}
+		}
+
+	case SHA384:
+		for _, entry := range eventLogMap.Sha384EventLogs {
+			if entry.Pcr.Index == module.Pcr.Index {
+				pcrFound = true
+				break
+			}
+			index++
+		}
+
+		if !pcrFound {
+			eventLogMap.Sha384EventLogs = append(eventLogMap.Sha384EventLogs, types.TpmEventLog{Pcr: types.Pcr{Index: module.Pcr.Index, Bank: SHA384}, TpmEvent: module.TpmEvents})
+		} else {
+			for _, events := range module.TpmEvents {
+				eventLog := types.EventLog{Measurement: events.Measurement,
+					Tags: events.Tags, TypeID: events.TypeID, TypeName: events.TypeName}
+				eventLogMap.Sha384EventLogs[index].TpmEvent = append(eventLogMap.Sha384EventLogs[index].TpmEvent, eventLog)
 			}
 		}
 

@@ -16,6 +16,7 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
+	"github.com/cloudflare/cfssl/revoke"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -487,7 +488,7 @@ func SavePemCertChain(certFilePath string, certs ...[]byte) error {
 
 func GetCertPool(certs []x509.Certificate) *x509.CertPool {
 	certPool := x509.NewCertPool()
-	for i, _ := range certs {
+	for i := range certs {
 		certPool.AddCert(&certs[i])
 	}
 	return certPool
@@ -539,5 +540,113 @@ func GetCertExtension(cert *x509.Certificate, oid asn1.ObjectIdentifier) []byte 
 			return ext.Value
 		}
 	}
+	return nil
+}
+
+func GetLeafCert(certchain []*x509.Certificate) *x509.Certificate {
+	var cert *x509.Certificate
+	for _, cert = range certchain {
+		if !cert.IsCA {
+			break
+		}
+	}
+	return cert
+}
+
+// VerifyEKCertChain verifies a cert chain for validity and ensures no certs have been
+// revoked
+func VerifyEKCertChain(enableRevokeCheck bool, ekCertChain []*x509.Certificate, ecPool *x509.CertPool) error {
+	if ekCertChain == nil {
+		return errors.New("crypt/x509/VerifyEKCertChain: cert chain is empty")
+	}
+
+	var roots *x509.CertPool
+	if ecPool == nil {
+		roots = x509.NewCertPool()
+	} else {
+		roots = ecPool
+	}
+	inters := x509.NewCertPool()
+	var lc *x509.Certificate
+
+	// split into root and intermediate CAs
+	for _, cert := range ekCertChain {
+		if cert.IsCA {
+			// root certs have issuer == subject
+			if cert.Subject.String() == cert.Issuer.String() {
+				roots.AddCert(cert)
+				continue
+			} else {
+				// intermediate certs have distinct issuers and subjects
+				inters.AddCert(cert)
+				continue
+			}
+		} else {
+			// leaf cert
+			lc = cert
+		}
+	}
+
+	// set params for verification
+	vopts := x509.VerifyOptions{
+		Roots:         roots,
+		Intermediates: inters,
+		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
+	}
+
+	// verify leaf cert
+	validExtKeyUsage := false
+
+	if lc == nil {
+		return errors.Errorf("crypt/x509/VerifyEKCertChain: leaf cert is missing from chain")
+	}
+
+	// check if the leaf cert has extended key usage 2.23.133.8.1 required for TPM EK Certs
+	// http://oid-info.com/get/2.23.133.8.1
+	for _, eku := range lc.UnknownExtKeyUsage {
+		if strings.Contains(eku.String(), "2.23.133.8.1") {
+			validExtKeyUsage = true
+			break
+		}
+	}
+	if !validExtKeyUsage {
+		return errors.Errorf("crypt/x509/VerifyEKCertChain: cert %v "+
+			"EK cert key usage is not valid", lc.Subject.CommonName)
+	}
+
+	removeCritExt := false
+	// TPM EK Certs contain critical extensions like 2.5.29.17 which cannot be handled by Go's x509 package
+	// these need to be removed before the verification process
+	if len(lc.UnhandledCriticalExtensions) > 0 {
+		for _, uhce := range lc.UnhandledCriticalExtensions {
+			if strings.Contains(uhce.String(), "2.5.29.17") {
+				removeCritExt = true
+				break
+			}
+		}
+	}
+	if removeCritExt {
+		// strip unhandled critical extensions list
+		// go x509 does not support these since this will cause Verify to fail
+		lc.UnhandledCriticalExtensions = []asn1.ObjectIdentifier{}
+	}
+	_, err := lc.Verify(vopts)
+	if err != nil {
+		return errors.Wrapf(err, "crypt/x509/VerifyEKCertChain: cert %v "+
+			"failed verification", lc.Subject)
+	}
+	if enableRevokeCheck {
+		isRevoked, isOk := revoke.VerifyCertificate(lc)
+		if isOk {
+			if isRevoked {
+				return errors.Errorf("crypt/x509/VerifyEKCertChain: cert %v was "+
+					"revoked", lc.Subject)
+			}
+		} else {
+			return errors.Errorf("crypt/x509/VerifyEKCertChain: revocation check "+
+				"failed for cert %v", lc.Subject)
+		}
+	}
+
 	return nil
 }

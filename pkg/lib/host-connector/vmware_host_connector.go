@@ -6,6 +6,9 @@ package host_connector
 
 import (
 	"crypto"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -122,6 +125,7 @@ func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationRe
 	var pcrManifest types.PcrManifest
 	pcrManifest.Sha256Pcrs = []types.HostManifestPcrs{}
 	pcrManifest.Sha1Pcrs = []types.HostManifestPcrs{}
+	pcrManifest.Sha384Pcrs = []types.HostManifestPcrs{}
 	var pcrEventLogMap types.PcrEventLogMap
 	cumulativePcrsValue := ""
 
@@ -135,14 +139,20 @@ func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationRe
 			return pcrManifest, "", err
 		}
 
-		if strings.EqualFold(pcrDetails.DigestMethod, "SHA256") {
+		if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA256) {
 			pcrManifest.Sha256Pcrs = append(pcrManifest.Sha256Pcrs, types.HostManifestPcrs{
 				Index:   pcrIndex,
 				Value:   intArrayToHexString(pcrDetails.DigestValue),
 				PcrBank: shaAlgorithm,
 			})
-		} else if strings.EqualFold(pcrDetails.DigestMethod, "SHA1") {
+		} else if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA1) {
 			pcrManifest.Sha1Pcrs = append(pcrManifest.Sha1Pcrs, types.HostManifestPcrs{
+				Index:   pcrIndex,
+				Value:   intArrayToHexString(pcrDetails.DigestValue),
+				PcrBank: shaAlgorithm,
+			})
+		} else if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA384) {
+			pcrManifest.Sha384Pcrs = append(pcrManifest.Sha384Pcrs, types.HostManifestPcrs{
 				Index:   pcrIndex,
 				Value:   intArrayToHexString(pcrDetails.DigestValue),
 				PcrBank: shaAlgorithm,
@@ -176,6 +186,7 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 	eventLogMap.Sha1EventLogs = []types.TpmEventLog{}
 	eventLogMap.Sha256EventLogs = []types.TpmEventLog{}
+	eventLogMap.Sha384EventLogs = []types.TpmEventLog{}
 
 	for _, eventLogEntry := range hostTpmEventLogEntry {
 		pcrFound := false
@@ -196,7 +207,7 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 		//vCenter 6.5 only supports SHA1 digest and hence do not have digest method field. Also if the hash is 0 they
 		//send out 40 0s instead of 20
-		if len(parsedEventLogEntry.EventDetails.DataHash) == 20 || len(parsedEventLogEntry.EventDetails.DataHash) == 40 {
+		if len(parsedEventLogEntry.EventDetails.DataHash) == sha1.Size || len(parsedEventLogEntry.EventDetails.DataHash) == 40 {
 			parsedEventLogEntry.EventDetails.DataHashMethod = constants.SHA1
 			for _, entry := range eventLogMap.Sha1EventLogs {
 				if entry.Pcr.Index == parsedEventLogEntry.PcrIndex {
@@ -212,7 +223,7 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 			} else {
 				eventLogMap.Sha1EventLogs[index].TpmEvent = append(eventLogMap.Sha1EventLogs[index].TpmEvent, eventLog)
 			}
-		} else if len(parsedEventLogEntry.EventDetails.DataHash) == 32 {
+		} else if len(parsedEventLogEntry.EventDetails.DataHash) == sha256.Size {
 			parsedEventLogEntry.EventDetails.DataHashMethod = constants.SHA256
 			for _, entry := range eventLogMap.Sha256EventLogs {
 				if entry.Pcr.Index == parsedEventLogEntry.PcrIndex {
@@ -230,6 +241,24 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 			} else {
 				eventLogMap.Sha256EventLogs[index].TpmEvent = append(eventLogMap.Sha256EventLogs[index].TpmEvent, eventLog)
 			}
+		} else if len(parsedEventLogEntry.EventDetails.DataHash) == sha512.Size384 {
+			parsedEventLogEntry.EventDetails.DataHashMethod = constants.SHA384
+			for _, entry := range eventLogMap.Sha384EventLogs {
+				if entry.Pcr.Index == parsedEventLogEntry.PcrIndex {
+					pcrFound = true
+					break
+				}
+				index++
+			}
+
+			eventLog := getEventLogInfo(parsedEventLogEntry)
+
+			if !pcrFound {
+				eventLogMap.Sha384EventLogs = append(eventLogMap.Sha384EventLogs,
+					types.TpmEventLog{Pcr: types.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []types.EventLog{eventLog}})
+			} else {
+				eventLogMap.Sha384EventLogs[index].TpmEvent = append(eventLogMap.Sha384EventLogs[index].TpmEvent, eventLog)
+			}
 		}
 
 	}
@@ -241,6 +270,10 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 	sort.SliceStable(eventLogMap.Sha256EventLogs[:], func(i, j int) bool {
 		return string(eventLogMap.Sha256EventLogs[i].Pcr.Index) < string(eventLogMap.Sha256EventLogs[j].Pcr.Index)
+	})
+
+	sort.SliceStable(eventLogMap.Sha384EventLogs[:], func(i, j int) bool {
+		return string(eventLogMap.Sha384EventLogs[i].Pcr.Index) < string(eventLogMap.Sha384EventLogs[j].Pcr.Index)
 	})
 
 	log.Debug("vmware_host_connector:getPcrEventLog() PCR event log created")

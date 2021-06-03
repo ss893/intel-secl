@@ -295,18 +295,19 @@ func main() {
 }
 
 // updatePcrSection method is used to update the pcr section in new flavor part
-func updatePcrSection(Pcrs map[string]map[string]templateModel.PcrEx, rules []hvs.PcrRules, pcrsmap map[int]string, vendor string) []types.FlavorPcrs {
+func updatePcrSection(Pcrs map[string]map[string]templateModel.PcrEx, rules []hvs.PcrRules, pcrsmap map[int][]string, vendor string) []types.FlavorPcrs {
 
 	newFlavorPcrs := make([]types.FlavorPcrs, len(pcrsmap))
 
 	for bank, pcrMap := range Pcrs {
 		for index, rule := range rules {
-			for mapIndex, templateBank := range pcrsmap {
+			for mapIndex, templateBanks := range pcrsmap {
 				if mapIndex != rule.Pcr.Index {
 					continue
 				}
 				pcrIndex := types.PcrIndex(mapIndex)
-				if types.SHAAlgorithm(bank) != types.SHAAlgorithm(templateBank) {
+				// check if flavor contains measurements for atleast one of the banks mentioned in the template
+				if !containsBank(templateBanks, bank) {
 					break
 				}
 				if expectedPcrEx, ok := pcrMap[pcrIndex.String()]; ok {
@@ -343,8 +344,8 @@ func updatePcrSection(Pcrs map[string]map[string]templateModel.PcrEx, rules []hv
 }
 
 // getPcrRules method is used to get the pcr rules defined in the flavor template
-func getPcrRules(flavorName string, template hvs.FlavorTemplate) ([]hvs.PcrRules, map[int]string) {
-	pcrsmap := make(map[int]string)
+func getPcrRules(flavorName string, template hvs.FlavorTemplate) ([]hvs.PcrRules, map[int][]string) {
+	pcrsmap := make(map[int][]string)
 	var rules []hvs.PcrRules
 
 	if flavorName == PlatformFlavor && template.FlavorParts.Platform != nil {
@@ -463,4 +464,14 @@ func updateDescription(description map[string]interface{}, meta templateModel.Me
 	}
 
 	return description
+}
+
+// containsBank is used to check if a particular PCRbank is among one of the banks listed in the template
+func containsBank(pcrBanks []string, pcrBank string) bool {
+	for _, bank := range pcrBanks {
+		if types.SHAAlgorithm(pcrBank) == types.SHAAlgorithm(bank) {
+			return true
+		}
+	}
+	return false
 }

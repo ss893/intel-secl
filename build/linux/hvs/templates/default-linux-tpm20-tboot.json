@@ -15,14 +15,14 @@
                 {
                     "pcr": {
                         "index": 0,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true
                 },
                 {
                     "pcr": {
                         "index": 17,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_equals": {
@@ -36,7 +36,7 @@
                 {
                     "pcr": {
                         "index": 18,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_equals": {
@@ -58,7 +58,7 @@
                 {
                     "pcr": {
                         "index": 17,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_includes": [
@@ -76,7 +76,7 @@
                 {
                     "pcr": {
                         "index": 17,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_includes": [
@@ -87,7 +87,7 @@
                 {
                     "pcr": {
                         "index": 18,
-                        "bank": "SHA256"
+                        "bank": ["SHA384", "SHA256", "SHA1"]
                     },
                     "pcr_matches": true,
                     "eventlog_includes": [

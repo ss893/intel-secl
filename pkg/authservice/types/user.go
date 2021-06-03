@@ -25,7 +25,7 @@ type User struct {
 	PasswordHash []byte     `json:"-"`
 	PasswordSalt []byte     `json:"-"`
 	PasswordCost int        `json:"-"`
-	Roles        []Role     `json:"roles,omitempty"gorm:"many2many:user_roles"`
+	Roles        []Role     `json:"roles,omitempty" gorm:"many2many:user_roles"`
 }
 
 type Users []User

@@ -75,12 +75,12 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
 
 		Context("ek root ca not present in endorsement certificate and ek cert is registered", func() {
-			It("Return Identity Proof request", func() {
+			It("Should get HTTP Status: 200 ", func() {
 				// mockEndorsement is having the ekcert
 				mockEndorsement := mocks.NewFakeTpmEndorsementStore()
 				certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, mockEndorsement, 2, "../domain/mocks/resources/aik-reqs-dir/")
@@ -115,7 +115,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
 
@@ -152,7 +152,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -190,7 +190,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -200,7 +200,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 			It("Return Identity Proof request response", func() {
 				router.Handle("/privacyca/identity-challenge-response", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostAiksController.IdentityRequestSubmitChallengeResponse))).Methods("POST")
 
-				// Mock TA Flow for generating data for identityChallengeRequestReponse
+				// Mock TA Flow for generating data for identityChallengeRequestResponse
 				aikModulus, _ := base64.StdEncoding.DecodeString("musrA8GOcUtcD3phno/e4XseAdzLG/Ff1qXBIZ/GWdQUKTvOQlUq5P+BJLD1ifp7bpyvXdpesnHZuhXpi4AM8D2uJYTs4MeamMJ2LKAu/zSk9IDz4Z4gnQACSGSWzqafXv8OAh6D7/EOjzUh/sjkZdTVjsKzyHGp7GbY+G+mt9/PdF1e4/TJlp41s6rQ6BAJ0mA4gNdkrJLW2iedM1MZJn2JgYWDtxej5wD6Gm7/BGD+Rn9wqyU4U6fjEsNqeXj0E0DtkreMAi9cAQuoagckvh/ru1o8psyzTM+Bk+EqpFrfg3nz4nDC+Nrz+IBjuJuFGNUUFbxC6FrdtX4c2jnQIQ==")
 				aikName, _ := base64.StdEncoding.DecodeString("AAuTbAaKYOG2opc4QXq0QzsUHFRMsV0m5lcmRK4SLrzdRA==")
 				identityReq := taModel.IdentityRequest{
@@ -233,7 +233,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
 
@@ -273,7 +273,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})

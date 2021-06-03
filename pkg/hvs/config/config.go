@@ -70,7 +70,7 @@ type VCSSConfig struct {
 }
 
 type NatsConfig struct {
-	Servers []string `yaml:"servers" mapstructure: "servers"`
+	Servers []string `yaml:"servers" mapstructure:"servers"`
 }
 
 // this function sets the configure file name and type

@@ -74,12 +74,14 @@ type EventLogEqual struct {
 }
 
 type PcrEventLogMap struct {
-	Sha1EventLogs   []TpmEventLog `json:"SHA1"`
-	Sha256EventLogs []TpmEventLog `json:"SHA256"`
+	Sha1EventLogs   []TpmEventLog `json:"SHA1,omitempty"`
+	Sha256EventLogs []TpmEventLog `json:"SHA256,omitempty"`
+	Sha384EventLogs []TpmEventLog `json:"SHA384,omitempty"`
 }
 type PcrManifest struct {
-	Sha1Pcrs       []HostManifestPcrs `json:"sha1pcrs"`
-	Sha256Pcrs     []HostManifestPcrs `json:"sha2pcrs"`
+	Sha1Pcrs       []HostManifestPcrs `json:"sha1pcrs,omitempty"`
+	Sha256Pcrs     []HostManifestPcrs `json:"sha2pcrs,omitempty"`
+	Sha384Pcrs     []HostManifestPcrs `json:"sha3pcrs,omitempty"`
 	PcrEventLogMap PcrEventLogMap     `json:"pcr_event_log_map"`
 }
 
@@ -194,7 +196,7 @@ func GetPcrIndexFromString(stringValue string) (PcrIndex, error) {
 
 // Finds the Pcr in a PcrManifest provided the pcrBank and index.  Returns
 // null if not found.  Returns an error if the pcrBank is not supported
-// by intel-secl (currently supports SHA1 and SHA256).
+// by intel-secl (currently supports SHA1, SHA256 and SHA384).
 func (pcrManifest *PcrManifest) GetPcrValue(pcrBank SHAAlgorithm, pcrIndex PcrIndex) (*HostManifestPcrs, error) {
 	// TODO: Is this the right data model for the PcrManifest?  Two things...
 	// - Flavor API returns a map[bank]map[pcrindex]
@@ -216,6 +218,13 @@ func (pcrManifest *PcrManifest) GetPcrValue(pcrBank SHAAlgorithm, pcrIndex PcrIn
 				break
 			}
 		}
+	case SHA384:
+		for _, pcr := range pcrManifest.Sha384Pcrs {
+			if pcr.Index == pcrIndex {
+				pcrValue = &pcr
+				break
+			}
+		}
 	default:
 		return nil, errors.Errorf("Unsupported sha algorithm %s", pcrBank)
 	}
@@ -223,15 +232,15 @@ func (pcrManifest *PcrManifest) GetPcrValue(pcrBank SHAAlgorithm, pcrIndex PcrIn
 	return pcrValue, nil
 }
 
-// IsEmpty returns true if both the Sha1Pcrs and Sha256Pcrs
+// IsEmpty returns true if both the Sha1Pcrs, Sha256Pcrs and Sha384Pcrs
 // are empty.
 func (pcrManifest *PcrManifest) IsEmpty() bool {
-	return len(pcrManifest.Sha1Pcrs) == 0 && len(pcrManifest.Sha256Pcrs) == 0
+	return len(pcrManifest.Sha1Pcrs) == 0 && len(pcrManifest.Sha256Pcrs) == 0 && len(pcrManifest.Sha384Pcrs) == 0
 }
 
 // Finds the EventLogEntry in a PcrEventLogMap provided the pcrBank and index.  Returns
 // null if not found.  Returns an error if the pcrBank is not supported
-// by intel-secl (currently supports SHA1 and SHA256).
+// by intel-secl (currently supports SHA1, SHA256 and SHA384).
 func (pcrEventLogMap *PcrEventLogMap) GetEventLogNew(pcrBank string, pcrIndex int) ([]EventLog, int, string, error) {
 	var eventLog []EventLog
 	var pIndex int
@@ -249,6 +258,15 @@ func (pcrEventLogMap *PcrEventLogMap) GetEventLogNew(pcrBank string, pcrIndex in
 		}
 	case SHA256:
 		for _, entry := range pcrEventLogMap.Sha256EventLogs {
+			if entry.Pcr.Index == pcrIndex {
+				eventLog = entry.TpmEvent
+				pIndex = entry.Pcr.Index
+				bank = entry.Pcr.Bank
+				break
+			}
+		}
+	case SHA384:
+		for _, entry := range pcrEventLogMap.Sha384EventLogs {
 			if entry.Pcr.Index == pcrIndex {
 				eventLog = entry.TpmEvent
 				pIndex = entry.Pcr.Index
@@ -396,6 +414,12 @@ func (pcrManifest *PcrManifest) GetEventLogCriteria(pcrBank SHAAlgorithm, pcrInd
 				return eventLogEntry.TpmEvent, nil
 			}
 		}
+	case "SHA384":
+		for _, eventLogEntry := range pcrManifest.PcrEventLogMap.Sha384EventLogs {
+			if eventLogEntry.Pcr.Index == pI {
+				return eventLogEntry.TpmEvent, nil
+			}
+		}
 	default:
 		return nil, fmt.Errorf("Unsupported sha algorithm %s", pcrBank)
 	}
@@ -413,6 +437,10 @@ func (pcrManifest *PcrManifest) GetPcrBanks() []SHAAlgorithm {
 	// check if each known digest algorithm is present and return
 	if len(pcrManifest.Sha256Pcrs) > 0 {
 		bankList = append(bankList, SHA256)
+	}
+	// check if each known digest algorithm is present and return
+	if len(pcrManifest.Sha384Pcrs) > 0 {
+		bankList = append(bankList, SHA384)
 	}
 
 	return bankList

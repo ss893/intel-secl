@@ -32,7 +32,7 @@ var _ = Describe("VersionController", func() {
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var version string
 				version = string(w.Body.Bytes())

@@ -196,7 +196,7 @@ var _ = Describe("FlavorController", func() {
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(404))
+				Expect(w.Code).To(Equal(http.StatusNotFound))
 			})
 		})
 	})

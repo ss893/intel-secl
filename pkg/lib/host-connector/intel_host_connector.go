@@ -57,16 +57,12 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 
 	var verificationNonce string
 	var hostManifest types.HostManifest
-	var pcrBankList []string
 
 	//Hardcoded pcr list here since there is no use case for customized pcr list
 	if pcrList == nil || len(pcrList) == 0 {
 		log.Infof("intel_host_connector:GetHostManifestAcceptNonce() pcrList is empty")
 		pcrList = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}
 	}
-
-	//always request sha1/sha256 PCR banks from TA
-	pcrBankList = []string{"SHA1", "SHA256"}
 
 	//check if AIK Certificate is present on host before getting host manifest
 	aikInDER, err := ic.client.GetAIK()
@@ -82,7 +78,7 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 			"host details from TA")
 	}
 
-	tpmQuoteResponse, err := ic.client.GetTPMQuote(nonce, pcrList, pcrBankList)
+	tpmQuoteResponse, err := ic.client.GetTPMQuote(nonce, pcrList, []string{})
 	if err != nil {
 		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error getting TPM "+
 			"quote response")

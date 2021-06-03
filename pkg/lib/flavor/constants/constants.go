@@ -36,5 +36,6 @@ const (
 	//PCR Info
 	PCR22  = 22
 	SHA256 = "SHA256"
+	SHA384 = "SHA384"
 	SHA1   = "SHA1"
 )

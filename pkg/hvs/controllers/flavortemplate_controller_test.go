@@ -58,7 +58,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 0,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_equals": {}
@@ -75,7 +75,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 7,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_includes": [
@@ -127,7 +127,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 0,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_equals": {}
@@ -144,7 +144,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 7,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_includes": [
@@ -194,7 +194,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 0,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true
 								}
@@ -238,7 +238,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 0,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true
 								}
@@ -300,7 +300,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 0,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_equals": {}
@@ -317,7 +317,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 7,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_includes": [
@@ -367,7 +367,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 0,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_equals": {}
@@ -384,7 +384,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 7,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_includes": [
@@ -434,7 +434,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 0,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_equals": {}
@@ -451,7 +451,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 7,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_includes": [
@@ -498,7 +498,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 0,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_equals": {}
@@ -515,7 +515,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								{
 									"pcr": {
 										"index": 7,
-										"bank": "SHA256"
+										"bank": ["SHA384", "SHA256", "SHA1"]
 									},
 									"pcr_matches": true,
 									"eventlog_includes": [
