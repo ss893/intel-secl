@@ -31,7 +31,7 @@ const (
 	TpmIdentityCertsDir       = ConfigDir + "certs/tpm-identity/"
 
 	// defaults
-	DefaultKeyManager         = "Directory"
+	DefaultKeyManager         = "Kmip"
 	DefaultEndpointUrl        = "http://localhost"
 	DefaultTransferPolicy     = "urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization"
 	DefaultConfigFilePath     = ConfigDir + "config.yml"
@@ -66,8 +66,7 @@ const (
 	DefaultKBSListenerPort   = 9443
 
 	// keymanager constants
-	DirectoryKeyManager = "directory"
-	KmipKeyManager      = "kmip"
+	KmipKeyManager = "kmip"
 
 	// algorithm constants
 	CRYPTOALG_AES = "AES"
