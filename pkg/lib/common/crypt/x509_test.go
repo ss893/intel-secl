@@ -90,8 +90,8 @@ func TestVerifyX509CertChainGoodChain(t *testing.T) {
 	var allCerts []*x509.Certificate
 	allCerts = append(allCerts, rootCertx509, intermediate1Certx509, ekCertx509)
 
-	assert.NoError(t, VerifyX509CertChain(true, allCerts, nil))
-	assert.NoError(t, VerifyX509CertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
+	assert.NoError(t, VerifyEKCertChain(true, allCerts, nil))
+	assert.NoError(t, VerifyEKCertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
 }
 
 func TestVerifyX509CertChainExpired(t *testing.T) {
@@ -191,13 +191,13 @@ func TestVerifyX509CertChainExpired(t *testing.T) {
 	var allCerts []*x509.Certificate
 	allCerts = append(allCerts, rootCertx509, intermediate1Certx509, ekCertx509)
 
-	assert.Error(t, VerifyX509CertChain(true, allCerts, nil))
-	assert.Error(t, VerifyX509CertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
+	assert.Error(t, VerifyEKCertChain(true, allCerts, nil))
+	assert.Error(t, VerifyEKCertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
 
 	// unset the EK cert usage
 	ekCertx509.UnknownExtKeyUsage = nil
-	assert.Error(t, VerifyX509CertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
-	assert.Error(t, VerifyX509CertChain(false, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
+	assert.Error(t, VerifyEKCertChain(true, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
+	assert.Error(t, VerifyEKCertChain(false, []*x509.Certificate{ekCertx509}, GetCertPool(append([]x509.Certificate{}, *rootCertx509, *intermediate1Certx509))))
 
 }
 
@@ -255,5 +255,5 @@ func TestEmptyX509Verify(t *testing.T) {
 	var allCerts []*x509.Certificate
 	allCerts = append(allCerts, rootCertx509, intermediate1Certx509)
 
-	assert.Error(t, VerifyX509CertChain(true, allCerts, nil))
+	assert.Error(t, VerifyEKCertChain(true, allCerts, nil))
 }

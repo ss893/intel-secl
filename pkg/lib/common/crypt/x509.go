@@ -553,11 +553,11 @@ func GetLeafCert(certchain []*x509.Certificate) *x509.Certificate {
 	return cert
 }
 
-// VerifyX509CertChain verifies a cert chain for validity and ensures no certs have been
+// VerifyEKCertChain verifies a cert chain for validity and ensures no certs have been
 // revoked
-func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecPool *x509.CertPool) error {
-	if certchain == nil {
-		return errors.New("crypt/x509/VerifyX509CertChain: cert chain is empty")
+func VerifyEKCertChain(enableRevokeCheck bool, ekCertChain []*x509.Certificate, ecPool *x509.CertPool) error {
+	if ekCertChain == nil {
+		return errors.New("crypt/x509/VerifyEKCertChain: cert chain is empty")
 	}
 
 	var roots *x509.CertPool
@@ -570,7 +570,7 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 	var lc *x509.Certificate
 
 	// split into root and intermediate CAs
-	for _, cert := range certchain {
+	for _, cert := range ekCertChain {
 		if cert.IsCA {
 			// root certs have issuer == subject
 			if cert.Subject.String() == cert.Issuer.String() {
@@ -598,7 +598,7 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 	validExtKeyUsage := false
 
 	if lc == nil {
-		return errors.Errorf("crypt/x509/VerifyX509CertChain: leaf cert is missing from chain")
+		return errors.Errorf("crypt/x509/VerifyEKCertChain: leaf cert is missing from chain")
 	}
 
 	// check if the leaf cert has extended key usage 2.23.133.8.1 required for TPM EK Certs
@@ -610,7 +610,7 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 		}
 	}
 	if !validExtKeyUsage {
-		return errors.Errorf("crypt/x509/VerifyX509CertChain: cert %v "+
+		return errors.Errorf("crypt/x509/VerifyEKCertChain: cert %v "+
 			"EK cert key usage is not valid", lc.Subject.CommonName)
 	}
 
@@ -632,18 +632,18 @@ func VerifyX509CertChain(enableRevCheck bool, certchain []*x509.Certificate, ecP
 	}
 	_, err := lc.Verify(vopts)
 	if err != nil {
-		return errors.Wrapf(err, "crypt/x509/VerifyX509CertChain: cert %v "+
+		return errors.Wrapf(err, "crypt/x509/VerifyEKCertChain: cert %v "+
 			"failed verification", lc.Subject)
 	}
-	if enableRevCheck {
+	if enableRevokeCheck {
 		isRevoked, isOk := revoke.VerifyCertificate(lc)
 		if isOk {
 			if isRevoked {
-				return errors.Errorf("crypt/x509/VerifyX509CertChain: cert %v was "+
+				return errors.Errorf("crypt/x509/VerifyEKCertChain: cert %v was "+
 					"revoked", lc.Subject)
 			}
 		} else {
-			return errors.Errorf("crypt/x509/VerifyX509CertChain: revocation check "+
+			return errors.Errorf("crypt/x509/VerifyEKCertChain: revocation check "+
 				"failed for cert %v", lc.Subject)
 		}
 	}
