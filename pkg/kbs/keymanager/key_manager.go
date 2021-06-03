@@ -28,9 +28,9 @@ func NewKeyManager(cfg *config.KmipConfig, provider string) (KeyManager, error) 
 		if err != nil {
 			return nil, errors.Wrap(err, "keymanager/key_manager:NewKeyManager() Failed to initialize client")
 		}
-		return &KmipManager{kmipClient}, nil
+		return NewKmipManager(kmipClient), nil
 	} else {
-		return &DirectoryManager{}, nil
+		return nil, errors.Errorf("keymanager/key_manager:NewKeyManager() No Key Manager supported for provider: %s", provider)
 	}
 }
 

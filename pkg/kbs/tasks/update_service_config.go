@@ -29,7 +29,7 @@ type UpdateServiceConfig struct {
 const envHelpPrompt = "Following environment variables are required for update-service-config setup:"
 
 var allowedSKCChallengeTypes = map[string]bool{"sgx": true, "sw": true, "sgx,sw": true, "sw,sgx": true}
-var allowedKeyManagers = map[string]bool{"directory": true, "kmip": true}
+var allowedKeyManagers = map[string]bool{"kmip": true}
 
 var envHelp = map[string]string{
 	"SERVICE_USERNAME":           "The service username as configured in AAS",
@@ -103,7 +103,7 @@ func (uc UpdateServiceConfig) Validate() error {
 		return errors.New("Configured port is not valid")
 	}
 	if _, validInput := allowedKeyManagers[strings.ToLower((*uc.AppConfig).KeyManager)]; !validInput {
-		return errors.New("Invalid value provided for KEY_MANAGER. Value should be either directory or kmip")
+		return errors.New("Invalid value provided for KEY_MANAGER. Value should be kmip")
 	}
 	if (*uc.AppConfig).Skc.StmLabel != "" {
 		if _, validInput := allowedSKCChallengeTypes[strings.ToLower((*uc.AppConfig).Skc.StmLabel)]; !validInput {
