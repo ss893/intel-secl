@@ -9,17 +9,18 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
+	"math/big"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/intel-secl/intel-secl/v4/pkg/clients"
 	claas "github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"math/big"
-	"os"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -298,7 +299,7 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, NewRole("HVS", "AttestationRegister", "",
 				[]string{"hosts:store:*", "hosts:search:*", "host_unique_flavors:create:*", "flavors:search:*",
 					"host_aiks:certify:*", "tpm_endorsements:create:*", "tpm_endorsements:search:*"}))
-			urc.Roles = append(urc.Roles, NewRole("AAS", "CredentialCreator", "type=TA."+a.TaFqdn+"", []string{"credential:create:*"}))
+			urc.Roles = append(urc.Roles, NewRole("AAS", "CredentialCreator", "type=TA"+a.TaFqdn+"", []string{"credential:create:*"}))
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.TaCN, a.TaSanList))
 		case "IHUB", "SIH":
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.IhubCN, a.IhubSanList))

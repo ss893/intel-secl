@@ -8,6 +8,10 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+
 	"github.com/intel-secl/intel-secl/v4/pkg/authservice/common"
 	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
 	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
@@ -18,9 +22,6 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"github.com/nats-io/nkeys"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
-	"strings"
 )
 
 type CredentialsController struct {
@@ -62,7 +63,7 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 		controller.Username = *createCredReq.Parameters.HostId
 	}
 
-	if !validateComponentType(r, strings.ToUpper(createCredReq.ComponentType), controller.Username) {
+	if !validateComponentType(r, strings.ToUpper(createCredReq.ComponentType)) {
 		secLog.Errorf("controllers/credentials_controller:CreateCredentials() %s : Component details in request "+
 			"do not match token context", commLogMsg.InvalidInputBadParam)
 		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Component details in request do not match " +
@@ -106,7 +107,7 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 	return formattedUserCred, http.StatusCreated, nil
 }
 
-func validateComponentType(r *http.Request, componentType string, hostId string) bool {
+func validateComponentType(r *http.Request, componentType string) bool {
 	roles, err := context.GetUserRoles(r)
 	if err != nil {
 		return false
@@ -115,16 +116,9 @@ func validateComponentType(r *http.Request, componentType string, hostId string)
 	requiredRole := aas.RoleInfo{
 		Service: constants.ServiceName,
 		Name:    constants.CredentialCreatorRoleName,
+		Context: "type=" + componentType,
 	}
 
-	if componentType == constants.ComponentTypeHvs {
-		requiredRole.Context = "type=" + constants.ComponentTypeHvs
-	} else if componentType == constants.ComponentTypeTa {
-		requiredRole.Context = "type=" + constants.ComponentTypeTa + "." + hostId
-	} else {
-		log.Error("controllers/credentials_controller: validateComponentType() Invalid component type provided")
-		return false
-	}
 	//If component is TA, token context should contain "TA.<Host-id>" else "HVS"
 	for _, role := range roles {
 		if role == requiredRole {
