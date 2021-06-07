@@ -32,13 +32,14 @@ import (
 )
 
 type CertifyHostAiksController struct {
-	CertStore          *models.CertificatesStore
-	ECStore            domain.TpmEndorsementStore
-	AikCertValidity    int
-	AikRequestsDirPath string
+	CertStore           *models.CertificatesStore
+	ECStore             domain.TpmEndorsementStore
+	AikCertValidity     int
+	AikRequestsDirPath  string
+	IsCheckEkCertRevoke bool
 }
 
-func NewCertifyHostAiksController(certStore *models.CertificatesStore, ecstore domain.TpmEndorsementStore, aikCertValidity int, aikReqsDir string) *CertifyHostAiksController {
+func NewCertifyHostAiksController(certStore *models.CertificatesStore, ecstore domain.TpmEndorsementStore, aikCertValidity int, aikReqsDir string, isCheckEkCertRevoke bool) *CertifyHostAiksController {
 	defaultLog.Trace("controllers/certify_host_aiks_controller:NewCertifyHostAiksController() Entering")
 	defer defaultLog.Trace("controllers/certify_host_aiks_controller:NewCertifyHostAiksController() Leaving")
 	// CertStore should have an entry for Privacyca key
@@ -54,7 +55,7 @@ func NewCertifyHostAiksController(certStore *models.CertificatesStore, ecstore d
 		return nil
 	}
 
-	return &CertifyHostAiksController{CertStore: certStore, ECStore: ecstore, AikCertValidity: aikCertValidity, AikRequestsDirPath: aikReqsDir}
+	return &CertifyHostAiksController{CertStore: certStore, ECStore: ecstore, AikCertValidity: aikCertValidity, AikRequestsDirPath: aikReqsDir, IsCheckEkCertRevoke: isCheckEkCertRevoke}
 }
 
 func (certifyHostAiksController *CertifyHostAiksController) StoreEkCerts(identityRequestChallenge, ekCertBytes []byte, identityChallengePayload taModel.IdentityChallengePayload) error {
@@ -205,7 +206,7 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 
 	// verify the complete certificate chain OR
 	// check if the certificate is already present in the ECStore
-	if err = crypt.VerifyEKCertChain(false, ekCertChain, crypt.GetCertPool(endorsementCerts)); !certifyHostAiksController.isEkCertRegistered(ekLeafCert) && err != nil {
+	if err = crypt.VerifyEKCertChain(certifyHostAiksController.IsCheckEkCertRevoke, ekCertChain, crypt.GetCertPool(endorsementCerts)); !certifyHostAiksController.isEkCertRegistered(ekLeafCert) && err != nil {
 		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted, Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is not registered with hvs")
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
 	}

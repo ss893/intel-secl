@@ -178,7 +178,7 @@ const (
 	MaxNumDaysSearchLimit = 365
 )
 
-//Schema location constansts
+//Schema location constants
 const (
 	CommonDefinitionsSchema = "/etc/hvs/schema/common.schema.json"
 	FlavorTemplateSchema    = "/etc/hvs/schema/flavor-template.json"
@@ -195,3 +195,6 @@ const (
 	HrrsRefreshPeriod                  = "hrrs-refresh-period"
 	VcssRefreshPeriod                  = "vcss-refresh-period"
 )
+
+// EnableEKCertRevokeCheck
+const EnableEKCertRevokeCheck = "enable-ekcert-revoke-check"

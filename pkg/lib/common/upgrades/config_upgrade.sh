@@ -2,16 +2,16 @@
 #iterate over all files in "config" directory which installer must copy
 # run all config upgrade scripts from current version to the latest version
 # e.g. v3.5.0 to v3.7.0 upgrade should run all following scripts
-# v3.5.1_{comopnent}_config.sh
-# v3.6.0_{comopnent}_config.sh
-# v3.6.1_{comopnent}_config.sh
-# v3.6.2_{comopnent}_config.sh
-# v3.7.0_{comopnent}_config.sh
+# v3.5.1_{component}_config.sh
+# v3.6.0_{component}_config.sh
+# v3.6.1_{component}_config.sh
+# v3.6.2_{component}_config.sh
+# v3.7.0_{component}_config.sh
 # but config update script should not run anything like
-# v3.2.0_{comopnent}_config.sh
-# v3.4.0_{comopnent}_config.sh
-# v3.4.1_{comopnent}_config.sh
-# v3.5.0_{comopnent}_config.sh
+# v3.2.0_{component}_config.sh
+# v3.4.0_{component}_config.sh
+# v3.4.1_{component}_config.sh
+# v3.5.0_{component}_config.sh
 
 #Upgrade config
 #get currently installed version number after removing '.'

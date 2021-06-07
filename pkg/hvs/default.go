@@ -104,16 +104,14 @@ func defaultConfig() *config.Configuration {
 		AASApiUrl:        viper.GetString("aas-base-url"),
 		CMSBaseURL:       viper.GetString("cms-base-url"),
 		CmsTlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
-		Dek:              viper.GetString("data-encryption-key"),
-		AikCertValidity:  viper.GetInt("aik-certificate-validity-years"),
+		HVS: commConfig.ServiceConfig{
+			Username: viper.GetString("hvs-service-username"),
+			Password: viper.GetString("hvs-service-password"),
+		},
 		AuditLog: config.AuditLogConfig{
 			MaxRowCount: viper.GetInt("audit-log-max-row-count"),
 			NumRotated:  viper.GetInt("audit-log-number-rotated"),
 			BufferSize:  viper.GetInt("audit-log-buffer-size"),
-		},
-		HVS: commConfig.ServiceConfig{
-			Username: viper.GetString("hvs-service-username"),
-			Password: viper.GetString("hvs-service-password"),
 		},
 		TLS: commConfig.TLSCertConfig{
 			CertFile:   viper.GetString("tls-cert-file"),
@@ -156,6 +154,8 @@ func defaultConfig() *config.Configuration {
 			Issuer:       viper.GetString("tag-ca-issuer"),
 			ValidityDays: viper.GetInt("tag-ca-validity-years"),
 		},
+		Dek:             viper.GetString("data-encryption-key"),
+		AikCertValidity: viper.GetInt("aik-certificate-validity-years"),
 		Log: commConfig.LogConfig{
 			MaxLength:    viper.GetInt("log-max-length"),
 			EnableStdout: viper.GetBool("log-enable-stdout"),
@@ -164,15 +164,16 @@ func defaultConfig() *config.Configuration {
 		HRRS: hrrs.HRRSConfig{
 			RefreshPeriod: viper.GetDuration(constants.HrrsRefreshPeriod),
 		},
-		VCSS: config.VCSSConfig{
-			RefreshPeriod: viper.GetDuration(constants.VcssRefreshPeriod),
-		},
 		FVS: config.FVSConfig{
 			NumberOfVerifiers:               viper.GetInt(constants.FvsNumberOfVerifiers),
 			NumberOfDataFetchers:            viper.GetInt(constants.FvsNumberOfDataFetchers),
 			SkipFlavorSignatureVerification: viper.GetBool(constants.FvsSkipFlavorSignatureVerification),
 			HostTrustCacheThreshold:         viper.GetInt(constants.FvsHostTrustCacheThreshold),
 		},
+		VCSS: config.VCSSConfig{
+			RefreshPeriod: viper.GetDuration(constants.VcssRefreshPeriod),
+		},
+		EnableEkCertRevokeChecks: viper.GetBool(constants.EnableEKCertRevokeCheck),
 	}
 }
 

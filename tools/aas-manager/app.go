@@ -809,7 +809,7 @@ func (a *App) Setup(args []string) error {
 		if jsonOut == "" {
 			jsonOut = "./populate-users.json"
 		}
-		fmt.Println("\n\nWrting Output to json file - ", jsonOut)
+		fmt.Println("\n\nWriting Output to json file - ", jsonOut)
 		outFile, err := os.OpenFile(jsonOut, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0)
 		if err != nil {
 			fmt.Println("could not open output json file - %s for writing" + jsonOut)

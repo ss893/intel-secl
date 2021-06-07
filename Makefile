@@ -107,6 +107,8 @@ download-eca:
 	cabextract certs/TrustedTpm.cab -d certs
 	find certs/ \( -name '*.der' -or -name '*.crt' -or -name '*.cer' \) | sed 's| |\\ |g' | xargs -L1 openssl x509 -inform DER -outform PEM -in >> build/linux/hvs/external-eca.pem 2> /dev/null || true
 	rm -rf certs
+	wget https://tsci.intel.com/content/OnDieCA/certs/TGL_00002003_OnDie_CA.cer && openssl x509 -inform DER -outform PEM -in TGL_00002003_OnDie_CA.cer >> build/linux/hvs/external-eca.pem 2> /dev/null || true
+	rm -rf TGL_00002003_OnDie_CA.cer
 
 test:
 	CGO_LDFLAGS="-Wl,-rpath -Wl,/usr/local/lib" CGO_CFLAGS_ALLOW="-f.*" go test ./... -coverprofile cover.out
