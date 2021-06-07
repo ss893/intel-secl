@@ -51,7 +51,7 @@ type CreateCredentialsReq struct {
 //   {
 //    	"type": "TA",
 //    	"parameters": {
-//        	"host-id": "abcd"
+//        	"host-id": "<TA FQDN>"
 //   	 }
 //   }
 // x-sample-call-output: |

@@ -52,18 +52,21 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
 	}
 
-	if strings.ToUpper(createCredReq.ComponentType) == constants.ComponentTypeTa && createCredReq.Parameters != nil &&
-		createCredReq.Parameters.HostId != nil {
-		err = validation.ValidateHostname(*createCredReq.Parameters.HostId)
-		if err != nil {
-			secLog.WithError(err).Errorf("controllers/credentials_controller:CreateCredentials() %s : Invalid "+
-				"host id provided in request body", commLogMsg.InvalidInputBadEncoding)
-			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid host id provided"}
+	if strings.ToUpper(createCredReq.ComponentType) == constants.ComponentTypeTa {
+		if createCredReq.Parameters != nil && createCredReq.Parameters.TaHostId != nil {
+			err = validation.ValidateHostname(*createCredReq.Parameters.TaHostId)
+			if err != nil {
+				secLog.WithError(err).Errorf("controllers/credentials_controller:CreateCredentials() %s : Invalid "+
+					"host FQDN provided in request body", commLogMsg.InvalidInputBadEncoding)
+				return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid host FQDN provided"}
+			}
+			controller.Username = *createCredReq.Parameters.TaHostId
+		} else {
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Host FQDN is not provided"}
 		}
-		controller.Username = *createCredReq.Parameters.HostId
 	}
 
-	if !validateComponentType(r, strings.ToUpper(createCredReq.ComponentType)) {
+	if !validateComponentType(r, strings.ToUpper(createCredReq.ComponentType), controller.Username) {
 		secLog.Errorf("controllers/credentials_controller:CreateCredentials() %s : Component details in request "+
 			"do not match token context", commLogMsg.InvalidInputBadParam)
 		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Component details in request do not match " +
@@ -107,7 +110,7 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 	return formattedUserCred, http.StatusCreated, nil
 }
 
-func validateComponentType(r *http.Request, componentType string) bool {
+func validateComponentType(r *http.Request, componentType string, fqdn string) bool {
 	roles, err := context.GetUserRoles(r)
 	if err != nil {
 		return false
@@ -116,13 +119,27 @@ func validateComponentType(r *http.Request, componentType string) bool {
 	requiredRole := aas.RoleInfo{
 		Service: constants.ServiceName,
 		Name:    constants.CredentialCreatorRoleName,
-		Context: "type=" + componentType,
 	}
 
-	//If component is TA, token context should contain "TA.<Host-id>" else "HVS"
+	if componentType == constants.ComponentTypeHvs {
+		requiredRole.Context = "type=" + constants.ComponentTypeHvs
+	} else if componentType == constants.ComponentTypeTa {
+		requiredRole.Context = "type=" + constants.ComponentTypeTa
+	} else {
+		log.Error("controllers/credentials_controller: validateComponentType() Invalid component type provided")
+		return false
+	}
+
 	for _, role := range roles {
 		if role == requiredRole {
 			return true
+		} else if componentType == constants.ComponentTypeTa {
+			oldContext := requiredRole.Context
+			requiredRole.Context += fqdn
+			if role == requiredRole {
+				return true
+			}
+			requiredRole.Context = oldContext
 		}
 	}
 

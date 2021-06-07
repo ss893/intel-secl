@@ -81,5 +81,5 @@ type CreateCredentialsReq struct {
 }
 
 type Parameters struct {
-	HostId *string `json:"host-id,omitempty"`
+	TaHostId *string `json:"host-id,omitempty"`
 }

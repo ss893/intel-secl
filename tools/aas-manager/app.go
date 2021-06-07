@@ -344,13 +344,9 @@ func (a *App) GetCustomClaimsTokenMap() (map[string]string, error) {
 	for k, _ := range a.CustomClaimsComponents {
 		switch k {
 		case "TA":
-			if strings.TrimSpace(a.TaFqdn) == "" {
-				fmt.Println("TA_FQDN not set. Skipping custom claims token creation for TA...")
-				continue
-			}
 			customClaims.Subject = "TA"
 			claims := `{"roles": [{"service": "HVS","name": "AttestationRegisterOutbound"},{"service": "AAS","name": 
-"CredentialCreator","context": "type=TA.` + a.TaFqdn + `"}],"permissions": [{"service": "HVS","rules": ["host_aiks:certify:*", 
+"CredentialCreator","context": "type=TA` + a.TaFqdn + `"}],"permissions": [{"service": "HVS","rules": ["host_aiks:certify:*", 
 "tpm_endorsements:create:*", "tpm_endorsements:search:*"]},{"service": "AAS","rules": ["credential:create:*"]}]}`
 			customClaims.ValiditySecs = validitySecs
 
@@ -509,9 +505,11 @@ func (a *App) LoadAllVariables(envFile string) error {
 
 	// set up the app map with components that need custom claims token
 	ccc := strings.Split(customClaimsComponent, ",")
-	a.CustomClaimsComponents = make(map[string]bool)
-	for i := range ccc {
-		a.CustomClaimsComponents[strings.TrimSpace(ccc[i])] = true
+	if len(ccc) != 1 && strings.TrimSpace(ccc[1]) != "" {
+		a.CustomClaimsComponents = make(map[string]bool)
+		for i := range ccc {
+			a.CustomClaimsComponents[strings.TrimSpace(ccc[i])] = true
+		}
 	}
 	return nil
 }
@@ -798,7 +796,7 @@ func (a *App) Setup(args []string) error {
 				return err
 			}
 			for component, token := range cctMap {
-				fmt.Printf("Custom Claims Token For %s:\n%s", component, token)
+				fmt.Printf("Custom Claims Token For %s:\n%s\n", component, token)
 			}
 		} else {
 			return errors.New("CCC_ADMIN_USERNAME and/or CCC_ADMIN_PASSWORD is not set")
