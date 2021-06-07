@@ -6,11 +6,13 @@
 package hvs
 
 import (
+	"encoding/xml"
 	"github.com/google/uuid"
 	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 )
 
 type ManifestRequest struct {
+	XMLName xml.Name `xml:"ManifestRequest"`
 	// swagger:strfmt uuid
 	HostId           uuid.UUID      `xml:"hostId,omitempty"`
 	ConnectionString string         `xml:"connectionString"`

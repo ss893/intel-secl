@@ -80,7 +80,7 @@ func (factory *ruleFactory) GetVerificationRules() ([]rules.Rule, string, error)
 
 	}
 
-	log.Info("requiredRules:", requiredRules)
+	log.Infof("requiredRules: %v", requiredRules)
 
 	flavorPcrs := factory.signedFlavor.Flavor.Pcrs
 

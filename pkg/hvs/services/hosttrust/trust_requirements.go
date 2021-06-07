@@ -68,7 +68,7 @@ func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[cf.Fl
 		if err != nil {
 			return nil, errors.Wrap(err, "error searching flavor for host id "+hostId.String())
 		}
-		defaultLog.Debugf("%v from Flavorgroup %v Flavors retrieved with ALL_OF policy", fg.ID, len(reqs.AllOfFlavors))
+		defaultLog.Debugf("From Flavorgroup %v, %v Flavors retrieved with ALL_OF policy", fg.ID, len(reqs.AllOfFlavors))
 	}
 
 	reqPartsMap := fgRequirePolicyMap[hvs.FlavorRequired]
