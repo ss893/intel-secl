@@ -166,19 +166,21 @@ main() {
     fi
   fi
 
-  if [ "$UPGRADE_VERSION" = "$COMPONENT_VERSION" ]; then
-    echo "Installed component is already up to date, no need of upgrade"
-    echo "Exiting upgrade"
-    exit 125
-  fi
+  if [ -z "$BACKUP_ONLY" ]; then
+    if [ "$UPGRADE_VERSION" = "$COMPONENT_VERSION" ]; then
+      echo "Installed component is already up to date, no need of upgrade"
+      echo "Exiting upgrade"
+      exit 125
+    fi
 
-  UPGRADE_MANIFEST="./manifest/supported_versions"
-  IFS=$'\r\n' GLOBIGNORE='*' command eval 'SUPPORTED_VERSION=($(cat ${UPGRADE_MANIFEST}))'
-  if $(echo ${SUPPORTED_VERSION[@]} | grep -q "$COMPONENT_VERSION"); then
-    echo "Upgrade path from $COMPONENT_VERSION to $UPGRADE_VERSION is supported, proceeding with the upgrade"
-  else
-    echo "Upgrade path is not supported"
-    exit 1
+    UPGRADE_MANIFEST="./manifest/supported_versions"
+    IFS=$'\r\n' GLOBIGNORE='*' command eval 'SUPPORTED_VERSION=($(cat ${UPGRADE_MANIFEST}))'
+    if $(echo ${SUPPORTED_VERSION[@]} | grep -q "$COMPONENT_VERSION"); then
+      echo "Upgrade path from $COMPONENT_VERSION to $UPGRADE_VERSION is supported, proceeding with the upgrade"
+    else
+      echo "Upgrade path is not supported"
+      exit 1
+    fi
   fi
 
   stop_service
