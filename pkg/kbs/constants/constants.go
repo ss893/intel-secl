@@ -82,9 +82,8 @@ const (
 	NonceLength = 32
 )
 
-///SKC Specific constants
+// SKC Specific constants
 const (
-	DefaultSWLabel          = "SW"
 	DefaultSGXLabel         = "SGX"
 	VerifyQuote             = "/sgx_qv_verify_quote"
 	KeyTransferOpertaion    = "transfer key"
@@ -92,7 +91,6 @@ const (
 	SuccessStatus           = "success"
 	FailureStatus           = "failure"
 	SGXAlgorithmType        = "AES256-GCM"
-	SWAlgorithmType         = "AES256-WRAP"
 	TransferRoleType        = "KeyTransfer"
 	ContextPermissionsRegex = "^(permissions=)(.*)$"
 	TCBLevelOutOfDate       = "OutOfDate"
