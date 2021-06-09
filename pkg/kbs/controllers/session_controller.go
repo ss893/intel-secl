@@ -119,12 +119,6 @@ func (sc *SessionController) Create(responseWriter http.ResponseWriter, request 
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid create request"}
 	}
 
-	swQuote, err := checkAndvalidateSwQuote(sessionRequest)
-	if err != nil {
-		defaultLog.WithError(err).Error("controllers/session_controller:Create() invalid quote")
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "quote parameters mismatch"}
-	}
-
 	keyInfo := keytransfer.GetKeyInfo()
 	sessionObj := keyInfo.GetSessionObj(sessionRequest.Challenge)
 
@@ -132,36 +126,30 @@ func (sc *SessionController) Create(responseWriter http.ResponseWriter, request 
 		defaultLog.WithError(err).Error("controllers/session_controller:Create() no session object found.")
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "no session object found"}
 	}
-	var resAttr kbs.QuoteVerifyAttributes
+
 	var responseAttributes *kbs.QuoteVerifyAttributes
 	rsaKey, err := getRsaPubKey(sessionRequest.Quote)
 	if err != nil {
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "rsa key extraction failed"}
 	}
-	if swQuote {
-		resAttr.Message = "Software(SW) Quote Verification Successful"
-		resAttr.ChallengeKeyType = constants.CRYPTOALG_RSA
-		resAttr.ChallengeRsaPublicKey = string(rsaKey)
-		responseAttributes = &resAttr
-	} else {
-		nonce, err := getNonce(sessionRequest.Challenge)
-		if err != nil {
-			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error in fetching the nonce"}
-		}
-		Quote, Key, err := extractKeyFromQuote(sessionRequest.Quote)
-		if err != nil {
-			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error while extracting public key"}
-		}
-		UserData := addKeyandNonce(Key, nonce)
-		// send ecdsa quote and user data(Enclave Public Key + nonce) to Quote Verification Service
-		responseAttributes, err = session.VerifyQuote(Quote, UserData, sc.config, sc.trustedCaCertDir)
-		if err != nil || responseAttributes == nil {
-			secLog.WithError(err).Error("controllers/session_controller:Create() Remote attestation for new session failed")
-			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Remote attestation for new session failed"}
-		}
-		responseAttributes.ChallengeKeyType = constants.CRYPTOALG_RSA
-		responseAttributes.ChallengeRsaPublicKey = string(rsaKey)
+
+	nonce, err := getNonce(sessionRequest.Challenge)
+	if err != nil {
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error in fetching the nonce"}
 	}
+	Quote, Key, err := extractKeyFromQuote(sessionRequest.Quote)
+	if err != nil {
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error while extracting public key"}
+	}
+	UserData := addKeyandNonce(Key, nonce)
+	// send ecdsa quote and user data(Enclave Public Key + nonce) to Quote Verification Service
+	responseAttributes, err = session.VerifyQuote(Quote, UserData, sc.config, sc.trustedCaCertDir)
+	if err != nil || responseAttributes == nil {
+		secLog.WithError(err).Error("controllers/session_controller:Create() Remote attestation for new session failed")
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Remote attestation for new session failed"}
+	}
+	responseAttributes.ChallengeKeyType = constants.CRYPTOALG_RSA
+	responseAttributes.ChallengeRsaPublicKey = string(rsaKey)
 	keyInfo.SessionResponseMap[sessionRequest.Challenge] = *responseAttributes
 
 	swkKey, err := session.SessionCreateSwk()
@@ -182,11 +170,7 @@ func (sc *SessionController) Create(responseWriter http.ResponseWriter, request 
 
 		}
 		respAttr.SessionData.SWK = wrappedKey
-		if sessionRequest.ChallengeType == constants.SWAlgorithmType {
-			respAttr.SessionData.AlgorithmType = constants.SWAlgorithmType
-		} else {
-			respAttr.SessionData.AlgorithmType = constants.SGXAlgorithmType
-		}
+		respAttr.SessionData.AlgorithmType = constants.SGXAlgorithmType
 		respAttr.Operation = constants.SessionOperation
 		respAttr.Status = constants.SuccessStatus
 	} else {
@@ -210,7 +194,7 @@ func validateSessionCreateRequest(sessionRequest kbs.SessionManagementAttributes
 		return errors.New("challenge_type/challenge/quote parameters are missing")
 	}
 
-	if sessionRequest.ChallengeType != constants.DefaultSWLabel && sessionRequest.ChallengeType != constants.DefaultSGXLabel {
+	if sessionRequest.ChallengeType != constants.DefaultSGXLabel {
 		return errors.New("challenge_type parameter is not correct.")
 	}
 
@@ -218,43 +202,6 @@ func validateSessionCreateRequest(sessionRequest kbs.SessionManagementAttributes
 		return errors.New("Challenge is not a base64 string")
 	}
 	return nil
-}
-
-func checkAndvalidateSwQuote(sessionRequest kbs.SessionManagementAttributes) (bool, error) {
-	defaultLog.Trace("controllers/session_controller:checkAndvalidateSwQuote() Entering")
-	defer defaultLog.Trace("controllers/session_controller:checkAndvalidateSwQuote() Leaving")
-
-	decodedQuote, err := base64.StdEncoding.DecodeString(sessionRequest.Quote)
-	if err != nil {
-		return false, errors.New("not a base64 encoded quote")
-	}
-	quoteSize := binary.LittleEndian.Uint32(decodedQuote[8:])
-
-	var quoteType string
-	if quoteSize == 0 {
-		quoteType = "SW"
-	} else {
-		quoteType = "SGX"
-	}
-	if quoteType != sessionRequest.ChallengeType {
-		return false, errors.New("quotetype in quote header does not match with accept-challenge")
-	}
-
-	keyInfo := keytransfer.GetKeyInfo()
-	sessionObj := keyInfo.GetSessionObj(sessionRequest.Challenge)
-
-	if sessionObj.Stmlabel != sessionRequest.ChallengeType {
-		return false, errors.New("challenge type in request does not match with existing session")
-	}
-
-	if sessionObj.SessionId == sessionRequest.Challenge && len(sessionObj.SWK) != 0 {
-		return false, errors.New("using existing challenge for establishing new session")
-	}
-
-	if quoteType == "SW" {
-		return true, nil
-	}
-	return false, nil
 }
 
 // getRsaPubKey extracts the modulus/exponent values and public key blob
