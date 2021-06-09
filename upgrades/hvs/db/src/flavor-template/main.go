@@ -136,6 +136,9 @@ func downloadFlavorsAndTemplates(cfg *hvsconfig.DBConfig, dataStore *postgres.Da
 		fmt.Println("Failed to download old flavors")
 		return nil, nil, err
 	}
+	if signedFlavors == nil {
+		return nil, nil, nil
+	}
 
 	//Downloading Flavor templates
 	ftStore := postgres.NewFlavorTemplateStore(dataStore)
@@ -177,6 +180,10 @@ func main() {
 		fmt.Println("Error in downloading Flavors/flavor templates : ", err)
 		os.Exit(1)
 	}
+	if signedFlavors == nil {
+		fmt.Println("\n No flavors present in database, no flavor conversion required")
+		return
+	}
 
 	// Get the private key if signing key file path is provided
 	flavorSignKey := getPrivateKey(signingKeyFilePath)
@@ -205,7 +212,6 @@ func main() {
 
 		//Skip converting the flavor if the flavor part is software
 		if flavor.Flavor.Meta.Description.FlavorPart == SoftwareFlavor {
-			fmt.Println("\nSkipping flavor conversion for Software flavor type")
 			continue
 		}
 

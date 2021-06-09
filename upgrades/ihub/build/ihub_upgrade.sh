@@ -6,7 +6,12 @@ BACKUP_PATH=${BACKUP_PATH}ihub/
 INSTALLED_EXEC_PATH=/opt/ihub/bin/ihub
 NEW_EXEC_NAME=ihub
 
-IHUB_INSTANCES=( $(pgrep -a ihub | grep "/usr/bin/ihub" | awk 'NF>1{print $NF}') )
+OLD_INSTANCE=`pgrep -a ihub | grep "/usr/bin/ihub" | wc -w`
+if [ $OLD_INSTANCE -eq 3 ] ; then
+  IHUB_INSTANCES=( "ihub" )
+else
+  IHUB_INSTANCES=( $(pgrep -a ihub | grep "/usr/bin/ihub" | awk 'NF>1{print $NF}') )
+fi
 declare -p IHUB_INSTANCES &>/dev/null
 
 INDEX=0

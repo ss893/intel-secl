@@ -15,7 +15,6 @@ import (
 	flavorModel "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v4/upgrades/hvs/db/src/flavor-template/model"
 	"github.com/jinzhu/gorm"
-	"github.com/pkg/errors"
 )
 
 var Db *postgres.DataStore
@@ -55,7 +54,7 @@ func DownloadOldFlavors(cfg *hvsconfig.DBConfig, db *gorm.DB) ([]model.SignedFla
 	}
 
 	if len(signedFlavors) <= 0 {
-		return nil, errors.New("There are no old flavors present in DB")
+		return nil, nil
 	}
 	fmt.Println("Downloading old flavors from database is successful")
 	return signedFlavors, nil
@@ -79,9 +78,7 @@ func UpdateFlavor(cfg *hvsconfig.DBConfig, db *gorm.DB, id uuid.UUID, flavor fla
 //GetDatabaseConnection returns a postgres.DataStore instance if establishing connection to Postgres DB is successful
 func GetDatabaseConnection(cfg *hvsconfig.DBConfig) (*postgres.DataStore, error) {
 
-	conf := postgres.NewDatabaseConfig(cfg.Vendor, cfg)
-
-	db, dbErr := postgres.New(conf)
+	db, dbErr := postgres.InitDatabase(cfg)
 	if dbErr != nil {
 		fmt.Println("Error in establishing connection to Db")
 		return nil, dbErr

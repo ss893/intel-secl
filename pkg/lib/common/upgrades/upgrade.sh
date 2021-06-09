@@ -214,13 +214,17 @@ main() {
 
   check_service_stop_status
 
-  echo "Migrating Configuration"
-  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config
-  exit_on_error false "Failed to upgrade the configuration to the latest."
-
   echo "Replacing executable to the latest version"
-  cp -f ${NEW_EXEC_NAME} ${INSTALLED_EXEC_PATH}
+  \cp -f ${NEW_EXEC_NAME} ${INSTALLED_EXEC_PATH}
   exit_on_error false "Failed to copy to new executable."
+
+  echo "Migrating Database if required"
+  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config "./database" ""
+  exit_on_error false "Failed to upgrade the database to the latest."
+
+  echo "Migrating Configuration if required"
+  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config "./config" ".sh"
+  exit_on_error false "Failed to upgrade the configuration to the latest."
 
   if [ "$NEW_EXEC_NAME" != "$OLD_EXEC_NAME" ]; then
     echo "Updating component directories and symlinks"
