@@ -148,8 +148,9 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 			if bindingKeyCertificate == nil {
 				log.Warn("intel_host_connector:GetHostManifestAcceptNonce() - " +
 					"Could not decode Binding key certificate. Unexpected response from client")
+			} else {
+				bindingKeyCertificateBase64 = base64.StdEncoding.EncodeToString(bindingKeyCertificate.Bytes)
 			}
-			bindingKeyCertificateBase64 = base64.StdEncoding.EncodeToString(bindingKeyCertificate.Bytes)
 		} else {
 			log.Warn("intel_host_connector:GetHostManifestAcceptNonce() " +
 				"Empty Binding Key received")
