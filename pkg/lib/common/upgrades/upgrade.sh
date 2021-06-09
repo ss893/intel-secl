@@ -168,7 +168,7 @@ main() {
 
   if [ -z "$BACKUP_ONLY" ]; then
     if [ "$UPGRADE_VERSION" = "$COMPONENT_VERSION" ]; then
-      echo "Installed component is already up to date, no need of upgrade"
+      echo "Installed component is already up to date, upgrade not required"
       echo "Exiting upgrade"
       exit 125
     fi

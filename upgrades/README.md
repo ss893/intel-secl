@@ -26,8 +26,6 @@ Latest release: v4.0.0
 
 
 NOTE:
-iHUB and WPM does not support direct upgrade from v3.5.0 to v4.0.0. As,
-1. iHUB service has been changed from single instance to multi-instance support in v3.6.0.
-2. WPM has changed its directory structure
+WPM does not support direct upgrade from v3.5.0 to v4.0.0. As we have changed directory structure of WPM in v3.6
 
-For these two components, user need to upgrade to v3.6.0 first then to the latest version v4.0.0
+For WPM, user need to upgrade to v3.6.0 first then to the latest version v4.0.0
