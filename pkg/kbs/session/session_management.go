@@ -26,11 +26,11 @@ func SessionCreateSwk() ([]byte, error) {
 	defaultLog.Trace("session/session_management:SessionCreateSwk() Entering")
 	defer defaultLog.Trace("session/session_management:SessionCreateSwk() Leaving")
 
-	//create an AES Key here of 256 bytes
+	// create an AES Key here of 256 bits
 	keyBytes := make([]byte, 32)
 	_, err := rand.Read(keyBytes)
 	if err != nil {
-		return nil, errors.Wrap(err, "session/session_management:SessionCreateSwk() Failed to read the key bytes")
+		return nil, errors.Wrap(err, "session/session_management:SessionCreateSwk() Failed to generate random key bytes")
 	}
 
 	return keyBytes, nil
