@@ -505,10 +505,11 @@ func (a *App) LoadAllVariables(envFile string) error {
 
 	// set up the app map with components that need custom claims token
 	ccc := strings.Split(customClaimsComponent, ",")
-	if len(ccc) != 1 && strings.TrimSpace(ccc[1]) != "" {
-		a.CustomClaimsComponents = make(map[string]bool)
-		for i := range ccc {
-			a.CustomClaimsComponents[strings.TrimSpace(ccc[i])] = true
+
+	a.CustomClaimsComponents = make(map[string]bool)
+	for _, component := range ccc {
+		if strings.TrimSpace(component) != "" {
+			a.CustomClaimsComponents[strings.TrimSpace(component)] = true
 		}
 	}
 	return nil
@@ -796,7 +797,7 @@ func (a *App) Setup(args []string) error {
 				return err
 			}
 			for component, token := range cctMap {
-				fmt.Printf("Custom Claims Token For %s:\n%s\n", component, token)
+				fmt.Printf("Custom Claims Token For %s:\nBEARER_TOKEN=%s\n", component, token)
 			}
 		} else {
 			return errors.New("CCC_ADMIN_USERNAME and/or CCC_ADMIN_PASSWORD is not set")
