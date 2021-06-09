@@ -28,7 +28,7 @@ type UpdateServiceConfig struct {
 
 const envHelpPrompt = "Following environment variables are required for update-service-config setup:"
 
-var allowedSKCChallengeTypes = map[string]bool{"sgx": true, "sw": true, "sgx,sw": true, "sw,sgx": true}
+var allowedSKCChallengeTypes = map[string]bool{"sgx": true}
 var allowedKeyManagers = map[string]bool{"kmip": true}
 
 var envHelp = map[string]string{
@@ -107,7 +107,7 @@ func (uc UpdateServiceConfig) Validate() error {
 	}
 	if (*uc.AppConfig).Skc.StmLabel != "" {
 		if _, validInput := allowedSKCChallengeTypes[strings.ToLower((*uc.AppConfig).Skc.StmLabel)]; !validInput {
-			return errors.New("Invalid value provided for SKC_CHALLENGE_TYPE. List of allowed values SGX, SW or any combination for SGX and SW")
+			return errors.New("Invalid value provided for SKC_CHALLENGE_TYPE. allowed value is SGX")
 		}
 	}
 	return nil
