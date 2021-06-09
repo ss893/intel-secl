@@ -92,11 +92,13 @@ func CreateJWTToken(keyPair nkeys.KeyPair, issuerKeyPair nkeys.KeyPair, creatorT
 		// create a new operator claim
 		claims = jwt.NewOperatorClaims(pk)
 		claims.(*jwt.OperatorClaims).Name = entityName
+		claims.(*jwt.OperatorClaims).Expires = time.Now().Add(time.Hour * 43800).Unix()
 		token, err = claims.(*jwt.OperatorClaims).Encode(issuerKeyPair)
 	} else if creatorType == constants.Account {
 		// create a new account claim
 		claims = jwt.NewAccountClaims(pk)
 		claims.(*jwt.AccountClaims).Name = entityName
+		claims.(*jwt.AccountClaims).Expires = time.Now().Add(time.Hour * 43800).Unix()
 		token, err = claims.(*jwt.AccountClaims).Encode(issuerKeyPair)
 	} else if creatorType == constants.User {
 		// create a new user claim
@@ -115,7 +117,7 @@ func CreateJWTToken(keyPair nkeys.KeyPair, issuerKeyPair nkeys.KeyPair, creatorT
 		} else {
 			return "", errors.New("invalid type provided")
 		}
-		claims.(*jwt.UserClaims).Expires = time.Now().Add(time.Hour * 48).Unix()
+		claims.(*jwt.UserClaims).Expires = time.Now().Add(time.Hour * 8760).Unix()
 		token, err = claims.(*jwt.UserClaims).Encode(issuerKeyPair)
 	}
 

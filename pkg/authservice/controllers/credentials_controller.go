@@ -77,7 +77,11 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 		log.WithError(err).Error("controllers/credentials_controller:CreateCredentials() Error creating user key pair")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error creating user nkeys"}
 	}
-	userSeed, _ := userKeyPair.Seed()
+	userSeed, err := userKeyPair.Seed()
+	if err != nil {
+		log.WithError(err).Error("controllers/credentials_controller:CreateCredentials() Error fetching user seed")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error fetching user seed"}
+	}
 
 	accountSeedBytes, err := ioutil.ReadFile(constants.AccountSeedFile)
 	if err != nil {
