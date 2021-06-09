@@ -20,8 +20,6 @@ const (
 )
 
 func (tpmInfoParser *tpmInfoParser) Init() error {
-	// don't do any checking in Init -- the TPM ACPI file may does not exist,
-	// which is ok and indicated a TPM is not present.
 	return nil
 }
 
@@ -29,10 +27,11 @@ func (tpmInfoParser *tpmInfoParser) Parse(hostInfo *model.HostInfo) error {
 
 	// check if the tpm device is present...
 	log.Debugf("Checking TPM device %q", tpmDeviceFile)
+
 	if _, err := os.Stat(tpmDeviceFile); os.IsNotExist(err) {
 		hostInfo.HardwareFeatures.TPM.Supported = false
 		hostInfo.HardwareFeatures.TPM.Enabled = false
-		log.Debugf("The TPM device at %q is not present, TPM will be considered not supported", tpmDeviceFile)
+		log.Debugf("The TPM device at %q is not present, TPM will be considered 'not supported'", tpmDeviceFile)
 		return nil
 	}
 
@@ -46,7 +45,7 @@ func (tpmInfoParser *tpmInfoParser) Parse(hostInfo *model.HostInfo) error {
 
 	file, err := os.Open(tpm2AcpiFile)
 	if err != nil {
-		return errors.Wrapf(err, "Failed to open TPM ACPI file from %q", tpm2AcpiFile)
+		return errors.Wrapf(err, "Failed to open TPM ACPI file from %q: ", tpm2AcpiFile)
 	}
 
 	defer func() {

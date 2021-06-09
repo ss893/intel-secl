@@ -19,11 +19,7 @@ func testSMBIOS(t *testing.T, expectedResults *model.HostInfo) {
 
 	smbiosInfoParser := smbiosInfoParser{}
 	smbiosInfoParser.Init()
-
-	err := smbiosInfoParser.Parse(&hostInfo)
-	if err != nil {
-		t.Errorf("Failed to parse SMBIOS: %v", err)
-	}
+	smbiosInfoParser.Parse(&hostInfo)
 
 	if !reflect.DeepEqual(&hostInfo, expectedResults) {
 		t.Errorf("The parsed SMBIOS data does not match the expected results.\nExpected: %+v\nActual: %+v\n", expectedResults, hostInfo)

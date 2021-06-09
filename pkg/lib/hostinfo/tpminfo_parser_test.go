@@ -17,11 +17,7 @@ func testTpm2Info(t *testing.T, expectedResults *model.HostInfo) {
 
 	tpmInfoParser := tpmInfoParser{}
 	tpmInfoParser.Init()
-
-	err := tpmInfoParser.Parse(&hostInfo)
-	if err != nil {
-		t.Errorf("Failed to parse TPM2: %v", err)
-	}
+	tpmInfoParser.Parse(&hostInfo)
 
 	if !reflect.DeepEqual(hostInfo.HardwareFeatures.TPM, expectedResults.HardwareFeatures.TPM) {
 		t.Errorf("The parsed TPM data does not match the expected results.\nExpected: %+v\nActual: %+v\n", expectedResults.HardwareFeatures.TPM, hostInfo.HardwareFeatures.TPM)

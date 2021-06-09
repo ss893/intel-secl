@@ -16,10 +16,7 @@ func testSecureBootParser(t *testing.T, expectedResults *model.HostInfo) {
 
 	secureBootParser := secureBootParser{}
 
-	err := secureBootParser.Parse(&hostInfo)
-	if err != nil {
-		t.Fatal(err)
-	}
+	secureBootParser.Parse(&hostInfo)
 
 	if !reflect.DeepEqual(hostInfo.HardwareFeatures.UEFI, expectedResults.HardwareFeatures.UEFI) {
 		t.Errorf("The parsed UEFI data does not match the expected results.\nExpected: %+v\nActual: %+v\n", expectedResults.HardwareFeatures.UEFI, hostInfo.HardwareFeatures.UEFI)

@@ -67,17 +67,16 @@ type smbiosTable struct {
 }
 
 func (smbiosInfoParser *smbiosInfoParser) Init() error {
-
-	if _, err := os.Stat(smbiosFile); os.IsNotExist(err) {
-		return errors.Errorf("Could not find SMBIOS file %q", smbiosFile)
-	}
-
 	return nil
 }
 
 func (smbiosInfoParser *smbiosInfoParser) Parse(hostInfo *model.HostInfo) error {
 
 	var err error
+
+	if _, err := os.Stat(smbiosFile); os.IsNotExist(err) {
+		return errors.Errorf("Could not find SMBIOS file %q", smbiosFile)
+	}
 
 	file, err := os.Open(smbiosFile)
 	if err != nil {

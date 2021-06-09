@@ -20,10 +20,8 @@ func testMsrInfoParser(t *testing.T, mockMsrReader msrReader, expectedResults *m
 		msrReader: mockMsrReader,
 	}
 
-	err := msrInfoParser.Parse(&hostInfo)
-	if err != nil {
-		t.Errorf("Failed to parse TXT: %v", err)
-	}
+	msrInfoParser.parseTxt(&hostInfo)
+	msrInfoParser.parseCbnt(&hostInfo)
 
 	if !reflect.DeepEqual(hostInfo.HardwareFeatures, expectedResults.HardwareFeatures) {
 		t.Errorf("The parsed MRS data does not match the expected results.\nExpected: %+v\nActual: %+v\n", expectedResults.HardwareFeatures, hostInfo.HardwareFeatures)

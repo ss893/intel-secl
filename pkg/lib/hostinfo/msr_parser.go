@@ -35,27 +35,33 @@ type msrInfoParser struct {
 	msrReader msrReader
 }
 
+// initialize 'msrReaderImpl' so that it can be mocked in unit tests.
 func (msrInfoParser *msrInfoParser) Init() error {
 
 	if _, err := os.Stat(msrFile); os.IsNotExist(err) {
-		return errors.Wrapf(err, "Could not find MSR file %q", msrFile)
+		return errors.Wrapf(err, "Failed to find MSR file %q", msrFile)
 	}
 
 	msrInfoParser.msrReader = &msrReaderImpl{}
-
 	return nil
 }
 
 func (msrInfoParser *msrInfoParser) Parse(hostInfo *model.HostInfo) error {
 
+	// if the msrReader is null, then something is wrong -- abort
+	// parsing and log an error
+	if msrInfoParser.msrReader == nil {
+		return errors.New("The MSR reader has not been initialized.")
+	}
+
 	err := msrInfoParser.parseTxt(hostInfo)
 	if err != nil {
-		return errors.Wrap(err, "Failed to parse TXT")
+		log.Errorf("Failed to parse TXT from msr: %+v", err)
 	}
 
 	err = msrInfoParser.parseCbnt(hostInfo)
 	if err != nil {
-		return errors.Wrap(err, "Failed to parse CBNT")
+		log.Errorf("Failed to parse CBNT from msr: %+v", err)
 	}
 
 	return nil
@@ -124,8 +130,7 @@ func (msrInfoParser *msrInfoParser) parseCbnt(hostInfo *model.HostInfo) error {
 //-------------------------------------------------------------------------------------------------
 // Implementation of msrReader
 //-------------------------------------------------------------------------------------------------
-type msrReaderImpl struct {
-}
+type msrReaderImpl struct{}
 
 // ReadAt seeks to 'offset', reads 8 bytes and returns the LittleEndian
 // uint64 value.

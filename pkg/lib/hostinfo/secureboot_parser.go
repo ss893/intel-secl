@@ -32,20 +32,19 @@ func (secureBootParser *secureBootParser) Parse(hostInfo *model.HostInfo) error 
 	var results uint32
 	file, err := os.Open(secureBootFile)
 	if err != nil {
-		return errors.Errorf("Failed to open secure-boot file %q", secureBootFile)
+		return errors.Wrapf(err, "Failed to open secure-boot file %q", secureBootFile)
 	}
 
 	defer func() {
 		err = file.Close()
 		if err != nil {
-			log.Errorf("Failed close secure-boot file %q: %s", secureBootFile, err.Error())
+			log.Errorf("Failed close secure-boot file %q: %+v", secureBootFile, err)
 		}
 	}()
 
 	err = binary.Read(file, binary.LittleEndian, &results)
 	if err != nil {
-		log.Warnf("The secure-boot file %q is too small.  SecureBoot will be considered disabled", secureBootFile)
-		return nil
+		return errors.Errorf("The secure-boot file %q is too small.  SecureBoot will be considered disabled", secureBootFile)
 	}
 
 	if results == 0 {
