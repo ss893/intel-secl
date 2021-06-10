@@ -168,51 +168,7 @@ else
   fi
 fi
 
-#Install secure docker daemon with wpm only if WPM_WITH_CONTAINER_SECURITY_DOCKER is enabled in wpm.env
-if [ "$WPM_WITH_CONTAINER_SECURITY_DOCKER" = "y" ] || [ "$WPM_WITH_CONTAINER_SECURITY_DOCKER" = "Y" ] || [ "$WPM_WITH_CONTAINER_SECURITY_DOCKER" = "yes" ]; then
-  which docker 2>/dev/null
-  if [ $? -ne 0 ]; then
-    echo "Error: Docker is required for Secure Docker Daemon to be installed!"
-    exit 1
-  fi
-  which cryptsetup 2>/dev/null
-  if [ $? -ne 0 ]; then
-    echo "Installing cryptsetup"
-    yum install -y cryptsetup
-    CRYPTSETUP_RESULT=$?
-    if [ $CRYPTSETUP_RESULT -ne 0 ]; then
-      echo "Error: Secure Docker Daemon requires cryptsetup - Install failed. Exiting."
-      exit $CRYPTSETUP_RESULT
-    fi
-  fi
-  echo "Installing secure docker daemon"
-  systemctl stop docker.service
-  mkdir -p $PRODUCT_HOME/secure-docker-daemon/backup
-  cp /usr/bin/docker $PRODUCT_HOME/secure-docker-daemon/backup/
-  # backup config files
-  if [ -f "/etc/docker/daemon.json" ]; then
-    cp /etc/docker/daemon.json $PRODUCT_HOME/secure-docker-daemon/backup
-  fi
-  chown -R root:root docker-daemon
-  cp -f docker-daemon/docker /usr/bin/
-  which /usr/bin/dockerd-ce 2>/dev/null
-  if [ $? -ne 0 ]; then
-    cp /usr/bin/dockerd $PRODUCT_HOME/secure-docker-daemon/backup/
-    cp -f docker-daemon/dockerd-ce /usr/bin/dockerd
-  else
-    cp /usr/bin/dockerd-ce $PRODUCT_HOME/secure-docker-daemon/backup/
-    cp -f docker-daemon/dockerd-ce /usr/bin/dockerd-ce
-  fi
-
-  # Replace existing daemon.json with the secureoverlay2 one
-  mkdir -p /etc/docker
-  cp daemon.json /etc/docker/
-
-  echo "Restarting docker"
-  systemctl daemon-reload
-  systemctl start docker.service
-  cp uninstall-secure-docker-daemon.sh $PRODUCT_HOME/secure-docker-daemon/
-elif [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "y" ] || [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "Y" ] || [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "yes" ]; then
+if [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "y" ] || [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "Y" ] || [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "yes" ]; then
   isinstalled=$(rpm -q skopeo)
   if [ "$isinstalled" == "package skopeo is not installed" ]; then
     echo "Prerequisite skopeo is not installed, please install skopeo before proceeding with container confidentiality."

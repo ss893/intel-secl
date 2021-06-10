@@ -79,23 +79,6 @@ aas-manager:
 	chmod +x deployments/installer/install_pgdb.sh
 	chmod +x deployments/installer/create_db.sh
 
-wpm-docker-installer: wpm
-	mkdir -p installer
-	cp build/linux/wpm/* installer/
-	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
-	cp pkg/lib/common/upgrades/config-upgrade installer/
-	cp pkg/lib/common/upgrades/*.sh installer/
-	cp -a upgrades/manifest/ installer/
-	cp -a upgrades/wpm/* installer/
-	mv installer/build/* installer/
-	chmod +x installer/*.sh
-	installer/build-secure-docker-daemon.sh
-	cp -rf secure-docker-daemon/out installer/docker-daemon
-	rm -rf secure-docker-daemon
-	cp cmd/wpm/wpm installer/wpm
-	makeself installer deployments/installer/wpm-$(VERSION).bin "wpm $(VERSION)" ./install.sh
-	rm -rf installer
-
 download-eca:
 	rm -rf build/linux/hvs/external-eca.pem
 	mkdir -p certs/
