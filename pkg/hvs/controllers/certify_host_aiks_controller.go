@@ -28,6 +28,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -204,11 +205,21 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is missing")
 	}
 
-	// verify the complete certificate chain OR
 	// check if the certificate is already present in the ECStore
-	if err = crypt.VerifyEKCertChain(certifyHostAiksController.IsCheckEkCertRevoke, ekCertChain, crypt.GetCertPool(endorsementCerts)); !certifyHostAiksController.isEkCertRegistered(ekLeafCert) && err != nil {
-		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted, Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is not registered with hvs")
-		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
+	if certifyHostAiksController.isEkCertRegistered(ekLeafCert) {
+		secLog.Infof("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is already registered with HVS")
+	} else {
+		// verify the complete certificate chain
+		err = crypt.VerifyEKCertChain(certifyHostAiksController.IsCheckEkCertRevoke, ekCertChain, crypt.GetCertPool(endorsementCerts))
+		if err != nil {
+			if strings.Contains(err.Error(), "revocation check failed for cert") {
+				secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC revocation check failed")
+				return taModel.IdentityProofRequest{}, http.StatusInternalServerError, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
+			} else {
+				secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC chain verification failed. Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is registered with hvs")
+				return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
+			}
+		}
 	}
 
 	identityRequestChallenge, err := crypt.GetRandomBytes(32)

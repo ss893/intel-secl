@@ -636,15 +636,17 @@ func VerifyEKCertChain(enableRevokeCheck bool, ekCertChain []*x509.Certificate, 
 			"failed verification", lc.Subject)
 	}
 	if enableRevokeCheck {
-		isRevoked, isOk := revoke.VerifyCertificate(lc)
-		if isOk {
-			if isRevoked {
-				return errors.Errorf("crypt/x509/VerifyEKCertChain: cert %v was "+
-					"revoked", lc.Subject)
+		for _, cert := range ekCertChain {
+			isRevoked, isOk := revoke.VerifyCertificate(cert)
+			if isOk {
+				if isRevoked {
+					return errors.Errorf("crypt/x509/VerifyEKCertChain: cert %v was "+
+						"revoked", cert.Subject)
+				}
+			} else {
+				return errors.Errorf("crypt/x509/VerifyEKCertChain: revocation check "+
+					"failed for cert %v", cert.Subject)
 			}
-		} else {
-			return errors.Errorf("crypt/x509/VerifyEKCertChain: revocation check "+
-				"failed for cert %v", lc.Subject)
 		}
 	}
 
