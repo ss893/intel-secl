@@ -6,7 +6,6 @@ package wpm
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/exec"
 	"github.com/intel-secl/intel-secl/v4/pkg/wpm/constants"
 	"os"
 )
@@ -52,38 +51,14 @@ func (a *App) execLinkPath() string {
 	return constants.ExecLinkPath
 }
 
-func removeSecureDockerDaemon() {
-	fmt.Println("Uninstalling secure-docker-daemon")
-
-	commandArgs := []string{constants.HomeDir + "secure-docker-daemon/uninstall-secure-docker-daemon.sh"}
-
-	_, err := exec.ExecuteCommand("/bin/sh", commandArgs)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while removing secure-docker-daemon %s:", err.Error())
-	}
-}
-
 func (a *App) uninstall(purge bool) error {
 	log.Trace("app:uninstall() Entering")
 	defer log.Trace("app:uninstall() Leaving")
 
 	fmt.Println("Uninstalling Workload Policy Manager")
 
-	_, err := os.Stat(constants.HomeDir + "secure-docker-daemon")
-	if err == nil {
-		removeSecureDockerDaemon()
-		// restart docker daemon
-		if err == nil {
-			commandArgs := []string{"start", "docker"}
-			_, err = exec.ExecuteCommand("systemctl", commandArgs)
-			if err != nil {
-				fmt.Print("Error starting docker daemon post-uninstall. Refer dockerd logs for more information.")
-			}
-		}
-	}
-
 	fmt.Println("removing : ", a.executablePath())
-	err = os.Remove(a.executablePath())
+	err := os.Remove(a.executablePath())
 	if err != nil {
 		log.WithError(err).Error("error removing executable")
 	}
