@@ -51,7 +51,6 @@ var envHelp = map[string]string{
 	"SERVER_IDLE_TIMEOUT":                    "Request Idle Timeout in Seconds",
 	"SERVER_MAX_HEADER_BYTES":                "Max Length of Request Header in Bytes",
 	"NAT_SERVERS":                            "List of NATs servers to establish connection with outbound TAs",
-	"ENABLE_EKCERT_REVOKE_CHECK":             "If enabled, revocation checks will be performed for EK certs for at time of AIK provisioning",
 }
 
 func (uc UpdateServiceConfig) Run() error {
@@ -97,7 +96,6 @@ func (uc UpdateServiceConfig) Run() error {
 			Servers: strings.Split(uc.NatServers, ","),
 		}
 	}
-	(*uc.AppConfig).EnableEkCertRevokeChecks = viper.GetBool(constants.EnableEKCertRevokeCheck)
 	return nil
 }
 

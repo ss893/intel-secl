@@ -61,7 +61,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 	aikPubKey := rsa.PublicKey{N: n, E: 65537}
 
 	BeforeEach(func() {
-		certifyHostAiksController := controllers.NewCertifyHostAiksController(certStore, &ecStore, 2, "", true)
+		certifyHostAiksController := controllers.NewCertifyHostAiksController(certStore, &ecStore, 2, "")
 		caKey := (*certStore)[models.CaCertTypesPrivacyCa.String()].Key
 		caCert := &(*certStore)[models.CaCertTypesPrivacyCa.String()].Certificates[0]
 		// Generate aik certificate

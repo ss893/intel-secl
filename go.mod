@@ -5,7 +5,6 @@ require (
 	github.com/Waterdrips/jwt-go v3.2.1-0.20200915121943-f6506928b72e+incompatible
 	github.com/antchfx/jsonquery v1.1.4
 	github.com/beevik/etree v1.1.0
-	github.com/cloudflare/cfssl v1.5.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible // indirect
 	github.com/google/uuid v1.1.1

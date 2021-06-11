@@ -36,14 +36,13 @@ type Configuration struct {
 	Dek             string `yaml:"data-encryption-key" mapstructure:"data-encryption-key"`
 	AikCertValidity int    `yaml:"aik-certificate-validity-years" mapstructure:"aik-certificate-validity-years"`
 
-	Server                   commConfig.ServerConfig `yaml:"server" mapstructure:"server"`
-	Log                      commConfig.LogConfig    `yaml:"log" mapstructure:"log"`
-	DB                       commConfig.DBConfig     `yaml:"db" mapstructure:"db"`
-	HRRS                     hrrs.HRRSConfig         `yaml:"hrrs" mapstructure:"hrrs"`
-	FVS                      FVSConfig               `yaml:"fvs" mapstructure:"fvs"`
-	VCSS                     VCSSConfig              `yaml:"vcss" mapstructure:"vcss"`
-	NATS                     NatsConfig              `yaml:"nats" mapstructure:"nats"`
-	EnableEkCertRevokeChecks bool                    `yaml:"enable-ekcert-revoke-check" mapstructure:"enable-ekcert-revoke-check"`
+	Server commConfig.ServerConfig `yaml:"server" mapstructure:"server"`
+	Log    commConfig.LogConfig    `yaml:"log" mapstructure:"log"`
+	DB     commConfig.DBConfig     `yaml:"db" mapstructure:"db"`
+	HRRS   hrrs.HRRSConfig         `yaml:"hrrs" mapstructure:"hrrs"`
+	FVS    FVSConfig               `yaml:"fvs" mapstructure:"fvs"`
+	VCSS   VCSSConfig              `yaml:"vcss" mapstructure:"vcss"`
+	NATS   NatsConfig              `yaml:"nats" mapstructure:"nats"`
 }
 
 type FVSConfig struct {

@@ -6,27 +6,20 @@ package controllers_test
 
 import (
 	"bytes"
-	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"crypto/x509/pkix"
-	"encoding/asn1"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/cloudflare/cfssl/crl"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
-	"math/big"
-	"net/http"
-	"net/http/httptest"
-	"time"
-
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
 	hvsRoutes "github.com/intel-secl/intel-secl/v4/pkg/hvs/router"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/privacyca"
 	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	"net/http"
+	"net/http/httptest"
 
 	"github.com/gorilla/mux"
 	. "github.com/onsi/ginkgo"
@@ -43,7 +36,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 	BeforeEach(func() {
 		router = mux.NewRouter()
 		cacert = &(*certStore)[models.CaCertTypesPrivacyCa.String()].Certificates[0]
-		certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, &ecStore, 2, "../domain/mocks/resources/aik-reqs-dir/", true)
+		certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, &ecStore, 2, "../domain/mocks/resources/aik-reqs-dir/")
 	})
 
 	Describe("Create Identity Proof request", func() {
@@ -85,104 +78,11 @@ var _ = Describe("CertifyHostAiksController", func() {
 			})
 		})
 
-		Context("Provide revoked certificate chain in request", func() {
-			It("Should get HTTP Status: 400", func() {
-				var revCrlBytes []byte
-
-				router.Handle("/privacyca/identity-challenge-request", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostAiksController.IdentityRequestGetChallenge))).Methods("POST")
-
-				// add CRL response handler
-				router.HandleFunc("/rootca.crl", func(w http.ResponseWriter, r *http.Request) {
-					_, _ = w.Write(revCrlBytes)
-				}).Methods("GET")
-
-				// Mock TA Flow for generating data for identityChallengeRequest
-				aikModulus, _ := base64.StdEncoding.DecodeString("musrA8GOcUtcD3phno/e4XseAdzLG/Ff1qXBIZ/GWdQUKTvOQlUq5P+BJLD1ifp7bpyvXdpesnHZuhXpi4AM8D2uJYTs4MeamMJ2LKAu/zSk9IDz4Z4gnQACSGSWzqafXv8OAh6D7/EOjzUh/sjkZdTVjsKzyHGp7GbY+G+mt9/PdF1e4/TJlp41s6rQ6BAJ0mA4gNdkrJLW2iedM1MZJn2JgYWDtxej5wD6Gm7/BGD+Rn9wqyU4U6fjEsNqeXj0E0DtkreMAi9cAQuoagckvh/ru1o8psyzTM+Bk+EqpFrfg3nz4nDC+Nrz+IBjuJuFGNUUFbxC6FrdtX4c2jnQIQ==")
-				aikName, _ := base64.StdEncoding.DecodeString("AAuTbAaKYOG2opc4QXq0QzsUHFRMsV0m5lcmRK4SLrzdRA==")
-				identityReq := taModel.IdentityRequest{
-					TpmVersion: "2.0",
-					AikModulus: aikModulus,
-					AikName:    aikName,
-				}
-
-				privacycaTpm2, err := privacyca.NewPrivacyCA(identityReq)
-				Expect(err).NotTo(HaveOccurred())
-				identityChallengeRequest := taModel.IdentityChallengePayload{}
-				identityChallengeRequest.IdentityRequest = identityReq
-
-				caKey, caCert, _ := crypt.CreateSelfSignedCertAndRSAPrivKeys()
-				crlIssuerCertx509, _ := crypt.GetCertFromPem([]byte(caCert))
-
-				ekCertPkixName := pkix.Name{
-					CommonName: "Acme TPM EK Cert",
-				}
-
-				// LEAF
-				ekCertTemplate := x509.Certificate{
-					SerialNumber:          big.NewInt(2023),
-					Subject:               ekCertPkixName,
-					NotBefore:             time.Now().AddDate(-2, 0, 0),
-					NotAfter:              time.Now().AddDate(1, 0, 0),
-					SubjectKeyId:          []byte{1, 2, 3, 4, 6},
-					KeyUsage:              x509.KeyUsageEncipherOnly,
-					OCSPServer:            []string{"http://ocsp.example.com"},
-					IssuingCertificateURL: []string{"http://crt.example.com/ca1.crt"},
-					DNSNames:              []string{"test.example.com"},
-					EmailAddresses:        []string{"somebody@thatiusedtoknow.org"},
-					UnknownExtKeyUsage:    []asn1.ObjectIdentifier{{2, 23, 133, 8, 1}},
-					ExtraExtensions: []pkix.Extension{
-						{
-							Id:    []int{1, 2, 3, 4},
-							Value: []byte("extra extension"),
-						},
-						// This extension should override the SubjectKeyId, above.
-						{
-							Id:       []int{2, 5, 29, 14},
-							Critical: false,
-							Value:    []byte{0x04, 0x04, 4, 3, 2, 1},
-						},
-					},
-					CRLDistributionPoints: []string{"http://rootca.crl"},
-				}
-
-				// create the EK leaf certificate
-				ekCertificateBytes, err := x509.CreateCertificate(rand.Reader, &ekCertTemplate, cacert,
-					cacert.PublicKey, caKey)
-
-				ekCertx509, _ := x509.ParseCertificate(ekCertificateBytes)
-
-				revokeCerts := []pkix.RevokedCertificate{
-					{
-						SerialNumber:   ekCertx509.SerialNumber,
-						RevocationTime: time.Now(),
-					},
-				}
-				revCrlBytes, _ = crl.CreateGenericCRL(revokeCerts, caKey, crlIssuerCertx509, time.Now().AddDate(1, 0, 0))
-
-				// Get the Identity challenge request
-				identityChallengeRequest, err = privacycaTpm2.GetIdentityChallengeRequest(ekCertificateBytes, cacert.PublicKey.(*rsa.PublicKey), identityChallengeRequest.IdentityRequest)
-				Expect(err).NotTo(HaveOccurred())
-				jsonData, _ := json.Marshal(identityChallengeRequest)
-
-				req, err := http.NewRequest(
-					"POST",
-					"/privacyca/identity-challenge-request",
-					bytes.NewBuffer(jsonData),
-				)
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusBadRequest))
-			})
-		})
-
 		Context("ek root ca not present in endorsement certificate and ek cert is registered", func() {
 			It("Should get HTTP Status: 200", func() {
 				// mockEndorsement is having the ekcert
 				mockEndorsement := mocks.NewFakeTpmEndorsementStore()
-				certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, mockEndorsement, 2, "../domain/mocks/resources/aik-reqs-dir/", true)
+				certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, mockEndorsement, 2, "../domain/mocks/resources/aik-reqs-dir/")
 				router.Handle("/privacyca/identity-challenge-request", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostAiksController.IdentityRequestGetChallenge))).Methods("POST")
 
 				// Mock TA Flow for generating data for identityChallengeRequest
