@@ -600,7 +600,7 @@ func SendDataToEndPoint(openstack OpenstackDetails) error {
 	for index := range openstack.HostDetails {
 		err := filterHostReportsForOpenstack(&openstack.HostDetails[index], &openstack)
 		if err != nil {
-			log.WithError(err).Errorf("openstackplugin/openstack_plugin:SendDataToEndPoint() Error in Filtering"+
+			log.WithError(err).Warnf("openstackplugin/openstack_plugin:SendDataToEndPoint() Could not Filter"+
 				" Host details for Openstack host %s", openstack.HostDetails[index].HostID.String())
 		}
 	}
@@ -608,7 +608,7 @@ func SendDataToEndPoint(openstack OpenstackDetails) error {
 	log.Info("openstackplugin/openstack_plugin:SendDataToEndPoint() Updating traits to Openstack for host : ", openstack.HostDetails)
 	err = updateOpenstackTraits(&openstack)
 	if err != nil {
-		return errors.Wrap(err, "openstackplugin/openstack_plugin:SendDataToEndPoint() Error in Filtering Host details for Openstack")
+		return errors.Wrap(err, "openstackplugin/openstack_plugin:SendDataToEndPoint() Error in updating Host traits for Openstack")
 	}
 
 	return nil

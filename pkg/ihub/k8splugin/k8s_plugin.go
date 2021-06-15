@@ -426,7 +426,7 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 		if kubernetes.Config.AttestationService.HVSBaseURL != "" {
 			err := FilterHostReports(&kubernetes, &hostDetails, kubernetes.TrustedCAsStoreDir, kubernetes.SamlCertFilePath)
 			if err != nil {
-				log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Error in Filtering Report for Hosts")
+				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get HostReport for host %s from HVS", hostDetails.HostID.String())
 			} else {
 				hvsFail = false
 				// mark Trust Agent as running on this host
@@ -436,7 +436,7 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 		if kubernetes.Config.AttestationService.SHVSBaseURL != "" {
 			platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostName, kubernetes.Config, kubernetes.TrustedCAsStoreDir)
 			if err != nil {
-				log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Host %s doesn't exist in SHVS", hostDetails.HostID)
+				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get HostPlatformData for host %s from SHVS", hostDetails.HostName)
 			} else {
 				shvsFail = false
 				// mark TEE agent as running on this host
