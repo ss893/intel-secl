@@ -7,7 +7,7 @@ package models
 import "github.com/google/uuid"
 
 type FlavorTemplateFilterCriteria struct {
-	Id                 uuid.UUID
+	Ids                []uuid.UUID
 	Label              string
 	ConditionContains  string
 	FlavorPartContains string

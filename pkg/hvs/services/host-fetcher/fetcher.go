@@ -456,9 +456,13 @@ func (svc *Service) updateMissingHostDetails(hostId uuid.UUID, manifest *types.H
 			// get flavorgroupID to create host-flavorgroup links
 			var fgIDs []uuid.UUID
 			for _, fgName := range host.FlavorgroupNames {
-				existingFlavorGroups, _ := svc.fgs.Search(&models.FlavorGroupFilterCriteria{
+				existingFlavorGroups, err := svc.fgs.Search(&models.FlavorGroupFilterCriteria{
 					NameEqualTo: fgName,
 				})
+				if err != nil {
+					defaultLog.Error("hostfetcher/Service:updateMissingHostDetails() Failed to search flavorgroup")
+					return
+				}
 				fgIDs = append(fgIDs, existingFlavorGroups[0].ID)
 			}
 			// add host-flavorgroup link

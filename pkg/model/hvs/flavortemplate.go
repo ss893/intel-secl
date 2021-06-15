@@ -44,6 +44,11 @@ type FlavorParts struct {
 	HostUnique *FlavorPart `json:"HOST_UNIQUE,omitempty"`
 }
 
+type FlavorTemplateReq struct {
+	FlavorgroupNames []string        `json:"flavorgroup_names,omitempty"`
+	FlavorTemplate   *FlavorTemplate `json:"flavor_template"`
+}
+
 type FlavorTemplate struct {
 	// swagger: strfmt uuid
 	ID    uuid.UUID `json:"id" gorm:"primary_key;type:uuid"`
@@ -52,6 +57,23 @@ type FlavorTemplate struct {
 	Condition   []string     `json:"condition" sql:"type:text[]"`
 	FlavorParts *FlavorParts `json:"flavor_parts,omitempty" sql:"type:JSONB"`
 }
+
+type FlavorTemplateFlavorgroupCollection struct {
+	FlavorTemplateFlavorgroups []FlavorTemplateFlavorgroup `json:"flavorgroup_flavortemplate_links" xml:"flavorgroup_flavortemplate_link"`
+}
+
+type FlavorTemplateFlavorgroup struct {
+	// swagger:strfmt uuid
+	FlavorTemplateId uuid.UUID `json:"flavortemplate_id,omitempty"`
+	// swagger:strfmt uuid
+	FlavorgroupId uuid.UUID `json:"flavorgroup_id,omitempty"`
+}
+
+type FlavorTemplateFlavorgroupCreateRequest struct {
+	// swagger:strfmt uuid
+	FlavorgroupId uuid.UUID `json:"flavorgroup_id,omitempty"`
+}
+
 
 type PcrListRules struct {
 	PcrBank     []string

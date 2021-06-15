@@ -31,7 +31,8 @@ import (
 )
 
 type FlavorTemplateController struct {
-	Store                   domain.FlavorTemplateStore
+	FTStore                 domain.FlavorTemplateStore
+	FGStore                 domain.FlavorGroupStore
 	CommonDefinitionsSchema string
 	FlavorTemplateSchema    string
 	DefinitionsSchemaJSON   string
@@ -42,9 +43,11 @@ type ErrorMessage struct {
 }
 
 // NewFlavorTemplateController This method is used to initialize the flavorTemplateController
-func NewFlavorTemplateController(store domain.FlavorTemplateStore, commonDefinitionsSchema, flavorTemplateSchema string) *FlavorTemplateController {
+func NewFlavorTemplateController(flavorTemplateStore domain.FlavorTemplateStore, flavorGroupStore domain.FlavorGroupStore,
+	commonDefinitionsSchema, flavorTemplateSchema string) *FlavorTemplateController {
 	return &FlavorTemplateController{
-		Store:                   store,
+		FTStore:                 flavorTemplateStore,
+		FGStore:                 flavorGroupStore,
 		CommonDefinitionsSchema: commonDefinitionsSchema,
 		FlavorTemplateSchema:    flavorTemplateSchema,
 	}
@@ -70,14 +73,56 @@ func (ftc *FlavorTemplateController) Create(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	//Store this template into database.
-	flavorTemplate, err := ftc.Store.Create(&flavorTemplateReq)
+	//FTStore this template into database.
+	flavorTemplate, err := ftc.FTStore.Create(flavorTemplateReq.FlavorTemplate)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:Create() Failed to create flavor template")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to create flavor template"}
 	}
 
+	var fgNames []string
+	if len(flavorTemplateReq.FlavorgroupNames) != 0 {
+		fgNames = flavorTemplateReq.FlavorgroupNames
+	} else {
+		defaultLog.Debug("Flavorgroup names not present in request, associating with default ones")
+		fgNames = append(fgNames, models.FlavorGroupsAutomatic.String())
+	}
+	defaultLog.Debugf("Associating Flavor-Template %s with flavorgroups %+q", flavorTemplate.ID, fgNames)
+	if len(fgNames) > 0 {
+		if err := ftc.linkFlavorgroupsToFlavorTemplate(fgNames, flavorTemplate.ID); err != nil {
+			defaultLog.WithError(err).Error("controllers/flavortemplate_controller:Create() Flavor-Template FlavorGroup association failed")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to associate Flavor-Template with flavorgroups"}
+		}
+	}
+
 	return flavorTemplate, http.StatusCreated, nil
+}
+
+func (ftc *FlavorTemplateController) linkFlavorgroupsToFlavorTemplate(flavorgroupNames []string, templateId uuid.UUID) error {
+	defaultLog.Trace("controllers/flavortemplate_controller:linkFlavorgroupsToFlavorTemplate() Entering")
+	defer defaultLog.Trace("controllers/flavortemplate_controller:linkFlavorgroupsToFlavorTemplate() Leaving")
+
+	flavorgroupIds := []uuid.UUID{}
+	flavorgroups, err := CreateMissingFlavorgroups(ftc.FGStore, flavorgroupNames)
+	if err != nil {
+		return errors.Wrapf(err, "Could not fetch flavorgroup Ids")
+	}
+	for _, flavorgroup := range flavorgroups {
+		linkExists, err := ftc.flavorGroupFlavorTemplateLinkExists(templateId, flavorgroup.ID)
+		if err != nil {
+			return errors.Wrap(err, "Could not check flavortemplate-flavorgroup link existence")
+		}
+		if !linkExists {
+			flavorgroupIds = append(flavorgroupIds, flavorgroup.ID)
+		}
+	}
+
+	defaultLog.Debugf("Linking flavortemplate %v with flavorgroups %+q", templateId, flavorgroupIds)
+	if err := ftc.FTStore.AddFlavorgroups(templateId, flavorgroupIds); err != nil {
+		return errors.Wrap(err, "Could not create flavortemplate-flavorgroup links")
+	}
+
+	return nil
 }
 
 // Retrieve This method is used to retrieve a flavor template
@@ -85,9 +130,9 @@ func (ftc *FlavorTemplateController) Retrieve(w http.ResponseWriter, r *http.Req
 	defaultLog.Trace("controllers/flavortemplate_controller:Retrieve() Entering")
 	defer defaultLog.Trace("controllers/flavortemplate_controller:Retrieve() Leaving")
 
-	templateID := uuid.MustParse(mux.Vars(r)["id"])
+	templateID := uuid.MustParse(mux.Vars(r)["ftId"])
 
-	flavorTemplate, err := ftc.Store.Retrieve(templateID, false)
+	flavorTemplate, err := ftc.FTStore.Retrieve(templateID, false)
 	if err != nil {
 		switch err.(type) {
 		case *commErr.StatusNotFoundError:
@@ -138,7 +183,7 @@ func (ftc *FlavorTemplateController) Search(w http.ResponseWriter, r *http.Reque
 	}
 
 	//call store function to retrieve all available templates from DB.
-	flavorTemplates, err := ftc.Store.Search(criteria)
+	flavorTemplates, err := ftc.FTStore.Search(criteria)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:Search() Error retrieving all flavor templates")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error retrieving all flavor templates"}
@@ -152,10 +197,10 @@ func (ftc *FlavorTemplateController) Delete(w http.ResponseWriter, r *http.Reque
 	defaultLog.Trace("controllers/flavortemplate_controller:Delete() Entering")
 	defer defaultLog.Trace("controllers/flavortemplate_controller:Delete() Leaving")
 
-	templateID := uuid.MustParse(mux.Vars(r)["id"])
+	templateID := uuid.MustParse(mux.Vars(r)["ftId"])
 
 	//call store function to delete template from DB.
-	if err := ftc.Store.Delete(templateID); err != nil {
+	if err := ftc.FTStore.Delete(templateID); err != nil {
 		switch err.(type) {
 		case *commErr.StatusNotFoundError:
 			defaultLog.WithError(err).Error("controllers/flavortemplate_controller:Delete() Flavor template with given ID does not exist")
@@ -170,11 +215,11 @@ func (ftc *FlavorTemplateController) Delete(w http.ResponseWriter, r *http.Reque
 }
 
 // getFlavorTemplateCreateReq This method is used to get the body content of Flavor Template Create Request
-func (ftc *FlavorTemplateController) getFlavorTemplateCreateReq(r *http.Request) (hvs.FlavorTemplate, error) {
+func (ftc *FlavorTemplateController) getFlavorTemplateCreateReq(r *http.Request) (hvs.FlavorTemplateReq, error) {
 	defaultLog.Trace("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Entering")
 	defer defaultLog.Trace("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Leaving")
 
-	var createFlavorTemplateReq hvs.FlavorTemplate
+	var createFlavorTemplateReq hvs.FlavorTemplateReq
 	if r.Header.Get("Content-Type") != constants.HTTPMediaTypeJson {
 		defaultLog.Error("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Invalid Content-Type")
 		return createFlavorTemplateReq, &commErr.UnsupportedMediaError{Message: "Invalid Content-Type"}
@@ -205,36 +250,204 @@ func (ftc *FlavorTemplateController) getFlavorTemplateCreateReq(r *http.Request)
 		return createFlavorTemplateReq, &commErr.BadRequestError{Message: "Unable to decode request body"}
 	}
 
-	if createFlavorTemplateReq.ID != uuid.Nil {
-		template, err := ftc.Store.Retrieve(createFlavorTemplateReq.ID, true)
+	if createFlavorTemplateReq.FlavorTemplate.ID != uuid.Nil {
+		template, err := ftc.FTStore.Retrieve(createFlavorTemplateReq.FlavorTemplate.ID, true)
 		if err != nil {
 			switch err.(type) {
 			case *commErr.StatusNotFoundError:
 				break
 			default:
 				defaultLog.WithError(err).Error("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Failed to retrieve flavor template")
-				return hvs.FlavorTemplate{}, errors.New("Failed to validate flavor template ID")
+				return hvs.FlavorTemplateReq{}, errors.New("Failed to validate flavor template ID")
 			}
 		}
 		if template != nil {
 			defaultLog.WithError(err).Error("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Unable to create flavor template, template with given template ID already exists or has been deleted")
-			return hvs.FlavorTemplate{}, &commErr.BadRequestError{Message: "FlavorTemplate with given template ID already exists or has been deleted"}
+			return hvs.FlavorTemplateReq{}, &commErr.BadRequestError{Message: "FlavorTemplate with given template ID already exists or has been deleted"}
 		}
 	}
 
 	defaultLog.Debug("Validating create flavor request")
-	errMsg, err := ftc.ValidateFlavorTemplateCreateRequest(createFlavorTemplateReq, string(body))
+	errMsg, err := ftc.ValidateFlavorTemplateCreateRequest(*createFlavorTemplateReq.FlavorTemplate, string(body))
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Unable to create flavor template, validation failed")
 		return createFlavorTemplateReq, &commErr.BadRequestError{Message: errMsg}
 	}
 
-	if len(createFlavorTemplateReq.Condition) == 0 {
+	if len(createFlavorTemplateReq.FlavorTemplate.Condition) == 0 {
 		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Unable to create flavor template, empty condition field provided")
-		return hvs.FlavorTemplate{}, &commErr.BadRequestError{Message: "Unable to create flavor template, empty condition field provided"}
+		return hvs.FlavorTemplateReq{}, &commErr.BadRequestError{Message: "Unable to create flavor template, empty condition field provided"}
 	}
 
 	return createFlavorTemplateReq, nil
+}
+
+func (ftc *FlavorTemplateController) AddFlavorgroup(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
+	defaultLog.Trace("controllers/flavortemplate_controller:AddFlavorgroup() Entering")
+	defer defaultLog.Trace("controllers/flavortemplate_controller:AddFlavorgroup() Leaving")
+
+	if r.Header.Get("Content-Type") != constants.HTTPMediaTypeJson {
+		return nil, http.StatusUnsupportedMediaType, &commErr.ResourceError{Message: "Invalid Content-Type"}
+	}
+
+	if r.ContentLength == 0 {
+		secLog.Error("controllers/flavortemplate_controller:AddFlavorgroup() The request body was not provided")
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body was not provided"}
+	}
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	var reqFlavorTemplateFlavorgroup hvs.FlavorTemplateFlavorgroupCreateRequest
+	err := dec.Decode(&reqFlavorTemplateFlavorgroup)
+	if err != nil {
+		secLog.WithError(err).Errorf("controllers/flavortemplate_controller:AddFlavorgroup() %s :  Failed to decode request body as FlavorTemplateFlavorgroupCreateRequest", commLogMsg.InvalidInputBadEncoding)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
+	}
+
+	if reqFlavorTemplateFlavorgroup.FlavorgroupId == uuid.Nil {
+		secLog.Errorf("controllers/flavortemplate_controller:AddFlavorgroup() %s : Invalid Flavorgroup Id specified in request", commLogMsg.InvalidInputBadParam)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid Flavorgroup Id specified in request"}
+	}
+
+	ftId := uuid.MustParse(mux.Vars(r)["ftId"])
+	_, err = ftc.FTStore.Retrieve(ftId, false)
+	if err != nil {
+		switch err.(type) {
+		case *commErr.StatusNotFoundError:
+			secLog.WithError(err).WithField("id", ftId).Info(
+				"controllers/flavortemplate_controller:AddFlavorgroup() Flavor template with given ID does not exist or has been deleted")
+			return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Flavor template with given ID does not exist or has been deleted"}
+		default:
+			secLog.WithError(err).WithField("id", ftId).Info(
+				"controllers/flavortemplate_controller:AddFlavorgroup() Failed to retrieve FlavorTemplate")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve FlavorTemplate with the given ID"}
+		}
+	}
+
+	_, err = ftc.FGStore.Retrieve(reqFlavorTemplateFlavorgroup.FlavorgroupId)
+	if err != nil {
+		if strings.Contains(err.Error(), commErr.RowsNotFound) {
+			defaultLog.WithError(err).WithField("id", reqFlavorTemplateFlavorgroup.FlavorgroupId).Error("controllers/flavortemplate_controller:AddFlavorgroup() Flavorgroup with specified id could not be located")
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Flavorgroup with specified id does not exist"}
+		} else {
+			defaultLog.WithError(err).WithField("id", reqFlavorTemplateFlavorgroup.FlavorgroupId).Error("controllers/flavortemplate_controller:AddFlavorgroup() Flavorgroup retrieve failed")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve Flavorgroup from database"}
+		}
+	}
+
+	linkExists, err := ftc.flavorGroupFlavorTemplateLinkExists(ftId, reqFlavorTemplateFlavorgroup.FlavorgroupId)
+	if err != nil {
+		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:AddFlavorgroup() Flavor Template Flavorgroup link retrieve failed")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to create Flavor Template Flavorgroup link"}
+	}
+	if linkExists {
+		secLog.WithError(err).Warningf("%s: Trying to create duplicate Flavor Template Flavorgroup link", commLogMsg.InvalidInputBadParam)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Flavor Template Flavorgroup link with specified ids already exist"}
+	}
+
+	defaultLog.Debugf("Linking flavor template %v with flavorgroup %v", ftId, reqFlavorTemplateFlavorgroup.FlavorgroupId)
+	err = ftc.FTStore.AddFlavorgroups(ftId, []uuid.UUID{reqFlavorTemplateFlavorgroup.FlavorgroupId})
+	if err != nil {
+		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:AddFlavorgroup() Flavor Template Flavorgroup association failed")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to associate flavor template with Flavorgroup"}
+	}
+
+	createdFlavorTemplateFlavorgroup := hvs.FlavorTemplateFlavorgroup{
+		FlavorTemplateId:        ftId,
+		FlavorgroupId: reqFlavorTemplateFlavorgroup.FlavorgroupId,
+	}
+
+	secLog.WithField("flavortemplate-flavorgroup-link", createdFlavorTemplateFlavorgroup).Infof("%s: Flavor Template Flavorgroup link created by: %s", commLogMsg.PrivilegeModified, r.RemoteAddr)
+	return createdFlavorTemplateFlavorgroup, http.StatusCreated, nil
+}
+
+
+func (ftc *FlavorTemplateController) flavorGroupFlavorTemplateLinkExists(ftId, flavorgroupId uuid.UUID) (bool, error) {
+	defaultLog.Trace("controllers/flavortemplate_controller:flavorGroupFlavorTemplateLinkExists() Entering")
+	defer defaultLog.Trace("controllers/flavortemplate_controller:flavorGroupFlavorTemplateLinkExists() Leaving")
+
+	// retrieve the flavortemplate-flavorgroup link using flavortemplate id and flavorgroup id
+	_, err := ftc.FTStore.RetrieveFlavorgroup(ftId, flavorgroupId)
+	if err != nil {
+		if strings.Contains(err.Error(), commErr.RowsNotFound) {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+	return true, nil
+}
+
+func (ftc *FlavorTemplateController) RetrieveFlavorgroup(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
+	defaultLog.Trace("controllers/flavortemplate_controller:RetrieveFlavorgroup() Entering")
+	defer defaultLog.Trace("controllers/flavortemplate_controller:RetrieveFlavorgroup() Leaving")
+
+	ftId := uuid.MustParse(mux.Vars(r)["ftId"])
+	fgId := uuid.MustParse(mux.Vars(r)["fgId"])
+	flavorTemplateFlavorgroup, err := ftc.FTStore.RetrieveFlavorgroup(ftId, fgId)
+	if err != nil {
+		if strings.Contains(err.Error(), commErr.RowsNotFound) {
+			defaultLog.WithError(err).Error("controllers/flavortemplate_controller:RetrieveFlavorgroup() Flavor Template Flavorgroup link with specified ids could not be located")
+			return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Flavor Template Flavorgroup link with specified ids does not exist"}
+		} else {
+			defaultLog.WithError(err).Error("controllers/flavortemplate_controller:RetrieveFlavorgroup() Flavor Template Foavorgroup link retrieve failed")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve Flavor Template Flavorgroup link from database"}
+		}
+	}
+
+	secLog.WithField("flavortemplate-flavorgroup-link", flavorTemplateFlavorgroup).Infof("%s: Flavor Template Flavorgroup link retrieved by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
+	return flavorTemplateFlavorgroup, http.StatusOK, nil
+}
+
+func (ftc *FlavorTemplateController) RemoveFlavorgroup(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
+	defaultLog.Trace("controllers/flavortemplate_controller:RemoveFlavorgroup() Entering")
+	defer defaultLog.Trace("controllers/flavortemplate_controller:RemoveFlavorgroup() Leaving")
+
+	ftId := uuid.MustParse(mux.Vars(r)["ftId"])
+	fgId := uuid.MustParse(mux.Vars(r)["fgId"])
+	flavorTemplateFlavorgroup, err := ftc.FTStore.RetrieveFlavorgroup(ftId, fgId)
+	if err != nil {
+		if strings.Contains(err.Error(), commErr.RowsNotFound) {
+			defaultLog.WithError(err).Error("controllers/flavortemplate_controller:RetrieveFlavorgroup() Flavor Template Flavorgroup link with specified ids could not be located")
+			return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Flavor Template Flavorgroup link with specified ids does not exist"}
+		} else {
+			defaultLog.WithError(err).Error("controllers/flavortemplate_controller:RetrieveFlavorgroup() Flavor Template Foavorgroup link retrieve failed")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve Flavor Template Flavorgroup link from database"}
+		}
+	}
+
+	if err := ftc.FTStore.RemoveFlavorgroups(ftId, []uuid.UUID{fgId}); err != nil {
+		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:RemoveFlavorgroup() Flavor Template Flavorgroup link delete failed")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to delete Flavor Template Flavorgroup link"}
+	}
+
+	secLog.WithField("flavortemplate-flavorgroup-link", flavorTemplateFlavorgroup).Infof("Flavor Template Flavorgroup link deleted by: %s", r.RemoteAddr)
+	return nil, http.StatusNoContent, nil
+}
+
+func (ftc *FlavorTemplateController) SearchFlavorgroups(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
+	defaultLog.Trace("controllers/flavortemplate_controller:SearchFlavorgroups() Entering")
+	defer defaultLog.Trace("controllers/flavortemplate_controller:SearchFlavorgroups() Leaving")
+
+	ftId := uuid.MustParse(mux.Vars(r)["ftId"])
+	fgIds, err := ftc.FTStore.SearchFlavorgroups(ftId)
+	if err != nil {
+		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:SearchFlavorgroups() Flavor Template Flavorgroup links search failed")
+		return nil, http.StatusInternalServerError, errors.Errorf("Failed to search Flavor Template Flavorgroup links")
+	}
+
+	flavorTemplateFlavorgroups := []hvs.FlavorTemplateFlavorgroup{}
+	for _, fgId := range fgIds {
+		flavorTemplateFlavorgroups = append(flavorTemplateFlavorgroups, hvs.FlavorTemplateFlavorgroup{
+			FlavorTemplateId:        ftId,
+			FlavorgroupId: fgId,
+		})
+	}
+	flavorTemplateFlavorgroupCollection := hvs.FlavorTemplateFlavorgroupCollection{FlavorTemplateFlavorgroups: flavorTemplateFlavorgroups}
+
+	secLog.Infof("%s: Flavor Template Flavorgroup links searched by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
+	return flavorTemplateFlavorgroupCollection, http.StatusOK, nil
 }
 
 // validateFlavorTemplateCreateRequest This method is used to validate the flavor template
@@ -359,7 +572,7 @@ func populateFlavorTemplateFilterCriteria(params url.Values) (*models.FlavorTemp
 		if err != nil {
 			return nil, errors.Wrap(err, "Invalid id query param value, must be UUID")
 		}
-		criteria.Id = id
+		criteria.Ids = []uuid.UUID{id}
 	}
 	if params.Get("label") != "" {
 		label := params.Get("label")

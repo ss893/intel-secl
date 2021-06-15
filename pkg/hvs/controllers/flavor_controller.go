@@ -169,6 +169,25 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 	var platformFlavor *fType.PlatformFlavor
 	flavorFlavorPartMap := make(map[fc.FlavorPart][]hvs.SignedFlavor)
 
+	// add all flavorparts to default flavorgroups if flavorgroup name is not given
+	if flavorReq.FlavorgroupNames == nil && len(flavorReq.FlavorParts) == 0 {
+		for _, flavorPart := range fc.GetFlavorTypes() {
+			flavorParts = append(flavorParts, flavorPart)
+		}
+	}
+
+	// get the flavorgroup names
+	if len(flavorReq.FlavorgroupNames) == 0 {
+		flavorReq.FlavorgroupNames = []string{dm.FlavorGroupsAutomatic.String()}
+	}
+
+	// check if the flavorgroup is already created, else create flavorgroup
+	flavorgroups, err := CreateMissingFlavorgroups(fcon.FGStore, flavorReq.FlavorgroupNames)
+	if err != nil {
+		defaultLog.Error("controllers/flavor_controller:createFlavors() Error getting flavorgroups")
+		return nil, err
+	}
+
 	if flavorReq.ConnectionString != "" {
 		// get flavor from host
 		// get host manifest from the host
@@ -192,7 +211,7 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 
 		var flavorTemplates []hvs.FlavorTemplate
 		defaultLog.Debug("Getting flavor templates...")
-		flavorTemplates, err = fcon.findTemplatesToApply(hostManifest)
+		flavorTemplates, err = fcon.findTemplatesToApply(flavorgroups, hostManifest)
 		if len(flavorTemplates) == 0 {
 			defaultLog.WithError(err).Error("controllers/flavor_controller:CreateFlavors() No templates found to apply")
 			return nil, errors.Wrap(err, "No templates found to create flavors")
@@ -289,23 +308,6 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 			return nil, errors.New("Valid flavor content must be given")
 		}
 	}
-	var err error
-	// add all flavorparts to default flavorgroups if flavorgroup name is not given
-	if flavorReq.FlavorgroupNames == nil && len(flavorReq.FlavorParts) == 0 {
-		for _, flavorPart := range fc.GetFlavorTypes() {
-			flavorParts = append(flavorParts, flavorPart)
-		}
-	}
-	// get the flavorgroup names
-	if len(flavorReq.FlavorgroupNames) == 0 {
-		flavorReq.FlavorgroupNames = []string{dm.FlavorGroupsAutomatic.String()}
-	}
-	// check if the flavorgroup is already created, else create flavorgroup
-	flavorgroups, err := CreateMissingFlavorgroups(fcon.FGStore, flavorReq.FlavorgroupNames)
-	if err != nil {
-		defaultLog.Error("controllers/flavor_controller:createFlavors() Error getting flavorgroups")
-		return nil, err
-	}
 
 	// if platform flavor was retrieved from host, break it into the flavor part flavor map using the flavorgroups
 	if platformFlavor != nil {
@@ -377,12 +379,20 @@ func (fcon *FlavorController) getHostManifest(cs string) (*hcType.HostManifest, 
 	return &hostManifest, err
 }
 
-func (fcon *FlavorController) findTemplatesToApply(hostManifest *hcType.HostManifest) ([]hvs.FlavorTemplate, error) {
+func (fcon *FlavorController) findTemplatesToApply(flavorgroups []hvs.FlavorGroup, hostManifest *hcType.HostManifest) ([]hvs.FlavorTemplate, error) {
 	defaultLog.Trace("controllers/flavor_controller:findTemplatesToApply() Entering")
 	defer defaultLog.Trace("controllers/flavor_controller:findTemplatesToApply() Leaving")
 	var filteredTemplates []hvs.FlavorTemplate
 
-	ftc := models.FlavorTemplateFilterCriteria{IncludeDeleted: false}
+	var flavorTemplateIds []uuid.UUID
+	for _, flavorGroup := range flavorgroups {
+		templateIds, err := fcon.FGStore.SearchFlavorTemplatesByFlavorGroup(flavorGroup.ID)
+		if err != nil {
+			return nil, errors.Wrap(err, "controllers/flavor_controller:findTemplatesToApply() Error retrieving flavor templates associated with flavorgroup")
+		}
+		flavorTemplateIds = append(flavorTemplateIds, templateIds...)
+	}
+	ftc := models.FlavorTemplateFilterCriteria{Ids: flavorTemplateIds, IncludeDeleted: false}
 	flavorTemplates, err := fcon.FTStore.Search(&ftc)
 	if err != nil {
 		return nil, errors.Wrap(err, "controllers/flavor_controller:findTemplatesToApply() Error retrieving all flavor templates")

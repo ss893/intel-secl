@@ -5,6 +5,7 @@
 package postgres
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -189,8 +190,8 @@ func (ft *FlavorTemplateStore) buildFlavorTemplateSearchQuery(tx *gorm.DB, crite
 		tx = tx.Where("deleted = ?", false)
 	}
 
-	if criteria.Id != uuid.Nil {
-		tx = tx.Where("id = ?", criteria.Id)
+	if criteria.Ids != nil && len(criteria.Ids) > 0 {
+		tx = tx.Where("id IN (?)", criteria.Ids)
 	}
 	if criteria.Label != "" {
 		tx = tx.Where(convertToPgJsonqueryString("content", "label")+" = ?", criteria.Label)
@@ -203,4 +204,84 @@ func (ft *FlavorTemplateStore) buildFlavorTemplateSearchQuery(tx *gorm.DB, crite
 	}
 
 	return tx
+}
+
+func (ft *FlavorTemplateStore) AddFlavorgroups(ftId uuid.UUID, fgIds []uuid.UUID) error {
+	defaultLog.Trace("postgres/flavortemplate_store:AddFlavorgroups() Entering")
+	defer defaultLog.Trace("postgres/flavortemplate_store:AddFlavorgroups() Leaving")
+
+	defaultLog.Debugf("postgres/flavortemplate_store:AddFlavorgroups() Linking flavor-template %v with flavorgroups %+q", ftId, fgIds)
+	var hfgValues []string
+	var hfgValueArgs []interface{}
+	for _, fgId := range fgIds {
+		hfgValues = append(hfgValues, "(?, ?)")
+		hfgValueArgs = append(hfgValueArgs, ftId)
+		hfgValueArgs = append(hfgValueArgs, fgId)
+	}
+
+	insertQuery := fmt.Sprintf("INSERT INTO flavortemplate_flavorgroup VALUES %s", strings.Join(hfgValues, ","))
+	defaultLog.Debugf("postgres/flavortemplate_store:AddFlavorgroups() insert query - %v", insertQuery)
+	err := ft.Store.Db.Model(flavortemplateFlavorgroup{}).Exec(insertQuery, hfgValueArgs...).Error
+	if err != nil {
+		return errors.Wrap(err, "postgres/flavortemplate_store:AddFlavorgroups() failed to create flavor-template Flavorgroup associations")
+	}
+	defaultLog.Debugf("postgres/flavortemplate_store:AddFlavorgroups() Linking flavor-template completed for %v ", ftId)
+	return nil
+}
+
+func (ft *FlavorTemplateStore) RetrieveFlavorgroup(ftId uuid.UUID, fgId uuid.UUID) (*hvs.FlavorTemplateFlavorgroup, error) {
+	defaultLog.Trace("postgres/flavortemplate_store:RetrieveFlavorgroup() Entering")
+	defer defaultLog.Trace("postgres/flavortemplate_store:RetrieveFlavorgroup() Leaving")
+
+	ftfg := hvs.FlavorTemplateFlavorgroup{}
+	row := ft.Store.Db.Model(&flavortemplateFlavorgroup{}).Where(&flavortemplateFlavorgroup{FlavorTemplateId: ftId, FlavorgroupId: fgId}).Row()
+	if err := row.Scan(&ftfg.FlavorTemplateId, &ftfg.FlavorgroupId); err != nil {
+		return nil, errors.Wrap(err, "postgres/flavortemplate_store:RetrieveFlavorgroup() failed to scan record")
+	}
+	return &ftfg, nil
+}
+
+func (ft *FlavorTemplateStore) RemoveFlavorgroups(ftId uuid.UUID, fgIds []uuid.UUID) error {
+	defaultLog.Trace("postgres/flavortemplate_store:RemoveFlavorgroups() Entering")
+	defer defaultLog.Trace("postgres/flavortemplate_store:RemoveFlavorgroups() Leaving")
+
+	tx := ft.Store.Db
+	if ftId != uuid.Nil {
+		tx = tx.Where("flavortemplate_id = ?", ftId)
+	}
+
+	if len(fgIds) >= 1 {
+		tx = tx.Where("flavorgroup_id IN (?)", fgIds)
+	}
+
+	if err := tx.Delete(&flavortemplateFlavorgroup{}).Error; err != nil {
+		return errors.Wrap(err, "postgres/flavortemplate_store:RemoveFlavorgroups() failed to delete flavor-template Flavorgroup association")
+	}
+	return nil
+}
+
+func (hs *FlavorTemplateStore) SearchFlavorgroups(ftId uuid.UUID) ([]uuid.UUID, error) {
+	defaultLog.Trace("postgres/flavortemplate_store:SearchFlavorgroups() Entering")
+	defer defaultLog.Trace("postgres/flavortemplate_store:SearchFlavorgroups() Leaving")
+
+	rows, err := hs.Store.Db.Model(&flavortemplateFlavorgroup{}).Select("flavorgroup_id").Where(&flavortemplateFlavorgroup{FlavorTemplateId: ftId}).Rows()
+	if err != nil {
+		return nil, errors.Wrap(err, "postgres/flavortemplate_store:SearchFlavorgroups() failed to retrieve records from db")
+	}
+	defer func() {
+		derr := rows.Close()
+		if derr != nil {
+			defaultLog.WithError(derr).Error("Error closing rows")
+		}
+	}()
+
+	var fgIds []uuid.UUID
+	for rows.Next() {
+		var fgId uuid.UUID
+		if err := rows.Scan(&fgId); err != nil {
+			return nil, errors.Wrap(err, "postgres/flavortemplate_store:SearchFlavorgroups() failed to scan record")
+		}
+		fgIds = append(fgIds, fgId)
+	}
+	return fgIds, nil
 }

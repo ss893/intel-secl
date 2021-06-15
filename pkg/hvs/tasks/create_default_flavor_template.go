@@ -7,6 +7,7 @@ package tasks
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -26,6 +27,7 @@ type CreateDefaultFlavorTemplate struct {
 
 	commandName   string
 	TemplateStore *postgres.FlavorTemplateStore
+	FGStore       *postgres.FlavorGroupStore
 	Directory     string
 }
 
@@ -46,7 +48,7 @@ var defaultFlavorTemplateNames = []string{
 func (t *CreateDefaultFlavorTemplate) Run() error {
 
 	if t.TemplateStore == nil {
-		err := t.FlavorTemplateStore()
+		err := t.InitializeStores()
 		if err != nil {
 			return errors.Wrap(err, "Failed to initialize flavor template store instance")
 		}
@@ -57,6 +59,10 @@ func (t *CreateDefaultFlavorTemplate) Run() error {
 		return err
 	}
 
+	defaultFlavorGroup, _ := t.FGStore.Search(&models.FlavorGroupFilterCriteria{
+		NameEqualTo: models.FlavorGroupsAutomatic.String(),
+	})
+	defaultFlavorGroupId := defaultFlavorGroup[0].ID
 	for _, ft := range templates {
 		ftc := models.FlavorTemplateFilterCriteria{Label: ft.Label}
 		ftList, err := t.TemplateStore.Search(&ftc)
@@ -64,9 +70,15 @@ func (t *CreateDefaultFlavorTemplate) Run() error {
 			return errors.Wrap(err, "Failed to search the default flavor template(s)")
 		}
 		if len(ftList) == 0 {
-			_, err := t.TemplateStore.Create(&ft)
+			newTemplate, err := t.TemplateStore.Create(&ft)
 			if err != nil {
 				return errors.Wrap(err, "Failed to create default flavor template with ID \""+ft.ID.String()+"\"")
+			}
+			_, err = t.TemplateStore.RetrieveFlavorgroup(newTemplate.ID, defaultFlavorGroupId)
+			if err != nil {
+				if err := t.TemplateStore.AddFlavorgroups(newTemplate.ID, []uuid.UUID{defaultFlavorGroupId}); err != nil {
+					return errors.Wrap(err, "Could not create flavortemplate-flavorgroup links")
+				}
 			}
 		}
 	}
@@ -82,7 +94,7 @@ func (t *CreateDefaultFlavorTemplate) Validate() error {
 	var err error
 
 	if t.TemplateStore == nil {
-		err := t.FlavorTemplateStore()
+		err := t.InitializeStores()
 		if err != nil {
 			return errors.Wrap(err, "Failed to initialize flavor template store instance")
 		}
@@ -126,7 +138,7 @@ func (t *CreateDefaultFlavorTemplate) SetName(n, e string) {
 	t.commandName = n
 }
 
-func (t *CreateDefaultFlavorTemplate) FlavorTemplateStore() error {
+func (t *CreateDefaultFlavorTemplate) InitializeStores() error {
 	var dataStore *postgres.DataStore
 	var err error
 	if t.TemplateStore == nil {
@@ -135,9 +147,10 @@ func (t *CreateDefaultFlavorTemplate) FlavorTemplateStore() error {
 			return errors.Wrap(err, "Failed to connect database")
 		}
 		t.TemplateStore = postgres.NewFlavorTemplateStore(dataStore)
+		t.FGStore = postgres.NewFlavorGroupStore(dataStore)
 	}
 	if t.TemplateStore.Store == nil {
-		return errors.New("Failed to create FlavorTemplateStore")
+		return errors.New("Failed to create InitializeStores")
 	}
 	return nil
 }

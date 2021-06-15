@@ -25,12 +25,13 @@ var _ = Describe("FlavorTemplateController", func() {
 	var router *mux.Router
 	var w *httptest.ResponseRecorder
 	var flavorTemplateStore *mocks.MockFlavorTemplateStore
+	var flavorGroupStore *mocks.MockFlavorgroupStore
 	var flavorTemplateController *controllers.FlavorTemplateController
 	BeforeEach(func() {
 		router = mux.NewRouter()
 		flavorTemplateStore = mocks.NewFakeFlavorTemplateStore()
 
-		flavorTemplateController = controllers.NewFlavorTemplateController(flavorTemplateStore,
+		flavorTemplateController = controllers.NewFlavorTemplateController(flavorTemplateStore, flavorGroupStore,
 			"../../../build/linux/hvs/schema/common.schema.json", "../../../build/linux/hvs/schema/flavor-template.json")
 	})
 

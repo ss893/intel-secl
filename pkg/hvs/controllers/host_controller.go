@@ -597,9 +597,12 @@ func (hc *HostController) linkHostUniqueFlavorsToHost(newHost *hvs.Host) error {
 func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames []string) ([]hvs.FlavorGroup, error) {
 	flavorgroups := []hvs.FlavorGroup{}
 	for _, flavorgroupName := range flavorgroupNames {
-		existingFlavorGroups, _ := fGStore.Search(&models.FlavorGroupFilterCriteria{
+		existingFlavorGroups, err := fGStore.Search(&models.FlavorGroupFilterCriteria{
 			NameEqualTo: flavorgroupName,
 		})
+		if err != nil {
+			return nil, errors.Wrapf(err, "Could not find flavorgroup with name : %s", flavorgroupName)
+		}
 		if existingFlavorGroups == nil || len(existingFlavorGroups) == 0 {
 			flavorgroup, err := createNewFlavorGroup(fGStore, flavorgroupName)
 			if err != nil {

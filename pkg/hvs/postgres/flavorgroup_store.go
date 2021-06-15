@@ -43,8 +43,20 @@ func (f *FlavorGroupStore) Create(fg *hvs.FlavorGroup) (*hvs.FlavorGroup, error)
 		FlavorTypeMatchPolicy: PGFlavorMatchPolicies(fg.MatchPolicies),
 	}
 
-	if err := f.Store.Db.Create(&dbFlavorGroup).Error; err != nil {
+	if err = f.Store.Db.Create(&dbFlavorGroup).Error; err != nil {
 		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to create Flavorgroup")
+	}
+
+	defaultFlavorGroup, err := f.Search(&models.FlavorGroupFilterCriteria{NameEqualTo: models.FlavorGroupsAutomatic.String()})
+	if err != nil {
+		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to search default flavorgroup")
+	}
+	defaultTemplates, err := f.SearchFlavorTemplatesByFlavorGroup(defaultFlavorGroup[0].ID)
+	if err != nil {
+		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to search default templaets")
+	}
+	if err = f.AddFlavorTemplates(fg.ID, defaultTemplates); err != nil {
+		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to associate Flavorgroup with Flavor Templates")
 	}
 	return fg, nil
 }
@@ -301,6 +313,34 @@ func (f *FlavorGroupStore) SearchHostsByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID
 	return hIDs, nil
 }
 
+// SearchFlavorTemplatesByFlavorGroup is used to fetch a list of flavor templates which are linked to the provided FlavorGroup
+func (f *FlavorGroupStore) SearchFlavorTemplatesByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error) {
+	defaultLog.Trace("postgres/flavorgroup_store:SearchFlavorTemplatesByFlavorGroup() Entering")
+	defer defaultLog.Trace("postgres/flavorgroup_store:SearchFlavorTemplatesByFlavorGroup() Leaving")
+
+	rows, err := f.Store.Db.Model(&flavortemplateFlavorgroup{}).Select("flavortemplate_id").Where(&flavortemplateFlavorgroup{FlavorgroupId: fgID}).Rows()
+	if err != nil {
+		return nil, errors.Wrap(err, "postgres/flavorgroup_store:SearchFlavorTemplatesByFlavorGroup() failed to retrieve records from db")
+	}
+	defer func() {
+		derr := rows.Close()
+		if derr != nil {
+			defaultLog.WithError(derr).Error("Error closing rows")
+		}
+	}()
+
+	var ftIDs []uuid.UUID
+	for rows.Next() {
+		var ftId uuid.UUID
+		if err := rows.Scan(&ftId); err != nil {
+			return nil, errors.Wrap(err, "postgres/flavorgroup_store:SearchFlavorTemplatesByFlavorGroup() failed to scan record")
+		}
+		ftIDs = append(ftIDs, ftId)
+	}
+
+	return ftIDs, nil
+}
+
 // searchFlavorGroups returns a list of flavorgroups linked to flavor
 func (f *FlavorGroupStore) searchFlavorGroups(flavorId *uuid.UUID) ([]uuid.UUID, error) {
 	defaultLog.Trace("postgres/flavorgroup_store:searchFlavorGroups() Entering")
@@ -351,7 +391,7 @@ func (f *FlavorGroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[fc.F
 		var flavorParts []string
 		err := f.Store.Db.Model(&flavor{}).Where("id in (select flavor_id from flavorgroup_flavor where flavorgroup_id = ?)", fgId).Pluck(("DISTINCT(flavor_part)"), &flavorParts).Error
 		if err != nil {
-			return nil, errors.Wrap(err, "postgres/host_store:GetFlavorTypesInFlavorGroup() failed to retrieve records from db")
+			return nil, errors.Wrap(err, "postgres/flavorgroup_store:GetFlavorTypesInFlavorGroup() failed to retrieve records from db")
 		}
 		fpMap := make(map[fc.FlavorPart]bool)
 		for _, fp := range flavorParts {
@@ -362,4 +402,27 @@ func (f *FlavorGroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[fc.F
 		return fpMap, nil
 	}
 
+}
+
+func (f *FlavorGroupStore) AddFlavorTemplates(fgId uuid.UUID, ftIds []uuid.UUID) error {
+	defaultLog.Trace("postgres/flavorgroup_store:AddFlavorTemplates() Entering")
+	defer defaultLog.Trace("postgres/flavorgroup_store:AddFlavorTemplates() Leaving")
+
+	defaultLog.Debugf("postgres/flavorgroup_store:AddFlavorTemplates() Linking flavorgroup %v with flavor-templates %+q", fgId, ftIds)
+	var hfgValues []string
+	var hfgValueArgs []interface{}
+	for _, ftId := range ftIds {
+		hfgValues = append(hfgValues, "(?, ?)")
+		hfgValueArgs = append(hfgValueArgs, ftId)
+		hfgValueArgs = append(hfgValueArgs, ftId)
+	}
+
+	insertQuery := fmt.Sprintf("INSERT INTO flavortemplate_flavorgroup VALUES %s", strings.Join(hfgValues, ","))
+	defaultLog.Debugf("postgres/flavorgroup_store:AddFlavorTemplates() insert query - %v", insertQuery)
+	err := f.Store.Db.Model(flavortemplateFlavorgroup{}).Exec(insertQuery, hfgValueArgs...).Error
+	if err != nil {
+		return errors.Wrap(err, "postgres/flavorgroup_store:AddFlavorTemplates() failed to create flavor-template Flavorgroup associations")
+	}
+	defaultLog.Debugf("postgres/flavorgroup_store:AddFlavorTemplates() Linking flavor-template completed for flavorgroup %v ", fgId)
+	return nil
 }

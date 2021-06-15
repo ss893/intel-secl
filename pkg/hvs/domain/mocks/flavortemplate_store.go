@@ -103,9 +103,12 @@ func (store *MockFlavorTemplateStore) Search(criteria *models.FlavorTemplateFilt
 	}
 	for _, template := range rec {
 		//ID
-		if criteria.Id != uuid.Nil {
-			if template.ID == criteria.Id {
-				rec = append(rec, template)
+		if criteria.Ids != nil {
+			for _, id := range criteria.Ids {
+				if template.ID == id {
+					rec = append(rec, template)
+					break
+				}
 			}
 		}
 
@@ -172,4 +175,18 @@ func NewFakeFlavorTemplateStore() *MockFlavorTemplateStore {
 	store.Create(&sf)
 
 	return store
+}
+
+func (store *MockFlavorTemplateStore) AddFlavorgroups(uuid.UUID, []uuid.UUID) error {
+	return nil
+}
+func (store *MockFlavorTemplateStore) RetrieveFlavorgroup(uuid.UUID, uuid.UUID) (*hvs.FlavorTemplateFlavorgroup, error) {
+	return nil, nil
+}
+func (store *MockFlavorTemplateStore) RemoveFlavorgroups(uuid.UUID, []uuid.UUID) error {
+	return nil
+}
+
+func (store *MockFlavorTemplateStore) SearchFlavorgroups(uuid.UUID) ([]uuid.UUID, error) {
+	return nil, nil
 }

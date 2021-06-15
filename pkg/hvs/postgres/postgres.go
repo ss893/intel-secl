@@ -144,7 +144,7 @@ func (ds *DataStore) Migrate() {
 
 	ds.Db.AutoMigrate(flavorGroup{}, host{}, flavor{}, trustCache{}, hostuniqueFlavor{}, flavorgroupFlavor{}, hostStatus{}, esxiCluster{},
 		esxiClusterHost{}, tagCertificate{}, tpmEndorsement{}, report{}, hostCredential{}, hostFlavorgroup{}, auditLogEntry{},
-		queue{}, flavorTemplate{})
+		queue{}, flavorTemplate{}, flavortemplateFlavorgroup{})
 }
 
 func (ds *DataStore) Close() {

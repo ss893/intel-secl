@@ -27,6 +27,7 @@ type (
 		SearchFlavors(uuid.UUID) ([]uuid.UUID, error)
 		RetrieveFlavor(uuid.UUID, uuid.UUID) (*hvs.FlavorgroupFlavorLink, error)
 		SearchHostsByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error)
+		SearchFlavorTemplatesByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error)
 		GetFlavorTypesInFlavorGroup(flvGrpId uuid.UUID) (map[cf.FlavorPart]bool, error)
 	}
 
@@ -86,6 +87,10 @@ type (
 		Search(*models.FlavorTemplateFilterCriteria) ([]hvs.FlavorTemplate, error)
 		Delete(uuid.UUID) error
 		Recover([]string) error
+		AddFlavorgroups(uuid.UUID, []uuid.UUID) error
+		RetrieveFlavorgroup(uuid.UUID, uuid.UUID) (*hvs.FlavorTemplateFlavorgroup, error)
+		RemoveFlavorgroups(uuid.UUID, []uuid.UUID) error
+		SearchFlavorgroups(uuid.UUID) ([]uuid.UUID, error)
 	}
 
 	// HostStatusStore specifies the DB operations that must be implemented for the Host Status API

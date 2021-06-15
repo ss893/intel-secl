@@ -163,6 +163,10 @@ func (store *MockFlavorgroupStore) RetrieveFlavor(fgId uuid.UUID, fId uuid.UUID)
 }
 
 // SearchHostsByFlavorGroup is used to fetch a list of hosts which are linked to the provided FlavorGroup
+func (store *MockFlavorgroupStore) SearchFlavorTemplatesByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error) {
+	return nil, nil
+}
+
 func (store *MockFlavorgroupStore) SearchHostsByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error) {
 	var hIds []uuid.UUID
 	for _, hf := range store.HostFlavorgroupStore {

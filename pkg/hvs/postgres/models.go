@@ -77,6 +77,11 @@ type (
 		Deleted bool                    `gorm:"column:deleted;not null;type:bool"`
 	}
 
+	flavortemplateFlavorgroup struct {
+		FlavorTemplateId uuid.UUID `gorm:"type:uuid REFERENCES flavor_template(Id) ON UPDATE CASCADE ON DELETE CASCADE;not null;unique_index:idx_flavorgroup_flavortemplate"`
+		FlavorgroupId    uuid.UUID `gorm:"type:uuid REFERENCES flavor_group(Id) ON UPDATE CASCADE ON DELETE CASCADE;not null;unique_index:idx_flavorgroup_flavortemplate"`
+	}
+
 	hostCredential struct {
 		Id           uuid.UUID     `gorm:"primary_key;type:uuid"`
 		HostId       uuid.UUID     `gorm:"type:uuid REFERENCES host(Id) ON UPDATE CASCADE ON DELETE CASCADE;index:idx_host_credential_host_id"`
