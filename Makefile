@@ -21,8 +21,8 @@ kbs:
 	cd cmd/kbs && env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct \
 		go build -gcflags=all="-N -l" \
 		-ldflags "-X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v4/pkg/kbs/version.GitHash=$(GITCOMMIT)" -o kbs
-	
-%-installer: %
+
+%-pre-installer: %
 	mkdir -p installer
 	cp -r build/linux/$*/* installer/
 	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
@@ -38,7 +38,13 @@ kbs:
 	mv installer/build/* installer/
 	chmod +x installer/*.sh
 	cp cmd/$*/$* installer/$*
+
+%-installer: %-pre-installer %
 	makeself installer deployments/installer/$*-$(VERSION).bin "$* $(VERSION)" ./install.sh
+	rm -rf installer
+
+%-container-upgrader: %-pre-installer %
+	makeself installer deployments/installer/$*-container-upgrade-$(VERSION).bin "$* $(VERSION)" ./container_upgrade.sh
 	rm -rf installer
 
 %-docker: %

@@ -9,12 +9,14 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/tasks"
 	"os"
 	"reflect"
 	"strings"
 
 	"github.com/antchfx/jsonquery"
 	"github.com/google/uuid"
+	hvsConstants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
 	hvsconfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
@@ -158,7 +160,12 @@ func main() {
 	fmt.Println("Starting Flavor conversion tool")
 
 	//Fetching configuration details
-	conf, err := config.LoadConfig(ConfigFilePath)
+	configFile := os.Args[1]
+	if configFile == "" {
+		configFile = ConfigFilePath
+	}
+	fmt.Println("Reading config from : " + configFile)
+	conf, err := config.LoadConfig(configFile)
 	if err != nil {
 		fmt.Println("Error in getting DB connection details : ", err)
 		os.Exit(1)
@@ -171,6 +178,17 @@ func main() {
 	dataStore, err := database.GetDatabaseConnection(&conf.DB)
 	if err != nil {
 		fmt.Println("Error in establishing database connection")
+		os.Exit(1)
+	}
+
+	//Load default templates in Database
+	loadDefaultTemplates := &tasks.CreateDefaultFlavorTemplate{
+		DBConf:    conf.DB,
+		Directory: hvsConstants.DefaultFlavorTemplatesDirectory,
+	}
+	err = loadDefaultTemplates.Run()
+	if err != nil {
+		fmt.Println("Error in loading flavor templates : ", err)
 		os.Exit(1)
 	}
 

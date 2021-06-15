@@ -77,7 +77,6 @@ func UpdateFlavor(cfg *hvsconfig.DBConfig, db *gorm.DB, id uuid.UUID, flavor fla
 
 //GetDatabaseConnection returns a postgres.DataStore instance if establishing connection to Postgres DB is successful
 func GetDatabaseConnection(cfg *hvsconfig.DBConfig) (*postgres.DataStore, error) {
-
 	db, dbErr := postgres.InitDatabase(cfg)
 	if dbErr != nil {
 		fmt.Println("Error in establishing connection to Db")

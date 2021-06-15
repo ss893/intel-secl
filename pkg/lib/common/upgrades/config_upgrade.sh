@@ -18,14 +18,15 @@
 #get currently installed version number after removing '.'
 COMPONENT_VERSION=$(echo $1 | sed 's/v//' | sed 's/\.//g')
 READ_FILES=false
-ASSET_DIR=$3
-EXT=$4
-
+BACKEDUP_CONFIG_PATH=$2
+CONFIG_PATH=$3
+ASSET_DIR=$4
+EXT=$5
 if [ -d "$ASSET_DIR" ]; then
   chmod +x ${ASSET_DIR}/*${EXT}
+  cd $ASSET_DIR
   #Sort files
-  cd $ASSET_DIR && ls -1 *${EXT} | sort -n -k1.4 >temp_configs
-  IFS=$'\r\n' GLOBIGNORE='*' command eval 'configUpgradeFiles=($(cat temp_configs))'
+  IFS=$'\r\n' GLOBIGNORE='*' command eval 'configUpgradeFiles=($(ls | sort))'
   rm -rf temp_configs
   cd -
 
@@ -40,8 +41,8 @@ if [ -d "$ASSET_DIR" ]; then
 
     #Run all config files which are post current release
     if $READ_FILES; then
-      echo "Running upgrade script - $ASSET_DIR/$i with arguments $2"
-      $ASSET_DIR/$i $2
+      echo "Running upgrade script - $ASSET_DIR/$i with arguments $BACKEDUP_CONFIG_PATH $CONFIG_PATH"
+      $ASSET_DIR/$i $BACKEDUP_CONFIG_PATH $CONFIG_PATH
       if [ $? != 0 ]; then
         echo "Failed to apply $i upgrade script"
         exit 1

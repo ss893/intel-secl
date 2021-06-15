@@ -22,8 +22,7 @@ import (
 )
 
 type CreateDefaultFlavorTemplate struct {
-	DBConf  commConfig.DBConfig
-	deleted []string
+	DBConf commConfig.DBConfig
 
 	commandName   string
 	TemplateStore *postgres.FlavorTemplateStore
@@ -42,24 +41,12 @@ var defaultFlavorTemplateNames = []string{
 }
 
 func (t *CreateDefaultFlavorTemplate) Run() error {
-	var templates []hvs.FlavorTemplate
-	var ftList []hvs.FlavorTemplate
 
 	if t.TemplateStore == nil {
 		err := t.FlavorTemplateStore()
 		if err != nil {
 			return errors.Wrap(err, "Failed to initialize flavor template store instance")
 		}
-	}
-
-	if len(t.deleted) != 0 {
-		// Recover deleted default template.
-		err := t.TemplateStore.Recover(t.deleted)
-		if err != nil {
-			return errors.Wrapf(err, "Failed to recover default flavor template(s) %s", t.deleted)
-		}
-		t.deleted = []string{}
-		return nil
 	}
 
 	templates, err := t.getTemplates()
@@ -69,7 +56,7 @@ func (t *CreateDefaultFlavorTemplate) Run() error {
 
 	for _, ft := range templates {
 		ftc := models.FlavorTemplateFilterCriteria{Label: ft.Label}
-		ftList, err = t.TemplateStore.Search(&ftc)
+		ftList, err := t.TemplateStore.Search(&ftc)
 		if err != nil {
 			return errors.Wrap(err, "Failed to search the default flavor template(s)")
 		}
@@ -88,7 +75,7 @@ func (t *CreateDefaultFlavorTemplate) Validate() error {
 
 	var ftList []hvs.FlavorTemplate
 	defaultFlavorTemplateMap := map[string]bool{}
-	t.deleted = []string{}
+	deleted := []string{}
 	var err error
 
 	if t.TemplateStore == nil {
@@ -117,12 +104,12 @@ func (t *CreateDefaultFlavorTemplate) Validate() error {
 
 	for _, templateName := range defaultFlavorTemplateNames {
 		if !defaultFlavorTemplateMap[templateName] {
-			t.deleted = append(t.deleted, templateName)
+			deleted = append(deleted, templateName)
 		}
 	}
 
-	if len(t.deleted) != 0 {
-		return errors.New(t.commandName + ": Failed to recover deleted default flavor template(s) \"" + strings.Join(t.deleted, " "))
+	if len(deleted) != 0 {
+		return errors.New(t.commandName + ": Failed to recover deleted default flavor template(s) \"" + strings.Join(deleted, " "))
 	}
 	return nil
 }
