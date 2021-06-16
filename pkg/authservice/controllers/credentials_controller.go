@@ -137,13 +137,6 @@ func validateComponentType(r *http.Request, componentType string, fqdn string) b
 	for _, role := range roles {
 		if role == requiredRole {
 			return true
-		} else if componentType == constants.ComponentTypeTa {
-			oldContext := requiredRole.Context
-			requiredRole.Context += fqdn
-			if role == requiredRole {
-				return true
-			}
-			requiredRole.Context = oldContext
 		}
 	}
 

@@ -109,7 +109,6 @@ type App struct {
 	CustomClaimsComponents        map[string]bool
 	CustomClaimsTokenValiditySecs string
 	CredentialCreatorRoleContext  string
-	TaFqdn                        string
 
 	ConsoleWriter io.Writer
 }
@@ -299,7 +298,7 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, NewRole("HVS", "AttestationRegister", "",
 				[]string{"hosts:store:*", "hosts:search:*", "host_unique_flavors:create:*", "flavors:search:*",
 					"host_aiks:certify:*", "tpm_endorsements:create:*", "tpm_endorsements:search:*"}))
-			urc.Roles = append(urc.Roles, NewRole("AAS", "CredentialCreator", "type=TA"+a.TaFqdn+"", []string{"credential:create:*"}))
+			urc.Roles = append(urc.Roles, NewRole("AAS", "CredentialCreator", "type=TA", []string{"credential:create:*"}))
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.TaCN, a.TaSanList))
 		case "IHUB", "SIH":
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.IhubCN, a.IhubSanList))
@@ -346,7 +345,7 @@ func (a *App) GetCustomClaimsTokenMap() (map[string]string, error) {
 		case "TA":
 			customClaims.Subject = "TA"
 			claims := `{"roles": [{"service": "HVS","name": "AttestationRegisterOutbound"},{"service": "AAS","name": 
-"CredentialCreator","context": "type=TA` + a.TaFqdn + `"}],"permissions": [{"service": "HVS","rules": ["host_aiks:certify:*", 
+"CredentialCreator","context": "type=TA"}],"permissions": [{"service": "HVS","rules": ["host_aiks:certify:*", 
 "tpm_endorsements:create:*", "tpm_endorsements:search:*"]},{"service": "AAS","rules": ["credential:create:*"]}]}`
 			customClaims.ValiditySecs = validitySecs
 
@@ -482,7 +481,6 @@ func (a *App) LoadAllVariables(envFile string) error {
 
 		{&customClaimsComponent, "CUSTOM_CLAIMS_COMPONENTS", "", "Component List For Custom Claims Creation", false, false},
 		{&a.CustomClaimsTokenValiditySecs, "CUSTOM_CLAIMS_TOKEN_VALIDITY_SECS", "172800", "Custom Claims Token Validity In Seconds", false, false},
-		{&a.TaFqdn, "TA_FQDN", "", "FQDN for TA Host", false, false},
 	}
 
 	hasError := false

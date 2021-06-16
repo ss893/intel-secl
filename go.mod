@@ -6,7 +6,6 @@ require (
 	github.com/antchfx/jsonquery v1.1.4
 	github.com/beevik/etree v1.1.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/form3tech-oss/jwt-go v3.2.2+incompatible // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
