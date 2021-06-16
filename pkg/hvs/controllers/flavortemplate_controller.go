@@ -354,14 +354,13 @@ func (ftc *FlavorTemplateController) AddFlavorgroup(w http.ResponseWriter, r *ht
 	}
 
 	createdFlavorTemplateFlavorgroup := hvs.FlavorTemplateFlavorgroup{
-		FlavorTemplateId:        ftId,
-		FlavorgroupId: reqFlavorTemplateFlavorgroup.FlavorgroupId,
+		FlavorTemplateId: ftId,
+		FlavorgroupId:    reqFlavorTemplateFlavorgroup.FlavorgroupId,
 	}
 
 	secLog.WithField("flavortemplate-flavorgroup-link", createdFlavorTemplateFlavorgroup).Infof("%s: Flavor Template Flavorgroup link created by: %s", commLogMsg.PrivilegeModified, r.RemoteAddr)
 	return createdFlavorTemplateFlavorgroup, http.StatusCreated, nil
 }
-
 
 func (ftc *FlavorTemplateController) flavorGroupFlavorTemplateLinkExists(ftId, flavorgroupId uuid.UUID) (bool, error) {
 	defaultLog.Trace("controllers/flavortemplate_controller:flavorGroupFlavorTemplateLinkExists() Entering")
@@ -440,8 +439,8 @@ func (ftc *FlavorTemplateController) SearchFlavorgroups(w http.ResponseWriter, r
 	flavorTemplateFlavorgroups := []hvs.FlavorTemplateFlavorgroup{}
 	for _, fgId := range fgIds {
 		flavorTemplateFlavorgroups = append(flavorTemplateFlavorgroups, hvs.FlavorTemplateFlavorgroup{
-			FlavorTemplateId:        ftId,
-			FlavorgroupId: fgId,
+			FlavorTemplateId: ftId,
+			FlavorgroupId:    fgId,
 		})
 	}
 	flavorTemplateFlavorgroupCollection := hvs.FlavorTemplateFlavorgroupCollection{FlavorTemplateFlavorgroups: flavorTemplateFlavorgroups}

@@ -26,9 +26,10 @@ type FlavorGroup struct {
 	ID   uuid.UUID `json:"id,omitempty"`
 	Name string    `json:"name,omitempty"`
 	// swagger:strfmt uuid
-	FlavorIds     []uuid.UUID         `json:"flavorIds,omitempty"`
-	Flavors       []Flavor            `json:"flavors,omitempty"`
-	MatchPolicies FlavorMatchPolicies `json:"flavor_match_policies,omitempty"`
+	FlavorIds         []uuid.UUID         `json:"flavorIds,omitempty"`
+	FlavorTemplateIds []uuid.UUID         `json:"flavortemplateIds,omitempty"`
+	Flavors           []Flavor            `json:"flavors,omitempty"`
+	MatchPolicies     FlavorMatchPolicies `json:"flavor_match_policies,omitempty"`
 }
 
 type FlavorMatchPolicy struct {

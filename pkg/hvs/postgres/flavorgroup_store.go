@@ -46,18 +46,6 @@ func (f *FlavorGroupStore) Create(fg *hvs.FlavorGroup) (*hvs.FlavorGroup, error)
 	if err = f.Store.Db.Create(&dbFlavorGroup).Error; err != nil {
 		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to create Flavorgroup")
 	}
-
-	defaultFlavorGroup, err := f.Search(&models.FlavorGroupFilterCriteria{NameEqualTo: models.FlavorGroupsAutomatic.String()})
-	if err != nil {
-		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to search default flavorgroup")
-	}
-	defaultTemplates, err := f.SearchFlavorTemplatesByFlavorGroup(defaultFlavorGroup[0].ID)
-	if err != nil {
-		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to search default templaets")
-	}
-	if err = f.AddFlavorTemplates(fg.ID, defaultTemplates); err != nil {
-		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to associate Flavorgroup with Flavor Templates")
-	}
 	return fg, nil
 }
 

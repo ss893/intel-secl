@@ -21,11 +21,13 @@ func SetFlavorGroupRoutes(router *mux.Router, store *postgres.DataStore, flavorg
 
 	flavorStore := postgres.NewFlavorStore(store)
 	hostStore := postgres.NewHostStore(store)
+	flavorTemplateStore := postgres.NewFlavorTemplateStore(store)
 	flavorgroupController := controllers.FlavorgroupController{
-		FlavorGroupStore: flavorgroupStore,
-		FlavorStore:      flavorStore,
-		HostStore:        hostStore,
-		HTManager:        hostTrustManager,
+		FlavorGroupStore:    flavorgroupStore,
+		FlavorTemplateStore: flavorTemplateStore,
+		FlavorStore:         flavorStore,
+		HostStore:           hostStore,
+		HTManager:           hostTrustManager,
 	}
 
 	flavorGroupIdExpr := fmt.Sprintf("%s%s", "/flavorgroups/", validation.IdReg)

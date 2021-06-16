@@ -29,6 +29,7 @@ type (
 		SearchHostsByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error)
 		SearchFlavorTemplatesByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error)
 		GetFlavorTypesInFlavorGroup(flvGrpId uuid.UUID) (map[cf.FlavorPart]bool, error)
+		AddFlavorTemplates(uuid.UUID, []uuid.UUID) error
 	}
 
 	HostStore interface {

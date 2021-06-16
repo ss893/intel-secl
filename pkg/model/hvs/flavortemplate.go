@@ -74,7 +74,6 @@ type FlavorTemplateFlavorgroupCreateRequest struct {
 	FlavorgroupId uuid.UUID `json:"flavorgroup_id,omitempty"`
 }
 
-
 type PcrListRules struct {
 	PcrBank     []string
 	PcrMatches  bool

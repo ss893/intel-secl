@@ -178,8 +178,11 @@ func (store *MockFlavorgroupStore) SearchHostsByFlavorGroup(fgID uuid.UUID) ([]u
 }
 
 func (store *MockFlavorgroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[cf.FlavorPart]bool, error) {
-
 	return make(map[cf.FlavorPart]bool), nil
+}
+
+func (store *MockFlavorgroupStore) AddFlavorTemplates(fgId uuid.UUID, ftIds []uuid.UUID) error {
+	return nil
 }
 
 // NewFakeFlavorgroupStore provides two dummy data for Flavorgroups

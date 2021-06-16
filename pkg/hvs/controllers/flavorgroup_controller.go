@@ -23,10 +23,11 @@ import (
 )
 
 type FlavorgroupController struct {
-	FlavorGroupStore domain.FlavorGroupStore
-	FlavorStore      domain.FlavorStore
-	HostStore        domain.HostStore
-	HTManager        domain.HostTrustManager
+	FlavorGroupStore    domain.FlavorGroupStore
+	FlavorTemplateStore domain.FlavorTemplateStore
+	FlavorStore         domain.FlavorStore
+	HostStore           domain.HostStore
+	HTManager           domain.HostTrustManager
 }
 
 var flavorGroupSearchParams = map[string]bool{"id": true, "nameEqualTo": true, "nameContains": true, "includeFlavorContent": true}
@@ -68,12 +69,51 @@ func (controller FlavorgroupController) Create(w http.ResponseWriter, r *http.Re
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "FlavorGroup with same name already exist"}
 	}
 
+	var templates []uuid.UUID
+	if reqFlavorGroup.FlavorTemplateIds != nil && len(reqFlavorGroup.FlavorTemplateIds) > 0 {
+		for _, templateId := range reqFlavorGroup.FlavorTemplateIds {
+			_, err := controller.FlavorTemplateStore.Retrieve(templateId, false)
+			if err != nil {
+				switch err.(type) {
+				case *commErr.StatusNotFoundError:
+					secLog.WithError(err).WithField("id", templateId).Info(
+						"controllers/flavortemplate_controller:Retrieve() Flavor template with given ID does not exist or has been deleted")
+					return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Flavor template with given ID does not exist or has been deleted"}
+				default:
+					secLog.WithError(err).WithField("id", templateId).Info(
+						"controllers/flavortemplate_controller:Retrieve() Failed to retrieve FlavorTemplate")
+					return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve FlavorTemplate with the given ID"}
+				}
+			}
+			templates = append(templates, templateId)
+		}
+	} else {
+		defaultFlavorGroup, err := controller.FlavorGroupStore.Search(&models.FlavorGroupFilterCriteria{NameEqualTo: models.FlavorGroupsAutomatic.String()})
+		if err != nil {
+			secLog.WithError(err).Info(
+				"controllers/flavortemplate_controller:Retrieve() Failed to search default flavorgroup")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to search default flavorgroup"}
+		}
+		templates, err = controller.FlavorGroupStore.SearchFlavorTemplatesByFlavorGroup(defaultFlavorGroup[0].ID)
+		if err != nil {
+			secLog.WithError(err).Info(
+				"controllers/flavortemplate_controller:Retrieve() Failed to search flavor templates associated with default flavorgroup")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to search flavor templates associated with default flavorgroup"}
+		}
+	}
+
 	// Persistence
 	newFlavorGroup, err := controller.FlavorGroupStore.Create(&reqFlavorGroup)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavorgroup_controller:Create() Flavorgroup save failed")
 		return nil, http.StatusInternalServerError, errors.Errorf("Error while inserting a new Flavorgroup")
 	}
+	if err = controller.FlavorGroupStore.AddFlavorTemplates(newFlavorGroup.ID, templates); err != nil {
+		secLog.WithError(err).Info(
+			"controllers/flavortemplate_controller:Retrieve() Failed to add flavor templates to the flavorgroup")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to add flavor templates to the flavorgroup"}
+	}
+
 	secLog.WithField("Name", reqFlavorGroup.Name).Infof("%s: FlavorGroup created by: %s", commLogMsg.PrivilegeModified, r.RemoteAddr)
 	return newFlavorGroup, http.StatusCreated, nil
 }
@@ -125,12 +165,13 @@ func (controller FlavorgroupController) Search(w http.ResponseWriter, r *http.Re
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{"Unable to search Flavorgroups"}
 	}
 
-	flavorgroupCollection, err := controller.getAssociatedFlavor(flavorgroups, includeFlavorContent)
+	flavorgroupCollection, err := controller.getAssociatedFlavorAndTemplates(flavorgroups, includeFlavorContent)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavorgroup_controller:Search() Error getting flavor(s) " +
 			"associated with flavor group")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{"Unable to search Flavorgroups"}
 	}
+
 	secLog.Infof("%s: Return flavorgroup query to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
 	return flavorgroupCollection, http.StatusOK, nil
 }
@@ -215,6 +256,13 @@ func ValidateFlavorGroup(flavorGroup hvs.FlavorGroup) error {
 	if flavorGroup.Name != "" {
 		if errs := validation.ValidateStrings([]string{flavorGroup.Name}); errs != nil {
 			return errors.Wrap(errs, "Valid FlavorGroup Name must be specified")
+		}
+	}
+	if flavorGroup.FlavorTemplateIds != nil && len(flavorGroup.FlavorTemplateIds) > 0 {
+		for _, templateId := range flavorGroup.FlavorTemplateIds {
+			if errs := validation.ValidateUUIDv4(templateId.String()); errs != nil {
+				return errors.Wrap(errs, "Valid Flavor Template ID must be specified")
+			}
 		}
 	}
 	if len(flavorGroup.MatchPolicies) == 0 {
@@ -468,10 +516,22 @@ func (controller FlavorgroupController) RetrieveFlavor(w http.ResponseWriter, r 
 	return fgl, http.StatusOK, nil
 }
 
-func (controller FlavorgroupController) getAssociatedFlavor(flavorgroupList []hvs.FlavorGroup, includeFlavorContent bool) (*hvs.
+func (controller FlavorgroupController) getAssociatedFlavorTemplates(flavorGroupID uuid.UUID) ([]uuid.UUID, error) {
+	templates, err := controller.FlavorGroupStore.SearchFlavorTemplatesByFlavorGroup(flavorGroupID)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to search flavor templates associated with default flavorgroup")
+	}
+	var templateIds []uuid.UUID
+	for _, templateId := range templates {
+		templateIds = append(templateIds, templateId)
+	}
+	return templateIds, nil
+}
+
+func (controller FlavorgroupController) getAssociatedFlavorAndTemplates(flavorgroupList []hvs.FlavorGroup, includeFlavorContent bool) (*hvs.
 	FlavorgroupCollection, error) {
-	defaultLog.Trace("controllers/flavorgroup_controller:getAssociatedFlavor() Entering")
-	defer defaultLog.Trace("controllers/flavorgroup_controller:getAssociatedFlavor() Leaving")
+	defaultLog.Trace("controllers/flavorgroup_controller:getAssociatedFlavorAndTemplates() Entering")
+	defer defaultLog.Trace("controllers/flavorgroup_controller:getAssociatedFlavorAndTemplates() Leaving")
 
 	for index, flavorGroup := range flavorgroupList {
 		flavorIds, err := controller.FlavorGroupStore.SearchFlavors(flavorGroup.ID)
@@ -489,6 +549,10 @@ func (controller FlavorgroupController) getAssociatedFlavor(flavorgroupList []hv
 			for _, signedFlavor := range signedFlavorList {
 				flavorgroupList[index].Flavors = append(flavorgroupList[index].Flavors, signedFlavor.Flavor)
 			}
+		}
+		flavorgroupList[index].FlavorTemplateIds, err = controller.getAssociatedFlavorTemplates(flavorGroup.ID)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error retrieving flavor templates linked to flavor group")
 		}
 	}
 
