@@ -74,7 +74,7 @@ func (ftc *FlavorTemplateController) Create(w http.ResponseWriter, r *http.Reque
 	}
 
 	//FTStore this template into database.
-	flavorTemplate, err := ftc.FTStore.Create(flavorTemplateReq.FlavorTemplate)
+	flavorTemplate, err := ftc.FTStore.Create(&flavorTemplateReq.FlavorTemplate)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:Create() Failed to create flavor template")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to create flavor template"}
@@ -103,7 +103,7 @@ func (ftc *FlavorTemplateController) linkFlavorgroupsToFlavorTemplate(flavorgrou
 	defer defaultLog.Trace("controllers/flavortemplate_controller:linkFlavorgroupsToFlavorTemplate() Leaving")
 
 	flavorgroupIds := []uuid.UUID{}
-	flavorgroups, err := CreateMissingFlavorgroups(ftc.FGStore, flavorgroupNames)
+	flavorgroups, err := CreateMissingFlavorgroups(ftc.FGStore, flavorgroupNames, []uuid.UUID{templateId})
 	if err != nil {
 		return errors.Wrapf(err, "Could not fetch flavorgroup Ids")
 	}
@@ -118,8 +118,10 @@ func (ftc *FlavorTemplateController) linkFlavorgroupsToFlavorTemplate(flavorgrou
 	}
 
 	defaultLog.Debugf("Linking flavortemplate %v with flavorgroups %+q", templateId, flavorgroupIds)
-	if err := ftc.FTStore.AddFlavorgroups(templateId, flavorgroupIds); err != nil {
-		return errors.Wrap(err, "Could not create flavortemplate-flavorgroup links")
+	if len(flavorgroupIds) > 0 {
+		if err := ftc.FTStore.AddFlavorgroups(templateId, flavorgroupIds); err != nil {
+			return errors.Wrap(err, "Could not create flavortemplate-flavorgroup links")
+		}
 	}
 
 	return nil
@@ -267,8 +269,15 @@ func (ftc *FlavorTemplateController) getFlavorTemplateCreateReq(r *http.Request)
 		}
 	}
 
+	flavorTemplateBytes, err := json.Marshal(createFlavorTemplateReq.FlavorTemplate)
+	if err != nil {
+		secLog.WithError(err).Info(
+			"controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Failed to marshal FlavorTemplate")
+		return hvs.FlavorTemplateReq{}, errors.New("Failed to marshal FlavorTemplate")
+	}
+
 	defaultLog.Debug("Validating create flavor request")
-	errMsg, err := ftc.ValidateFlavorTemplateCreateRequest(*createFlavorTemplateReq.FlavorTemplate, string(body))
+	errMsg, err := ftc.ValidateFlavorTemplateCreateRequest(createFlavorTemplateReq.FlavorTemplate, string(flavorTemplateBytes))
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Unable to create flavor template, validation failed")
 		return createFlavorTemplateReq, &commErr.BadRequestError{Message: errMsg}
@@ -354,7 +363,7 @@ func (ftc *FlavorTemplateController) AddFlavorgroup(w http.ResponseWriter, r *ht
 	}
 
 	createdFlavorTemplateFlavorgroup := hvs.FlavorTemplateFlavorgroup{
-		FlavorTemplateId: ftId,
+		FlavortemplateId: ftId,
 		FlavorgroupId:    reqFlavorTemplateFlavorgroup.FlavorgroupId,
 	}
 
@@ -439,7 +448,7 @@ func (ftc *FlavorTemplateController) SearchFlavorgroups(w http.ResponseWriter, r
 	flavorTemplateFlavorgroups := []hvs.FlavorTemplateFlavorgroup{}
 	for _, fgId := range fgIds {
 		flavorTemplateFlavorgroups = append(flavorTemplateFlavorgroups, hvs.FlavorTemplateFlavorgroup{
-			FlavorTemplateId: ftId,
+			FlavortemplateId: ftId,
 			FlavorgroupId:    fgId,
 		})
 	}

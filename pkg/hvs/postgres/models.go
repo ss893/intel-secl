@@ -78,7 +78,7 @@ type (
 	}
 
 	flavortemplateFlavorgroup struct {
-		FlavorTemplateId uuid.UUID `gorm:"type:uuid REFERENCES flavor_template(Id) ON UPDATE CASCADE ON DELETE CASCADE;not null;unique_index:idx_flavorgroup_flavortemplate"`
+		FlavortemplateId uuid.UUID `gorm:"type:uuid REFERENCES flavor_template(Id) ON UPDATE CASCADE ON DELETE CASCADE;not null;unique_index:idx_flavorgroup_flavortemplate"`
 		FlavorgroupId    uuid.UUID `gorm:"type:uuid REFERENCES flavor_group(Id) ON UPDATE CASCADE ON DELETE CASCADE;not null;unique_index:idx_flavorgroup_flavortemplate"`
 	}
 

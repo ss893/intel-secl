@@ -182,7 +182,7 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 	}
 
 	// check if the flavorgroup is already created, else create flavorgroup
-	flavorgroups, err := CreateMissingFlavorgroups(fcon.FGStore, flavorReq.FlavorgroupNames)
+	flavorgroups, err := CreateMissingFlavorgroups(fcon.FGStore, flavorReq.FlavorgroupNames, nil)
 	if err != nil {
 		defaultLog.Error("controllers/flavor_controller:createFlavors() Error getting flavorgroups")
 		return nil, err

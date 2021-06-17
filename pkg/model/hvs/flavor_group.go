@@ -26,8 +26,9 @@ type FlavorGroup struct {
 	ID   uuid.UUID `json:"id,omitempty"`
 	Name string    `json:"name,omitempty"`
 	// swagger:strfmt uuid
-	FlavorIds         []uuid.UUID         `json:"flavorIds,omitempty"`
-	FlavorTemplateIds []uuid.UUID         `json:"flavortemplateIds,omitempty"`
+	FlavorIds []uuid.UUID `json:"flavorIds,omitempty"`
+	// swagger:strfmt uuid
+	FlavorTemplateIds []uuid.UUID         `json:"flavorTemplateIds,omitempty"`
 	Flavors           []Flavor            `json:"flavors,omitempty"`
 	MatchPolicies     FlavorMatchPolicies `json:"flavor_match_policies,omitempty"`
 }
@@ -85,12 +86,14 @@ func (r FlavorGroup) MarshalJSON() ([]byte, error) {
 		Name                        string                      `json:"name,omitempty"`
 		FlavorIds                   []uuid.UUID                 `json:"flavorIds,omitempty"`
 		Flavors                     []Flavor                    `json:"flavors,omitempty"`
+		FlavorTemplateIds           []uuid.UUID                 `json:"flavorTemplateIds,omitempty"`
 		FlavorMatchPolicyCollection FlavorMatchPolicyCollection `json:"flavor_match_policy_collection,omitempty"`
 	}{
 		ID:                          r.ID,
 		Name:                        r.Name,
 		FlavorIds:                   r.FlavorIds,
 		Flavors:                     r.Flavors,
+		FlavorTemplateIds:           r.FlavorTemplateIds,
 		FlavorMatchPolicyCollection: FlavorMatchPolicyCollection{r.MatchPolicies},
 	})
 }
@@ -100,6 +103,7 @@ func (r *FlavorGroup) UnmarshalJSON(b []byte) error {
 		ID                          uuid.UUID                   `json:"id,omitempty"`
 		Name                        string                      `json:"name,omitempty"`
 		FlavorIds                   []uuid.UUID                 `json:"flavorIds,omitempty"`
+		FlavorTemplateIds           []uuid.UUID                 `json:"flavorTemplateIds,omitempty"`
 		Flavors                     []Flavor                    `json:"flavors,omitempty"`
 		FlavorMatchPolicyCollection FlavorMatchPolicyCollection `json:"flavor_match_policy_collection,omitempty"`
 	})
@@ -108,6 +112,7 @@ func (r *FlavorGroup) UnmarshalJSON(b []byte) error {
 		r.ID = decoded.ID
 		r.Name = decoded.Name
 		r.FlavorIds = decoded.FlavorIds
+		r.FlavorTemplateIds = decoded.FlavorTemplateIds
 		r.Flavors = decoded.Flavors
 		r.MatchPolicies = decoded.FlavorMatchPolicyCollection.FlavorMatchPolicies
 	}

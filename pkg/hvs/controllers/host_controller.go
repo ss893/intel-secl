@@ -536,7 +536,7 @@ func (hc *HostController) linkFlavorgroupsToHost(flavorgroupNames []string, host
 	defer defaultLog.Trace("controllers/host_controller:linkFlavorgroupsToHost() Leaving")
 
 	flavorgroupIds := []uuid.UUID{}
-	flavorgroups, err := CreateMissingFlavorgroups(hc.FGStore, flavorgroupNames)
+	flavorgroups, err := CreateMissingFlavorgroups(hc.FGStore, flavorgroupNames, nil)
 	if err != nil {
 		return errors.Wrapf(err, "Could not fetch flavorgroup Ids")
 	}
@@ -594,7 +594,7 @@ func (hc *HostController) linkHostUniqueFlavorsToHost(newHost *hvs.Host) error {
 	return nil
 }
 
-func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames []string) ([]hvs.FlavorGroup, error) {
+func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames []string, flavorTemplateIds []uuid.UUID) ([]hvs.FlavorGroup, error) {
 	flavorgroups := []hvs.FlavorGroup{}
 	for _, flavorgroupName := range flavorgroupNames {
 		existingFlavorGroups, err := fGStore.Search(&models.FlavorGroupFilterCriteria{
@@ -604,7 +604,7 @@ func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames
 			return nil, errors.Wrapf(err, "Could not find flavorgroup with name : %s", flavorgroupName)
 		}
 		if existingFlavorGroups == nil || len(existingFlavorGroups) == 0 {
-			flavorgroup, err := createNewFlavorGroup(fGStore, flavorgroupName)
+			flavorgroup, err := createNewFlavorGroup(fGStore, flavorgroupName, flavorTemplateIds)
 			if err != nil {
 				return nil, errors.Wrapf(err, "Could not create flavorgroup with name : %s", flavorgroupName)
 			}
@@ -616,11 +616,12 @@ func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames
 	return flavorgroups, nil
 }
 
-func createNewFlavorGroup(fGStore domain.FlavorGroupStore, flavorgroupName string) (*hvs.FlavorGroup, error) {
+func createNewFlavorGroup(fGStore domain.FlavorGroupStore, flavorgroupName string, flavorTemplateIds []uuid.UUID) (*hvs.FlavorGroup, error) {
 	defaultLog.Trace("controllers/host_controller:createNewFlavorGroup() Entering")
 	defer defaultLog.Trace("controllers/host_controller:createNewFlavorGroup() Leaving")
 
 	fg := utils.CreateFlavorGroupByName(flavorgroupName)
+	fg.FlavorTemplateIds = flavorTemplateIds
 	flavorGroup, err := fGStore.Create(&fg)
 	if err != nil {
 		return nil, err

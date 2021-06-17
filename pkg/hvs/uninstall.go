@@ -130,6 +130,7 @@ var tablesToDrop = []string{
 	"hostunique_flavor",
 	"audit_log_entry",
 	"flavor_template",
+	"flavortemplate_flavorgroup",
 }
 
 func (a *App) eraseData() error {

@@ -223,7 +223,7 @@ func (ft *FlavorTemplateStore) AddFlavorgroups(ftId uuid.UUID, fgIds []uuid.UUID
 	defaultLog.Debugf("postgres/flavortemplate_store:AddFlavorgroups() insert query - %v", insertQuery)
 	err := ft.Store.Db.Model(flavortemplateFlavorgroup{}).Exec(insertQuery, hfgValueArgs...).Error
 	if err != nil {
-		return errors.Wrap(err, "postgres/flavortemplate_store:AddFlavorgroups() failed to create flavor-template Flavorgroup associations")
+		return errors.Wrapf(err, "postgres/flavortemplate_store:AddFlavorgroups() failed to create flavor-template Flavorgroup associations  %v", insertQuery)
 	}
 	defaultLog.Debugf("postgres/flavortemplate_store:AddFlavorgroups() Linking flavor-template completed for %v ", ftId)
 	return nil
@@ -234,8 +234,8 @@ func (ft *FlavorTemplateStore) RetrieveFlavorgroup(ftId uuid.UUID, fgId uuid.UUI
 	defer defaultLog.Trace("postgres/flavortemplate_store:RetrieveFlavorgroup() Leaving")
 
 	ftfg := hvs.FlavorTemplateFlavorgroup{}
-	row := ft.Store.Db.Model(&flavortemplateFlavorgroup{}).Where(&flavortemplateFlavorgroup{FlavorTemplateId: ftId, FlavorgroupId: fgId}).Row()
-	if err := row.Scan(&ftfg.FlavorTemplateId, &ftfg.FlavorgroupId); err != nil {
+	row := ft.Store.Db.Model(&flavortemplateFlavorgroup{}).Where(&flavortemplateFlavorgroup{FlavortemplateId: ftId, FlavorgroupId: fgId}).Row()
+	if err := row.Scan(&ftfg.FlavortemplateId, &ftfg.FlavorgroupId); err != nil {
 		return nil, errors.Wrap(err, "postgres/flavortemplate_store:RetrieveFlavorgroup() failed to scan record")
 	}
 	return &ftfg, nil
@@ -264,7 +264,7 @@ func (hs *FlavorTemplateStore) SearchFlavorgroups(ftId uuid.UUID) ([]uuid.UUID, 
 	defaultLog.Trace("postgres/flavortemplate_store:SearchFlavorgroups() Entering")
 	defer defaultLog.Trace("postgres/flavortemplate_store:SearchFlavorgroups() Leaving")
 
-	rows, err := hs.Store.Db.Model(&flavortemplateFlavorgroup{}).Select("flavorgroup_id").Where(&flavortemplateFlavorgroup{FlavorTemplateId: ftId}).Rows()
+	rows, err := hs.Store.Db.Model(&flavortemplateFlavorgroup{}).Select("flavorgroup_id").Where(&flavortemplateFlavorgroup{FlavortemplateId: ftId}).Rows()
 	if err != nil {
 		return nil, errors.Wrap(err, "postgres/flavortemplate_store:SearchFlavorgroups() failed to retrieve records from db")
 	}

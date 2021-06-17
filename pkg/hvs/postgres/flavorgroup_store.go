@@ -46,6 +46,26 @@ func (f *FlavorGroupStore) Create(fg *hvs.FlavorGroup) (*hvs.FlavorGroup, error)
 	if err = f.Store.Db.Create(&dbFlavorGroup).Error; err != nil {
 		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to create Flavorgroup")
 	}
+	// Add default flavorgroup templates if they are missing
+	if fg.FlavorTemplateIds == nil || len(fg.FlavorTemplateIds) == 0 {
+		defaultFlavorGroup, err := f.Search(&models.FlavorGroupFilterCriteria{NameEqualTo: models.FlavorGroupsAutomatic.String()})
+		if err != nil {
+			return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to search default flavorgroup")
+		}
+		defaultTemplates, err := f.SearchFlavorTemplatesByFlavorGroup(defaultFlavorGroup[0].ID)
+		if err != nil {
+			return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to search default templaets")
+		}
+		if len(defaultTemplates) > 0 {
+			if err = f.AddFlavorTemplates(fg.ID, defaultTemplates); err != nil {
+				return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to associate Flavorgroup with Flavor Templates")
+			}
+		}
+	} else {
+		if err = f.AddFlavorTemplates(fg.ID, fg.FlavorTemplateIds); err != nil {
+			return nil, errors.Wrap(err, "postgres/flavorgroup_store:Create() failed to associate Flavorgroup with Flavor Templates")
+		}
+	}
 	return fg, nil
 }
 
@@ -402,7 +422,7 @@ func (f *FlavorGroupStore) AddFlavorTemplates(fgId uuid.UUID, ftIds []uuid.UUID)
 	for _, ftId := range ftIds {
 		hfgValues = append(hfgValues, "(?, ?)")
 		hfgValueArgs = append(hfgValueArgs, ftId)
-		hfgValueArgs = append(hfgValueArgs, ftId)
+		hfgValueArgs = append(hfgValueArgs, fgId)
 	}
 
 	insertQuery := fmt.Sprintf("INSERT INTO flavortemplate_flavorgroup VALUES %s", strings.Join(hfgValues, ","))

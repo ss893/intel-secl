@@ -45,8 +45,8 @@ type FlavorParts struct {
 }
 
 type FlavorTemplateReq struct {
-	FlavorgroupNames []string        `json:"flavorgroup_names,omitempty"`
-	FlavorTemplate   *FlavorTemplate `json:"flavor_template"`
+	FlavorgroupNames []string       `json:"flavorgroup_names,omitempty"`
+	FlavorTemplate   FlavorTemplate `json:"flavor_template"`
 }
 
 type FlavorTemplate struct {
@@ -64,7 +64,7 @@ type FlavorTemplateFlavorgroupCollection struct {
 
 type FlavorTemplateFlavorgroup struct {
 	// swagger:strfmt uuid
-	FlavorTemplateId uuid.UUID `json:"flavortemplate_id,omitempty"`
+	FlavortemplateId uuid.UUID `json:"flavortemplate_id,omitempty"`
 	// swagger:strfmt uuid
 	FlavorgroupId uuid.UUID `json:"flavorgroup_id,omitempty"`
 }
