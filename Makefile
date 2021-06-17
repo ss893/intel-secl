@@ -6,6 +6,8 @@ PROXY_EXISTS := $(shell if [[ "${https_proxy}" || "${http_proxy}" ]]; then echo 
 DOCKER_PROXY_FLAGS := ""
 ifeq ($(PROXY_EXISTS),1)
 	DOCKER_PROXY_FLAGS = --build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy}
+else
+	undefine DOCKER_PROXY_FLAGS
 endif
 
 TARGETS = cms kbs ihub hvs authservice wpm
@@ -43,16 +45,8 @@ kbs:
 	makeself installer deployments/installer/$*-$(VERSION).bin "$* $(VERSION)" ./install.sh
 	rm -rf installer
 
-%-container-upgrader: %-pre-installer %
-	makeself installer deployments/installer/$*-container-upgrade-$(VERSION).bin "$* $(VERSION)" ./container_upgrade.sh
-	rm -rf installer
-
 %-docker: %
-ifeq ($(PROXY_EXISTS),1)
 	docker build ${DOCKER_PROXY_FLAGS} -f build/image/Dockerfile-$* -t isecl/$*:$(VERSION) .
-else
-	docker build -f build/image/Dockerfile-$* -t isecl/$*:$(VERSION) .
-endif
 
 %-swagger:
 	mkdir -p docs/swagger
@@ -65,6 +59,11 @@ docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 
 %-oci-archive: %-docker
 	skopeo copy docker-daemon:isecl/$*:$(VERSION) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
+	if [ $@ == "hvs-oci-archive" ]; then \
+	    cd ./upgrades/$*/db && make all && cd - ; \
+	    docker build ${DOCKER_PROXY_FLAGS} -f build/image/Dockerfile-upgrade-$* -t isecl/$*-upgrade:$(VERSION) . ; \
+	    skopeo copy docker-daemon:isecl/$*-upgrade:$(VERSION) oci-archive:deployments/container-archive/oci/$*-upgrade-$(VERSION)-$(GITCOMMIT).tar:$(VERSION) ; \
+	fi
 
 kbs-docker: kbs
 	cp /usr/local/lib/libkmip.so.0.2 build/image/

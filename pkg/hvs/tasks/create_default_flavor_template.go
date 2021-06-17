@@ -30,9 +30,12 @@ type CreateDefaultFlavorTemplate struct {
 }
 
 var defaultFlavorTemplateNames = []string{
-	"default-linux-tpm20-tboot",
-	"default-linux-tpm20-suefi",
-	"default-linux-tpm20-cbnt",
+	"default-linux-rhel-tpm20-tboot",
+	"default-linux-rhel-tpm20-suefi",
+	"default-linux-rhel-tpm20-cbnt",
+	"default-linux-centos-tpm20-tboot",
+	"default-linux-centos-tpm20-suefi",
+	"default-linux-centos-tpm20-cbnt",
 	"default-uefi",
 	"default-bmc",
 	"default-pfr",

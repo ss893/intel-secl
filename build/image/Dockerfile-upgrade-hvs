@@ -1,0 +1,26 @@
+#  Copyright (C) 2021 Intel Corporation
+#  SPDX-License-Identifier: BSD-3-Clause
+
+FROM centos:8
+
+RUN mkdir -p /schema /templates /database /config
+
+COPY build/linux/hvs/schema/* /schema/
+
+COPY build/linux/hvs/templates/* /templates/
+
+COPY upgrades/hvs/config/* /config/ 
+
+COPY pkg/lib/common/upgrades/container_upgrade.sh /container_upgrade.sh
+
+COPY pkg/lib/common/upgrades/config_upgrade.sh /config_upgrade.sh
+
+COPY upgrades/hvs/db/out/* /database/
+
+RUN touch /.container-env
+
+RUN chmod +0766 /schema /templates
+
+RUN chmod -R +x /container_upgrade.sh /config_upgrade.sh /config /database
+
+ENTRYPOINT ["/container_upgrade.sh"]

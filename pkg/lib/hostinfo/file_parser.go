@@ -30,6 +30,10 @@ func (fileInfoParser *fileInfoParser) Parse(hostInfo *model.HostInfo) error {
 		hostInfo.IsDockerEnvironment = true
 	}
 
+	if _, err := os.Stat(isOCIContainerFile); err == nil {
+		hostInfo.IsDockerEnvironment = true
+	}
+
 	return nil
 }
 

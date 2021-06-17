@@ -1,5 +1,5 @@
 {
-    "label": "default-linux-tpm20-suefi",
+    "label": "default-linux-rhel-tpm20-suefi",
     "condition": [
         "//host_info/os_name//*[text()='RedHatEnterprise']",
         "//host_info/hardware_features/TPM/meta/tpm_version//*[text()='2.0']",

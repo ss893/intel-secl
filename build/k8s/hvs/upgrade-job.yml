@@ -1,0 +1,53 @@
+#  Copyright (C) 2021 Intel Corporation
+#  SPDX-License-Identifier: BSD-3-Clause
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hvs-upgrade
+  namespace: isecl
+  labels:
+    app: hvs
+spec:
+  template:
+    metadata:
+      labels:
+        app: hvs
+    spec:
+      securityContext:
+        fsGroup: 1001
+      restartPolicy: Never
+      containers:
+        - name: hvs
+          image: <upgrade-image-name>:<image-tag>
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
+          env:
+            - name: CONFIG_DIR
+              value: "/etc/hvs"
+            - name: COMPONENT_VERSION
+              value: <current deployed version>
+          envFrom:
+            - configMapRef:
+                name: hvs-config
+          volumeMounts:
+            - name: hvs-config-volume
+              mountPath: /etc/hvs/
+            - name: hvs-logs-volume
+              mountPath: /var/log/hvs/
+            - name: hvs-db-certs
+              mountPath: /etc/postgresql/
+      volumes:
+        - name: hvs-logs-volume
+          persistentVolumeClaim:
+            claimName: hvs-logs-pvc
+        - name: hvs-config-volume
+          persistentVolumeClaim:
+            claimName: hvs-config-pvc
+        - name: hvs-db-certs
+          secret:
+            secretName: hvs-db-certs
+            defaultMode: 0640
