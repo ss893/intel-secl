@@ -40,21 +40,48 @@ cd $CERTS_DIR
 
 echo "Creating certificate request..."
 
-cat >csr.json <<EOF
-{
-  "hosts": [
-	$(echo $SAN_LIST | tr -s "[:space:]" | sed 's/,/\",\"/g' | sed 's/^/\"/' | sed 's/$/\"/' | sed 's/,/,\n/g')
-  ],
-  "CN": "$CERT_CN",
-  "key": {
-	"algo": "rsa",
-	"size": 3072
-  }
-}
+# create a csr conf for openssl to use
+cat <<EOF >csr.conf
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+[req_distinguished_name]
+CN = $CERT_CN
+[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+[alt_names]
 EOF
 
+# split up the CSV entries in SAN_LIST
+IFS=','; san_list=($SAN_LIST); unset IFS
+
+# openssl requires each SAN entry to be appended separately as either IP or DNS
+export dnscounter=1
+export ipcounter=1
+for san in "${san_list[@]}";
+do
+# check if the san is an IP or an DNS
+if [[ $san =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]];
+then
+echo "IP.${ipcounter} = $san" >> csr.conf
+ipcounter=$((ipcounter+1))
+else
+echo "DNS.${dnscounter} = $san" >> csr.conf
+dnscounter=$((dnscounter+1))
+fi
+done
+
 CSR_FILE=sslcert
-cfssl genkey csr.json | cfssljson -bare $CSR_FILE
+
+# generate CSR
+openssl req -new \
+-newkey rsa:3072 -sha384 -nodes -keyout sslcert.key \
+-out ${CSR_FILE}.csr \
+-subj "/CN=$CERT_CN" \
+-config csr.conf
 
 if [ $? -ne 0 ]; then
   echo "Error generating CSR. Aborting..."
