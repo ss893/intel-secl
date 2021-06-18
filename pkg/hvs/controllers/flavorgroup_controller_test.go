@@ -181,6 +181,7 @@ var _ = Describe("FlavorgroupController", func() {
 		Context("Search FlavorGroups with invalid NameEqualTo parameter", func() {
 			It("Should get error:400", func() {
 				router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Search))).Methods("GET")
+
 				req, err := http.NewRequest("GET", "/flavorgroups?NameEqualTo=`000", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -442,7 +443,7 @@ var _ = Describe("FlavorgroupController", func() {
 				flavorGroup := hvs.FlavorGroup{}
 				err := json.Unmarshal([]byte(flavorgroupJson), &flavorGroup)
 				Expect(err).NotTo(HaveOccurred())
-				err = controllers.ValidateFlavorGroup(flavorGroup)
+				err = flavorgroupController.ValidateFlavorGroup(flavorGroup)
 				Ω(err).ShouldNot(HaveOccurred())
 			})
 		})
@@ -467,16 +468,16 @@ var _ = Describe("FlavorgroupController", func() {
 				err := json.Unmarshal([]byte(flavorgroupJson), &flavorGroup)
 				Expect(err).NotTo(HaveOccurred())
 				flavorGroup.Name = ""
-				err = controllers.ValidateFlavorGroup(flavorGroup)
+				err = flavorgroupController.ValidateFlavorGroup(flavorGroup)
 				Ω(err).Should(HaveOccurred())
 
 				flavorGroup.Name = "####"
-				err = controllers.ValidateFlavorGroup(flavorGroup)
+				err = flavorgroupController.ValidateFlavorGroup(flavorGroup)
 				Ω(err).Should(HaveOccurred())
 
 				flavorGroup.Name = "test"
 				flavorGroup.MatchPolicies = hvs.FlavorMatchPolicies{}
-				err = controllers.ValidateFlavorGroup(flavorGroup)
+				err = flavorgroupController.ValidateFlavorGroup(flavorGroup)
 				Ω(err).Should(HaveOccurred())
 			})
 		})

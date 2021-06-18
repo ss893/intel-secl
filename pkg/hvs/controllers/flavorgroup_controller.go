@@ -56,7 +56,7 @@ func (controller FlavorgroupController) Create(w http.ResponseWriter, r *http.Re
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
 	}
 
-	if err := ValidateFlavorGroup(reqFlavorGroup); err != nil {
+	if err := controller.ValidateFlavorGroup(reqFlavorGroup); err != nil {
 		secLog.WithError(err).Errorf("controllers/flavorgroup_controller:Create() %s", commLogMsg.InvalidInputBadParam)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid flavorgroup data "}
 	}
@@ -67,24 +67,6 @@ func (controller FlavorgroupController) Create(w http.ResponseWriter, r *http.Re
 	if existingFlavorGroups != nil && len(existingFlavorGroups) > 0 {
 		secLog.WithField("Name", existingFlavorGroups[0].Name).Warningf("%s: Trying to create duplicated FlavorGroup from addr: %s", commLogMsg.InvalidInputBadParam, r.RemoteAddr)
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "FlavorGroup with same name already exist"}
-	}
-
-	if reqFlavorGroup.FlavorTemplateIds != nil && len(reqFlavorGroup.FlavorTemplateIds) > 0 {
-		for _, templateId := range reqFlavorGroup.FlavorTemplateIds {
-			_, err := controller.FlavorTemplateStore.Retrieve(templateId, false)
-			if err != nil {
-				switch err.(type) {
-				case *commErr.StatusNotFoundError:
-					secLog.WithError(err).WithField("id", templateId).Info(
-						"controllers/flavorgroup_controller:Create() Flavor template with given ID does not exist or has been deleted")
-					return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Flavor template with given ID does not exist or has been deleted"}
-				default:
-					secLog.WithError(err).WithField("id", templateId).Info(
-						"controllers/flavorgroup_controller:Create() Failed to retrieve FlavorTemplate")
-					return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve FlavorTemplate with the given ID"}
-				}
-			}
-		}
 	}
 
 	// Persistence
@@ -226,7 +208,7 @@ func (controller FlavorgroupController) Retrieve(w http.ResponseWriter, r *http.
 	return flavorGroup, http.StatusOK, nil
 }
 
-func ValidateFlavorGroup(flavorGroup hvs.FlavorGroup) error {
+func (controller FlavorgroupController) ValidateFlavorGroup(flavorGroup hvs.FlavorGroup) error {
 	defaultLog.Trace("controllers/flavorgroup_controller:ValidateFlavorGroup() Entering")
 	defer defaultLog.Trace("controllers/flavorgroup_controller:ValidateFlavorGroup() Leaving")
 
@@ -243,8 +225,20 @@ func ValidateFlavorGroup(flavorGroup hvs.FlavorGroup) error {
 			if errs := validation.ValidateUUIDv4(templateId.String()); errs != nil {
 				return errors.Wrap(errs, "Valid Flavor Template ID must be specified")
 			}
+
+			_, err := controller.FlavorTemplateStore.Retrieve(templateId, false)
+			if err != nil {
+				switch err.(type) {
+				case *commErr.StatusNotFoundError:
+					return errors.Wrap(err, "Flavor template with given ID does not exist or has been deleted")
+				default:
+					return errors.Wrap(err, "Failed to retrieve FlavorTemplate with the given ID")
+				}
+			}
+
 		}
 	}
+
 	if len(flavorGroup.MatchPolicies) == 0 {
 		return errors.New("Flavor Type Match Policy Collection must be specified")
 	}
