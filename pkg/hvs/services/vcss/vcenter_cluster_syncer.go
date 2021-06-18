@@ -16,6 +16,7 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"github.com/vmware/govmomi/vim25/mo"
+	"runtime/debug"
 	"time"
 )
 
@@ -79,6 +80,12 @@ func (syncer *vCenterClusterSyncerImpl) Run() error {
 	syncer.ctx = context.Background()
 
 	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				defaultLog.Errorf("Panic occurred: %+v", err)
+				defaultLog.Error(string(debug.Stack()))
+			}
+		}()
 		for {
 			err := syncer.syncHosts()
 			if err != nil {

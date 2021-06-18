@@ -18,6 +18,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"net/http"
+	"runtime/debug"
 )
 
 // endpointHandler which writes generic response
@@ -161,6 +162,7 @@ func ErrorHandler(eh endpointHandler) http.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				defaultLog.Errorf("Panic occurred: %+v", err)
+				defaultLog.Error(string(debug.Stack()))
 				http.Error(w, "Unknown Error", http.StatusInternalServerError)
 			}
 		}()

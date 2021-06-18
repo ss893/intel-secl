@@ -6,7 +6,9 @@
 package auditlog
 
 import (
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	log "github.com/sirupsen/logrus"
+	"runtime/debug"
 	"sync"
 
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
@@ -23,6 +25,8 @@ type auditLogDB struct {
 	doneChan chan struct{}
 	lock     sync.Mutex
 }
+
+var defaultLog = commLog.GetDefaultLogger()
 
 func NewAuditLogDBWriter(s domain.AuditLogEntryStore, chanBufferSize int) (domain.AuditLogWriter, error) {
 	if s == nil {
@@ -55,6 +59,12 @@ func (alp *auditLogDB) startCreateRoutine() error {
 		return errors.New("auditLogDB: channel cannot be nil")
 	}
 	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				defaultLog.Errorf("Panic occurred: %+v", err)
+				defaultLog.Error(string(debug.Stack()))
+			}
+		}()
 		for {
 			select {
 			case e := <-alp.logQueue:
