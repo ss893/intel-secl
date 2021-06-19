@@ -24,7 +24,6 @@
             "index": 17,
             "bank": ["SHA384", "SHA256", "SHA1"]
           },
-          "pcr_matches": true,
           "eventlog_equals": {
             "excluding_tags": [
               "LCP_CONTROL_HASH",
@@ -38,7 +37,6 @@
             "index": 18,
             "bank": ["SHA384", "SHA256", "SHA1"]
           },
-          "pcr_matches": true,
           "eventlog_equals": {
             "excluding_tags": [
               "LCP_CONTROL_HASH",
@@ -60,7 +58,6 @@
             "index": 17,
             "bank": ["SHA384", "SHA256", "SHA1"]
           },
-          "pcr_matches": true,
           "eventlog_includes": [
             "vmlinuz"
           ]
@@ -78,7 +75,6 @@
             "index": 17,
             "bank": ["SHA384", "SHA256", "SHA1"]
           },
-          "pcr_matches": true,
           "eventlog_includes": [
             "LCP_CONTROL_HASH",
             "initrd"
@@ -89,7 +85,6 @@
             "index": 18,
             "bank": ["SHA384", "SHA256", "SHA1"]
           },
-          "pcr_matches": true,
           "eventlog_includes": [
             "LCP_CONTROL_HASH"
           ]
