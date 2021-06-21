@@ -298,26 +298,26 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 					})
 				}
 				if !reflect.DeepEqual(hostInfo.HardwareFeatures, taModel.HardwareFeatures{}) {
-					if hostInfo.HardwareFeatures.CBNT.Supported && hostInfo.HardwareFeatures.CBNT.Enabled &&
+					if hostInfo.HardwareFeatures.CBNT != nil && hostInfo.HardwareFeatures.CBNT.Enabled &&
 						hostInfo.HardwareFeatures.CBNT.Meta.Profile != "BTGP0" {
 						pfQueryAttrs = append(pfQueryAttrs, models.FlavorMetaKv{
 							Key:   "hardware.feature.CBNT.meta.profile",
 							Value: hostInfo.HardwareFeatures.CBNT.Meta.Profile,
 						})
 					}
-					if hostInfo.HardwareFeatures.UEFI.Supported && hostInfo.HardwareFeatures.UEFI.Enabled {
+					if hostInfo.HardwareFeatures.UEFI != nil && hostInfo.HardwareFeatures.UEFI.Enabled {
 						pfQueryAttrs = append(pfQueryAttrs, models.FlavorMetaKv{
 							Key:   "hardware.feature.UEFI.enabled",
 							Value: hostInfo.HardwareFeatures.UEFI.Enabled,
 						})
 					}
-					if hostInfo.HardwareFeatures.UEFI.Meta.SecureBootEnabled {
+					if hostInfo.HardwareFeatures.UEFI != nil && hostInfo.HardwareFeatures.UEFI.Meta.SecureBootEnabled {
 						pfQueryAttrs = append(pfQueryAttrs, models.FlavorMetaKv{
 							Key:   "hardware.feature.UEFI.meta.secure_boot_enabled",
 							Value: hostInfo.HardwareFeatures.UEFI.Meta.SecureBootEnabled,
 						})
 					}
-					if hostInfo.HardwareFeatures.TPM.Supported && hostInfo.HardwareFeatures.TPM.Enabled {
+					if hostInfo.HardwareFeatures.TPM != nil && hostInfo.HardwareFeatures.TPM.Enabled {
 						pfQueryAttrs = append(pfQueryAttrs, models.FlavorMetaKv{
 							Key:   "hardware.feature.TPM.enabled",
 							Value: hostInfo.HardwareFeatures.TPM.Enabled,

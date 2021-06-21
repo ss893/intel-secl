@@ -5,8 +5,7 @@
 package model
 
 type HardwareFeature struct {
-	Supported bool `json:"supported,string"`
-	Enabled   bool `json:"enabled,string"`
+	Enabled bool `json:"enabled,string"`
 }
 
 type CBNT struct {
@@ -51,12 +50,12 @@ type HostInfo struct {
 }
 
 type HardwareFeatures struct {
-	TXT  HardwareFeature `json:"TXT"`
-	TPM  TPM             `json:"TPM"`
-	CBNT CBNT            `json:"CBNT"`
-	UEFI UEFI            `json:"UEFI"`
-	PFR  HardwareFeature `json:"PFR"`
-	BMC  HardwareFeature `json:"BMC"`
+	TXT  *HardwareFeature `json:"TXT,omitempty"`
+	TPM  *TPM             `json:"TPM,omitempty"`
+	CBNT *CBNT            `json:"CBNT,omitempty"`
+	UEFI *UEFI            `json:"UEFI,omitempty"`
+	PFR  *HardwareFeature `json:"PFR,omitempty"`
+	BMC  *HardwareFeature `json:"BMC,omitempty"`
 }
 
 type OSType string

@@ -69,9 +69,6 @@ func (msrInfoParser *msrInfoParser) Parse(hostInfo *model.HostInfo) error {
 
 func (msrInfoParser *msrInfoParser) parseTxt(hostInfo *model.HostInfo) error {
 
-	// We assume that TXT is enabled on Intel processors since 2009.
-	hostInfo.HardwareFeatures.TXT.Supported = true
-
 	txtFlags, err := msrInfoParser.msrReader.ReadAt(txtMsrOffset)
 	if err != nil {
 		return errors.Wrap(err, "Failed to read TXT MSR flags")
@@ -82,7 +79,11 @@ func (msrInfoParser *msrInfoParser) parseTxt(hostInfo *model.HostInfo) error {
 		return errors.Wrap(err, "Failed to extract TXT enabled bits")
 	}
 
-	hostInfo.HardwareFeatures.TXT.Enabled = (bits == txtEnabledBits)
+	hostInfo.HardwareFeatures.TXT = &model.HardwareFeature{Enabled: false}
+
+	if bits == txtEnabledBits {
+		hostInfo.HardwareFeatures.TXT.Enabled = true
+	}
 
 	return nil
 }
@@ -99,9 +100,9 @@ func (msrInfoParser *msrInfoParser) parseCbnt(hostInfo *model.HostInfo) error {
 		return errors.Wrap(err, "Failed to extract CBNT enabled flags")
 	}
 
-	hostInfo.HardwareFeatures.CBNT.Enabled = (enabledBits == 1)
-	if hostInfo.HardwareFeatures.CBNT.Enabled == true {
-		hostInfo.HardwareFeatures.CBNT.Supported = true
+	hostInfo.HardwareFeatures.CBNT = &model.CBNT{}
+	if enabledBits == 1 {
+		hostInfo.HardwareFeatures.CBNT.Enabled = true
 
 		profileBits, err := bitShift(cbntFlags, 7, 0)
 		if err != nil {

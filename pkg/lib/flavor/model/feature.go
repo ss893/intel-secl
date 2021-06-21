@@ -45,11 +45,11 @@ type UEFI struct {
 
 // Feature encapsulates the presence of various Platform security features on the Host hardware
 type Feature struct {
-	AES_NI *AES_NI         `json:"AES_NI,omitempty"`
-	TXT    HardwareFeature `json:"TXT"`
-	TPM    TPM             `json:"TPM"`
-	CBNT   CBNT            `json:"CBNT"`
-	UEFI   UEFI            `json:"UEFI"`
-	PFR    HardwareFeature `json:"PFR"`
-	BMC    HardwareFeature `json:"BMC"`
+	AES_NI *AES_NI          `json:"AES_NI,omitempty"`
+	TXT    *HardwareFeature `json:"TXT,omitempty"`
+	TPM    *TPM             `json:"TPM,omitempty"`
+	CBNT   *CBNT            `json:"CBNT,omitempty"`
+	UEFI   *UEFI            `json:"UEFI,omitempty"`
+	PFR    *HardwareFeature `json:"PFR,omitempty"`
+	BMC    *HardwareFeature `json:"BMC,omitempty"`
 }

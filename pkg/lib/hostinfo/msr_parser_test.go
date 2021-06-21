@@ -46,9 +46,8 @@ func TestMsrPositive(t *testing.T) {
 	mockMsrReader.On("ReadAt", int64(cbntMsrOffset)).Return(0xf0000007d, nil)
 
 	hostInfo := model.HostInfo{}
-	hostInfo.HardwareFeatures.TXT.Supported = true
-	hostInfo.HardwareFeatures.TXT.Enabled = true
-	hostInfo.HardwareFeatures.CBNT.Supported = true
+	hostInfo.HardwareFeatures.TXT = &model.HardwareFeature{Enabled: true}
+	hostInfo.HardwareFeatures.CBNT = &model.CBNT{}
 	hostInfo.HardwareFeatures.CBNT.Enabled = true
 	hostInfo.HardwareFeatures.CBNT.Meta.Profile = cbntProfile5
 	hostInfo.HardwareFeatures.CBNT.Meta.MSR = cbntMsrFlags
@@ -64,9 +63,8 @@ func TestMsrNegative(t *testing.T) {
 	mockMsrReader.On("ReadAt", int64(cbntMsrOffset)).Return(0x400000000, nil)
 
 	hostInfo := model.HostInfo{}
-	hostInfo.HardwareFeatures.TXT.Supported = true
-	hostInfo.HardwareFeatures.TXT.Enabled = false
-	hostInfo.HardwareFeatures.CBNT.Supported = false
+	hostInfo.HardwareFeatures.TXT = &model.HardwareFeature{Enabled: false}
+	hostInfo.HardwareFeatures.CBNT = &model.CBNT{}
 	hostInfo.HardwareFeatures.CBNT.Enabled = false
 	hostInfo.HardwareFeatures.CBNT.Meta.Profile = ""
 	hostInfo.HardwareFeatures.CBNT.Meta.MSR = ""

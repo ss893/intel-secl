@@ -28,14 +28,12 @@ func (tpmInfoParser *tpmInfoParser) Parse(hostInfo *model.HostInfo) error {
 	// check if the tpm device is present...
 	log.Debugf("Checking TPM device %q", tpmDeviceFile)
 
+	hostInfo.HardwareFeatures.TPM = &model.TPM{}
 	if _, err := os.Stat(tpmDeviceFile); os.IsNotExist(err) {
-		hostInfo.HardwareFeatures.TPM.Supported = false
 		hostInfo.HardwareFeatures.TPM.Enabled = false
 		log.Debugf("The TPM device at %q is not present, TPM will be considered 'not supported'", tpmDeviceFile)
 		return nil
 	}
-
-	hostInfo.HardwareFeatures.TPM.Supported = true
 
 	if _, err := os.Stat(tpm2AcpiFile); os.IsNotExist(err) {
 		hostInfo.HardwareFeatures.TPM.Enabled = false

@@ -28,6 +28,7 @@ func TestSecureBootWhitley(t *testing.T) {
 	secureBootFile = "test_data/whitley/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c"
 
 	expectedResults := model.HostInfo{}
+	expectedResults.HardwareFeatures.UEFI = &model.UEFI{}
 	expectedResults.HardwareFeatures.UEFI.Meta.SecureBootEnabled = true
 
 	testSecureBootParser(t, &expectedResults)
@@ -39,6 +40,7 @@ func TestSecureBootPurley(t *testing.T) {
 	secureBootFile = "test_data/purley/nosuchfile"
 
 	expectedResults := model.HostInfo{}
+	expectedResults.HardwareFeatures.UEFI = &model.UEFI{}
 	expectedResults.HardwareFeatures.UEFI.Meta.SecureBootEnabled = false
 
 	testSecureBootParser(t, &expectedResults)
@@ -51,6 +53,7 @@ func TestSecureBootShortFile(t *testing.T) {
 	secureBootFile = "test_data/misc/SecureBootShortFile"
 
 	expectedResults := model.HostInfo{}
+	expectedResults.HardwareFeatures.UEFI = &model.UEFI{}
 	expectedResults.HardwareFeatures.UEFI.Meta.SecureBootEnabled = false
 
 	testSecureBootParser(t, &expectedResults)
@@ -62,6 +65,7 @@ func TestSecureBootZeroFile(t *testing.T) {
 	secureBootFile = "test_data/misc/SecureBootZeroFile"
 
 	expectedResults := model.HostInfo{}
+	expectedResults.HardwareFeatures.UEFI = &model.UEFI{}
 	expectedResults.HardwareFeatures.UEFI.Meta.SecureBootEnabled = false
 
 	testSecureBootParser(t, &expectedResults)

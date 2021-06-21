@@ -210,9 +210,8 @@ func (pfutil PlatformFlavorUtil) GetHardwareSectionDetails(hostManifest *hcTypes
 	hardware.ProcessorFlags = strings.TrimSpace(hostInfo.ProcessorFlags)
 
 	// Set TPM Feature presence
-	tpm := fm.TPM{}
+	tpm := &fm.TPM{}
 	tpm.Enabled = hostInfo.HardwareFeatures.TPM.Enabled
-	tpm.Supported = hostInfo.HardwareFeatures.TPM.Supported
 
 	tpm.Meta.TPMVersion = hostInfo.HardwareFeatures.TPM.Meta.TPMVersion
 	// populate tpm.Pcrbanks by checking the contents of PcrManifest
@@ -227,38 +226,43 @@ func (pfutil PlatformFlavorUtil) GetHardwareSectionDetails(hostManifest *hcTypes
 	}
 	feature.TPM = tpm
 
-	txt := fm.HardwareFeature{}
 	// Set TXT Feature presence
-	txt.Enabled = hostInfo.HardwareFeatures.TXT.Enabled
-	txt.Supported = hostInfo.HardwareFeatures.TXT.Supported
-	feature.TXT = txt
+	if hostInfo.HardwareFeatures.TXT != nil {
+		txt := &fm.HardwareFeature{}
+		txt.Enabled = hostInfo.HardwareFeatures.TXT.Enabled
+		feature.TXT = txt
+	}
 
-	cbnt := fm.CBNT{}
 	// set CBNT
-	cbnt.Enabled = hostInfo.HardwareFeatures.CBNT.Enabled
-	cbnt.Supported = hostInfo.HardwareFeatures.CBNT.Supported
-	cbnt.Meta.Profile = hostInfo.HardwareFeatures.CBNT.Meta.Profile
-	cbnt.Meta.MSR = hostInfo.HardwareFeatures.CBNT.Meta.MSR
-	feature.CBNT = cbnt
+	if hostInfo.HardwareFeatures.CBNT != nil {
+		cbnt := &fm.CBNT{}
+		cbnt.Enabled = hostInfo.HardwareFeatures.CBNT.Enabled
+		cbnt.Meta.Profile = hostInfo.HardwareFeatures.CBNT.Meta.Profile
+		cbnt.Meta.MSR = hostInfo.HardwareFeatures.CBNT.Meta.MSR
+		feature.CBNT = cbnt
+	}
 
-	uefi := fm.UEFI{}
 	// and UEFI state
-	uefi.Enabled = hostInfo.HardwareFeatures.UEFI.Enabled
-	uefi.Supported = hostInfo.HardwareFeatures.UEFI.Supported
-	uefi.Meta.SecureBootEnabled = hostInfo.HardwareFeatures.UEFI.Meta.SecureBootEnabled
-	feature.UEFI = uefi
+	if hostInfo.HardwareFeatures.UEFI != nil {
+		uefi := &fm.UEFI{}
+		uefi.Enabled = hostInfo.HardwareFeatures.UEFI.Enabled
+		uefi.Meta.SecureBootEnabled = hostInfo.HardwareFeatures.UEFI.Meta.SecureBootEnabled
+		feature.UEFI = uefi
+	}
 
-	bmc := fm.HardwareFeature{}
 	// Set BMC Feature presence
-	bmc.Enabled = hostInfo.HardwareFeatures.BMC.Enabled
-	bmc.Supported = hostInfo.HardwareFeatures.BMC.Supported
-	feature.BMC = bmc
+	if hostInfo.HardwareFeatures.BMC != nil {
+		bmc := &fm.HardwareFeature{}
+		bmc.Enabled = hostInfo.HardwareFeatures.BMC.Enabled
+		feature.BMC = bmc
+	}
 
-	pfr := fm.HardwareFeature{}
 	// Set PFR Feature presence
-	pfr.Enabled = hostInfo.HardwareFeatures.PFR.Enabled
-	pfr.Supported = hostInfo.HardwareFeatures.PFR.Supported
-	feature.PFR = pfr
+	if hostInfo.HardwareFeatures.PFR != nil {
+		pfr := &fm.HardwareFeature{}
+		pfr.Enabled = hostInfo.HardwareFeatures.PFR.Enabled
+		feature.PFR = pfr
+	}
 
 	hardware.Feature = &feature
 	return &hardware
@@ -364,23 +368,23 @@ func (pfutil PlatformFlavorUtil) getSupportedHardwareFeatures(hostDetails *taMod
 	defer log.Trace("flavor/util/platform_flavor_util:getSupportedHardwareFeatures() Leaving")
 
 	var features []string
-	if hostDetails.HardwareFeatures.CBNT.Enabled {
+	if hostDetails.HardwareFeatures.CBNT != nil && hostDetails.HardwareFeatures.CBNT.Enabled {
 		features = append(features, constants.Cbnt)
 		features = append(features, hostDetails.HardwareFeatures.CBNT.Meta.Profile)
 	}
 
-	if hostDetails.HardwareFeatures.TPM.Enabled {
+	if hostDetails.HardwareFeatures.TPM != nil && hostDetails.HardwareFeatures.TPM.Enabled {
 		features = append(features, constants.Tpm)
 	}
 
-	if hostDetails.HardwareFeatures.TXT.Enabled {
+	if hostDetails.HardwareFeatures.TXT != nil && hostDetails.HardwareFeatures.TXT.Enabled {
 		features = append(features, constants.Txt)
 	}
 
-	if hostDetails.HardwareFeatures.UEFI.Enabled {
+	if hostDetails.HardwareFeatures.UEFI != nil && hostDetails.HardwareFeatures.UEFI.Enabled {
 		features = append(features, constants.Uefi)
 	}
-	if hostDetails.HardwareFeatures.UEFI.Meta.SecureBootEnabled {
+	if hostDetails.HardwareFeatures.UEFI != nil && hostDetails.HardwareFeatures.UEFI.Meta.SecureBootEnabled {
 		features = append(features, constants.SecureBootEnabled)
 	}
 

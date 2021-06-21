@@ -120,20 +120,20 @@ func getHardwareFeaturesMap(features model.HardwareFeatures) map[string]string {
 
 	hwFeaturesMap := make(map[string]string)
 	featurePrefix := "FEATURE_"
-	if features.CBNT.Supported && features.CBNT.Enabled && features.CBNT.Meta.Profile != "" {
+	if features.CBNT != nil && features.CBNT.Enabled && features.CBNT.Meta.Profile != "" {
 		hwFeaturesMap[featurePrefix+constants.Cbnt] = strconv.FormatBool(features.CBNT.Enabled)
 		hwFeaturesMap["FEATURE_cbntProfile"] = features.CBNT.Meta.Profile
 	}
-	if features.UEFI.Supported && features.UEFI.Enabled {
+	if features.UEFI != nil {
 		hwFeaturesMap[featurePrefix+constants.Uefi] = strconv.FormatBool(features.UEFI.Enabled)
 	}
-	if features.UEFI.Meta.SecureBootEnabled {
+	if features.UEFI != nil {
 		hwFeaturesMap[featurePrefix+constants.SecureBootEnabled] = strconv.FormatBool(features.UEFI.Meta.SecureBootEnabled)
 	}
-	if features.TPM.Supported && features.TPM.Enabled {
+	if features.TPM != nil {
 		hwFeaturesMap[featurePrefix+constants.Tpm] = strconv.FormatBool(features.TPM.Enabled)
 	}
-	if features.TXT.Supported && features.TXT.Enabled {
+	if features.TXT != nil {
 		hwFeaturesMap[featurePrefix+constants.Txt] = strconv.FormatBool(features.TXT.Enabled)
 	}
 	return hwFeaturesMap

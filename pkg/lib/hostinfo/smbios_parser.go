@@ -219,8 +219,9 @@ var readers = map[uint8]func(*smbiosTable, *model.HostInfo) error{
 		}
 
 		if biosCharacteristicsExensions&constUefiFlag == constUefiFlag {
-			hostInfo.HardwareFeatures.UEFI.Supported = true
-			hostInfo.HardwareFeatures.UEFI.Enabled = true
+			hostInfo.HardwareFeatures.UEFI = &model.UEFI{
+				HardwareFeature: model.HardwareFeature{Enabled: true},
+			}
 		}
 
 		return nil

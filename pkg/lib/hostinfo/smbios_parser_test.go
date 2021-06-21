@@ -50,7 +50,7 @@ func TestSmbiosWhitley(t *testing.T) {
 	expectedResults.HardwareUUID = "88888888-8887-1615-0115-071ba5a5a5a5"
 	expectedResults.ProcessorInfo = "A6 06 06 00 FF FB EB BF"
 	expectedResults.ProcessorFlags = "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE-36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE"
-	expectedResults.HardwareFeatures.UEFI.Supported = true
+	expectedResults.HardwareFeatures.UEFI = &model.UEFI{}
 	expectedResults.HardwareFeatures.UEFI.Enabled = true
 
 	testSMBIOS(t, &expectedResults)
@@ -66,7 +66,7 @@ func TestSmbiosPurley(t *testing.T) {
 	expectedResults.HardwareUUID = "8032632b-8fa4-e811-906e-00163566263e"
 	expectedResults.ProcessorInfo = "54 06 05 00 FF FB EB BF"
 	expectedResults.ProcessorFlags = "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE-36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE"
-	expectedResults.HardwareFeatures.UEFI.Supported = true
+	expectedResults.HardwareFeatures.UEFI = &model.UEFI{}
 	expectedResults.HardwareFeatures.UEFI.Enabled = true
 
 	testSMBIOS(t, &expectedResults)

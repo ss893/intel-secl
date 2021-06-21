@@ -259,23 +259,17 @@ func main() {
 			newFlavor[flavorIndex].Hardware = new(model.Hardware)
 			copier.Copy(newFlavor[flavorIndex].Hardware, flavor.Flavor.Hardware)
 
-			// TXT
-			newFlavor[flavorIndex].Hardware.Feature.TXT.Supported = newFlavor[flavorIndex].Hardware.Feature.TXT.Enabled
-
 			// TPM
-			newFlavor[flavorIndex].Hardware.Feature.TPM.Supported = newFlavor[flavorIndex].Hardware.Feature.TPM.Enabled
 			newFlavor[flavorIndex].Hardware.Feature.TPM.Meta.TPMVersion = flavor.Flavor.Hardware.Feature.TPM.Version
 			newFlavor[flavorIndex].Hardware.Feature.TPM.Meta.PCRBanks = flavor.Flavor.Hardware.Feature.TPM.PcrBanks
 
 			// CBNT
 			if flavor.Flavor.Hardware.Feature.CBNT != nil {
-				newFlavor[flavorIndex].Hardware.Feature.CBNT.Supported = newFlavor[flavorIndex].Hardware.Feature.CBNT.Enabled
 				newFlavor[flavorIndex].Hardware.Feature.CBNT.Meta.Profile = flavor.Flavor.Hardware.Feature.CBNT.Profile
 			}
 
 			// UEFI
 			if flavor.Flavor.Hardware.Feature.SUEFI != nil {
-				newFlavor[flavorIndex].Hardware.Feature.UEFI.Supported = newFlavor[flavorIndex].Hardware.Feature.UEFI.Enabled
 				newFlavor[flavorIndex].Hardware.Feature.UEFI.Meta.SecureBootEnabled = flavor.Flavor.Hardware.Feature.SUEFI.Enabled
 			}
 		}

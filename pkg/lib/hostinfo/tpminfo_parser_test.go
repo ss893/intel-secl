@@ -29,7 +29,7 @@ func TestTpm2Purley(t *testing.T) {
 	tpmDeviceFile = "test_data/Readme.md" // for testing, just point to a valid file so the parser defines "TPM.Supported"
 
 	expectedResults := model.HostInfo{}
-	expectedResults.HardwareFeatures.TPM.Supported = true
+	expectedResults.HardwareFeatures.TPM = &model.TPM{}
 	expectedResults.HardwareFeatures.TPM.Enabled = true
 	expectedResults.HardwareFeatures.TPM.Meta.TPMVersion = constTpm20
 
@@ -41,7 +41,7 @@ func TestTpm2Whitley(t *testing.T) {
 	tpmDeviceFile = "test_data/Readme.md" // for testing, just point to a valid file so the parser defines "TPM.Supported"
 
 	expectedResults := model.HostInfo{}
-	expectedResults.HardwareFeatures.TPM.Supported = true
+	expectedResults.HardwareFeatures.TPM = &model.TPM{}
 	expectedResults.HardwareFeatures.TPM.Enabled = true
 	expectedResults.HardwareFeatures.TPM.Meta.TPMVersion = constTpm20
 
@@ -53,7 +53,7 @@ func TestTpm2NoAcpiFile(t *testing.T) {
 	tpmDeviceFile = "test_data/Readme.md" // for testing, just point to a valid file so the parser defines "TPM.Supported"
 
 	expectedResults := model.HostInfo{}
-	expectedResults.HardwareFeatures.TPM.Supported = true
+	expectedResults.HardwareFeatures.TPM = &model.TPM{}
 	expectedResults.HardwareFeatures.TPM.Enabled = false
 
 	testTpm2Info(t, &expectedResults)
@@ -64,7 +64,7 @@ func TestTpm2EvilMagic(t *testing.T) {
 	tpmDeviceFile = "/dev/tpm0"
 
 	expectedResults := model.HostInfo{}
-	expectedResults.HardwareFeatures.TPM.Supported = false
+	expectedResults.HardwareFeatures.TPM = &model.TPM{}
 	expectedResults.HardwareFeatures.TPM.Enabled = false
 
 	testTpm2Info(t, &expectedResults)
@@ -75,7 +75,7 @@ func TestTpm2ShortFile(t *testing.T) {
 	tpmDeviceFile = "test_data/Readme.md" // for testing, just point to a valid file so the parser defines "TPM.Supported"
 
 	expectedResults := model.HostInfo{}
-	expectedResults.HardwareFeatures.TPM.Supported = true
+	expectedResults.HardwareFeatures.TPM = &model.TPM{}
 	expectedResults.HardwareFeatures.TPM.Enabled = false
 
 	testTpm2Info(t, &expectedResults)
