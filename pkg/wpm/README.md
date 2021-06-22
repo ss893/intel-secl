@@ -52,15 +52,6 @@ Supports the following use cases:
 - Virtual machine confidentiality
 - Container confidentiality using skopeo and cri-o
 
-```shell
-git clone https://github.com/intel-secl/intel-secl.git
-cd intel-secl
-make wpm-docker-installer
-```
-
-### Build installer without the secure docker daemon
-### This is used for Skopeo encryption and Cri-o decryption for container confidentiality.
-### Note: This installer should be built if exclusively using ISecL for virtual machine confidentiality.
 
 ```shell
 git clone https://github.com/intel-secl/intel-secl.git
