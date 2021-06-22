@@ -6,11 +6,8 @@ package ta
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/base64"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
-	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
 	"net/url"
 	"strings"
 	"time"
@@ -24,7 +21,7 @@ var (
 	defaultTimeout = 10 * time.Second
 )
 
-func NewNatsTAClient(natsServers []string, natsHostID string) (TAClient, error) {
+func NewNatsTAClient(natsServers []string, natsHostID string, tlsConfig *tls.Config, natsCredentials string) (TAClient, error) {
 
 	if len(natsServers) == 0 {
 		return nil, errors.New("client/nats_client:NewNatsTAClient() At least one nats-server must be provided.")
@@ -34,9 +31,19 @@ func NewNatsTAClient(natsServers []string, natsHostID string) (TAClient, error) 
 		return nil, errors.New("client/nats_client:NewNatsTAClient() The nats-host-id was not provided")
 	}
 
+	if tlsConfig == nil {
+		return nil, errors.New("client/nats_client:NewNatsTAClient() TLS configuration was not provided")
+	}
+
+	if natsCredentials == "" {
+		return nil, errors.New("client/nats_client:NewNatsTAClient() NATS credential file path was not provided")
+	}
+
 	client := natsTAClient{
-		natsServers: natsServers,
-		natsHostID:  natsHostID,
+		natsServers:     natsServers,
+		natsHostID:      natsHostID,
+		tlsConfig:       tlsConfig,
+		natsCredentials: natsCredentials,
 	}
 
 	return &client, nil
@@ -44,30 +51,9 @@ func NewNatsTAClient(natsServers []string, natsHostID string) (TAClient, error) 
 
 func (client *natsTAClient) newNatsConnection() (*nats.EncodedConn, error) {
 
-	rootCAs, _ := x509.SystemCertPool()
-	if rootCAs == nil {
-		rootCAs = x509.NewCertPool()
-	}
-
-	certs, err := cos.GetDirFileContents(constants.TrustedCaCertsDir, "*.pem")
-	if err != nil {
-		log.Errorf("client/nats_client:newNatsConnection() Failed to append %q to RootCAs: %v", "/etc/hvs/certs/trustedca/nats-ca.pem", err)
-	}
-
-	for _, rootCACert := range certs {
-		if ok := rootCAs.AppendCertsFromPEM(rootCACert); !ok {
-			log.Info("client/nats_client:newNatsConnection() No certs appended, using system certs only")
-		}
-	}
-
-	tlsConfig := tls.Config{
-		InsecureSkipVerify: false,
-		RootCAs:            rootCAs,
-	}
-
 	conn, err := nats.Connect(strings.Join(client.natsServers, ","),
-		nats.Secure(&tlsConfig),
-		nats.UserCredentials(constants.NatsCredentials),
+		nats.Secure(client.tlsConfig),
+		nats.UserCredentials(client.natsCredentials),
 		nats.ErrorHandler(func(nc *nats.Conn, s *nats.Subscription, err error) {
 			if s != nil {
 				log.Infof("client/nats_client:newNatsConnection() NATS: Could not process subscription for subject %q: %v", s.Subject, err)
@@ -98,9 +84,11 @@ func (client *natsTAClient) newNatsConnection() (*nats.EncodedConn, error) {
 }
 
 type natsTAClient struct {
-	natsServers    []string
-	natsConnection *nats.EncodedConn
-	natsHostID     string
+	natsServers     []string
+	natsConnection  *nats.EncodedConn
+	natsHostID      string
+	tlsConfig       *tls.Config
+	natsCredentials string
 }
 
 func (client *natsTAClient) GetHostInfo() (taModel.HostInfo, error) {
