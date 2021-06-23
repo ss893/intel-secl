@@ -6,7 +6,6 @@
 package controllers
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -232,21 +231,11 @@ func (ftc *FlavorTemplateController) getFlavorTemplateCreateReq(r *http.Request)
 		return createFlavorTemplateReq, &commErr.BadRequestError{Message: "The request body is not provided"}
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Unable to read request body")
-		return createFlavorTemplateReq, &commErr.BadRequestError{Message: "Unable to read request body"}
-	}
-
-	//Once, the buffer r.Body is read using ReadAll, we cannot use it to decode again.
-	//Restore the request body to it's original state to decode the json data.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-
 	//Decode the incoming json data to note struct
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
-	err = dec.Decode(&createFlavorTemplateReq)
+	err := dec.Decode(&createFlavorTemplateReq)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavortemplate_controller:getFlavorTemplateCreateReq() Unable to decode request body")
 		return createFlavorTemplateReq, &commErr.BadRequestError{Message: "Unable to decode request body"}
