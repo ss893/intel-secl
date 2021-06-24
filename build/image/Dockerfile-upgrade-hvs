@@ -5,9 +5,9 @@ FROM centos:8
 
 RUN mkdir -p /database /config
 
-COPY build/linux/hvs/schema /schema
+COPY build/linux/hvs/schema /tmp/schema
 
-COPY build/linux/hvs/templates /templates
+COPY build/linux/hvs/templates /tmp/templates
 
 COPY upgrades/hvs/config/* /config/ 
 
@@ -19,7 +19,7 @@ COPY upgrades/hvs/db/out/* /database/
 
 RUN touch /.container-env
 
-RUN chmod +0644 /schema /templates
+RUN chmod -R +0644 /tmp/schema /tmp/templates
 
 RUN chmod -R +x /container_upgrade.sh /config_upgrade.sh /config /database
 

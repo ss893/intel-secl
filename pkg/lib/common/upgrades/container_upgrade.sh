@@ -10,14 +10,19 @@ exit_on_error() {
 help() {
   echo "
   This is a generic upgrade script intended to help upgrade config and database changes of component to the latest version.
-  ./container-upgrade.sh
+
+  Usage: ./container-upgrade.sh [-h|-help|help]
+
+  Required environment variables
+  COMPONENT_VERSION: Existing version of deployed container image
+  CONFIG_DIR:        Config directory of service/agent
 "
   exit 0
 }
 
 main() {
 
-  if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ] || [ "$1" == "" ] ; then
+  if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
     help "$@"
   fi
 
