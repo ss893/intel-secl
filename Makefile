@@ -41,10 +41,6 @@ $(TARGETS):
 %-docker: %
 	docker build ${DOCKER_PROXY_FLAGS} -f build/image/Dockerfile-$* -t isecl/$*:$(VERSION) .
 
-kbs-docker: kbs
-	docker build  ${DOCKER_PROXY_FLAGS} . -f build/image/Dockerfile-kbs -t isecl/kbs:$(VERSION)
-	docker save isecl/kbs:$(VERSION) > deployments/container-archive/docker/docker-kbs-$(VERSION)-$(GITCOMMIT).tar
-
 %-swagger:
 	mkdir -p docs/swagger
 	swagger generate spec -w ./docs/shared/$* -o ./docs/swagger/$*-openapi.yml
@@ -102,4 +98,4 @@ clean:
 	rm -rf deployments/container-archive/docker/*.tar
 	rm -rf deployments/container-archive/oci/*.tar
 
-.PHONY: installer test all clean kbs-docker aas-manager kbs wpm-docker-installer
+.PHONY: installer test all clean aas-manager kbs
