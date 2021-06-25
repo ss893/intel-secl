@@ -44,9 +44,9 @@ type KmipConfig struct {
 	Version                   string `yaml:"version" mapstructure:"version"`
 	ServerIP                  string `yaml:"server-ip" mapstructure:"server-ip"`
 	ServerPort                string `yaml:"server-port" mapstructure:"server-port"`
-	Hostname                  string `yaml:"hostname,omitempty" mapstructure:"hostname"`
-	Username                  string `yaml:"username,omitempty" mapstructure:"username"`
-	Password                  string `yaml:"password,omitempty" mapstructure:"password"`
+	Hostname                  string `yaml:"hostname" mapstructure:"hostname"`
+	Username                  string `yaml:"username" mapstructure:"username"`
+	Password                  string `yaml:"password" mapstructure:"password"`
 	ClientKeyFilePath         string `yaml:"client-key-path" mapstructure:"client-key-path"`
 	ClientCertificateFilePath string `yaml:"client-cert-path" mapstructure:"client-cert-path"`
 	RootCertificateFilePath   string `yaml:"root-cert-path" mapstructure:"root-cert-path"`

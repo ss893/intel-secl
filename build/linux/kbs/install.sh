@@ -10,6 +10,30 @@ COMPONENT_NAME=kbs
 SERVICE_USERNAME=kbs
 SERVICE_ENV=kbs.env
 
+if [[ $EUID -ne 0 ]]; then
+    echo "This installer must be run as root"
+    exit 1
+fi
+
+# find .env file
+echo PWD IS $(pwd)
+if [ -f ~/$SERVICE_ENV ]; then
+    echo Reading Installation options from $(realpath ~/$SERVICE_ENV)
+    env_file=~/$SERVICE_ENV
+elif [ -f ../$SERVICE_ENV ]; then
+    echo Reading Installation options from $(realpath ../$SERVICE_ENV)
+    env_file=../$SERVICE_ENV
+fi
+
+if [ -z $env_file ]; then
+    echo "No .env file found"
+    KBS_NOSETUP="true"
+else
+    source $env_file
+    env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+    if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+fi
+
 # Upgrade if component is already installed
 if command -v $COMPONENT_NAME &>/dev/null; then
   n=0
@@ -29,30 +53,6 @@ if command -v $COMPONENT_NAME &>/dev/null; then
   done
   echo "Exiting the installation.."
   exit 0
-fi
-
-# find .env file
-echo PWD IS $(pwd)
-if [ -f ~/$SERVICE_ENV ]; then
-    echo Reading Installation options from $(realpath ~/$SERVICE_ENV)
-    env_file=~/$SERVICE_ENV
-elif [ -f ../$SERVICE_ENV ]; then
-    echo Reading Installation options from $(realpath ../$SERVICE_ENV)
-    env_file=../$SERVICE_ENV
-fi
-
-if [[ $EUID -ne 0 ]]; then
-    echo "This installer must be run as root"
-    exit 1
-fi
-
-if [ -z $env_file ]; then
-    echo "No .env file found"
-    KBS_NOSETUP="true"
-else
-    source $env_file
-    env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-    if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
 fi
 
 echo "Setting up KBS Linux User..."

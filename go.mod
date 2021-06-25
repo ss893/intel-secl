@@ -6,8 +6,8 @@ require (
 	github.com/antchfx/jsonquery v1.1.4
 	github.com/beevik/etree v1.1.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/gemalto/kmip-go v0.0.5
-	github.com/google/uuid v1.1.1
+	github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
+	github.com/google/uuid v1.2.0
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
 	github.com/hashicorp/golang-lru v0.5.1
@@ -29,11 +29,8 @@ require (
 	github.com/vmware/govmomi v0.22.2
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 	gopkg.in/yaml.v2 v2.3.0
 )
 
 replace github.com/vmware/govmomi => github.com/arijit8972/govmomi fix-tpm-attestation-output
-
-// Commit ID has been used as consistent code is not yet released. Once released add a tag.
-replace github.com/gemalto/kmip-go => github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
