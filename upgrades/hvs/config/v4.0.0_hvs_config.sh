@@ -13,19 +13,21 @@ mkdir -p $TEMPLATES_PATH $SCHEMA_PATH
 # Change permission only in case of container environment
 if [ -f "/.container-env" ]; then
   # Copy Schema files
-  cp /tmp/schema/*.json $SCHEMA_PATH/ && chmod 0600 $SCHEMA_PATH/*.json
+  cp /tmp/schema/*.json $SCHEMA_PATH/
   # Copy template files
-  cp /tmp/templates/*.json $TEMPLATES_PATH/ && chmod 0600 $TEMPLATES_PATH/*.json
-  echo "Completed $SERVICE_NAME config upgrade to v4.0.0"
-  exit 0
+  cp /tmp/templates/*.json $TEMPLATES_PATH/
 fi
 
-# Copy template files
-cp -r templates/ $CONFIG_DIR/
+if [ ! -f "/.container-env" ]; then
+  # Copy template files
+  cp -r templates/ $CONFIG_DIR/
+  # Copy Schema files
+  cp -r schema/ $CONFIG_DIR/
+  chown -R $SERVICE_USERNAME:$SERVICE_USERNAME $SCHEMA_PATH/
+  chown -R $SERVICE_USERNAME:$SERVICE_USERNAME $TEMPLATES_PATH/
+fi
 
-# Copy Schema files
-cp -r schema/ $CONFIG_DIR/
+chmod 0600 $SCHEMA_PATH/*.json
+chmod 0600 $TEMPLATES_PATH/*.json
 
-chown -R $SERVICE_USERNAME:$SERVICE_USERNAME $SCHEMA_PATH/
-chown -R $SERVICE_USERNAME:$SERVICE_USERNAME $TEMPLATES_PATH/
 echo "Completed $SERVICE_NAME config upgrade to v4.0.0"
