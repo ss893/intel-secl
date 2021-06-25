@@ -363,12 +363,19 @@ func getPcrEventLog(eventLog string) (types.PcrEventLogMap, error) {
 
 	log.Trace("util/aik_quote_verifier:getPcrEventLog() Entering")
 	defer log.Trace("util/aik_quote_verifier:getPcrEventLog() Leaving")
+
 	var pcrEventLogMap types.PcrEventLogMap
 	var measureLogs []types.MeasureLog
+
+	if eventLog == "" {
+		return pcrEventLogMap, nil
+	}
+
 	err := json.Unmarshal([]byte(eventLog), &measureLogs)
 	if err != nil {
 		return types.PcrEventLogMap{}, errors.Wrap(err, "util/aik_quote_verifier:getPcrEventLog() Error unmarshalling measureLog")
 	}
+
 	for _, measureLog := range measureLogs {
 		addPcrEntry(measureLog, &pcrEventLogMap)
 	}
