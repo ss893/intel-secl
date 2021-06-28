@@ -115,6 +115,9 @@ func (cc *CreateCredentials) Validate() error {
 	defaultLog.Trace("tasks/create_credentials:Validate() Entering")
 	defer defaultLog.Trace("tasks/create_credentials:Validate() Leaving")
 
+	if !cc.CreateCredentials {
+		return nil
+	}
 	_, err := os.Stat(constants.OperatorSeedFile)
 	if err != nil {
 		return err
