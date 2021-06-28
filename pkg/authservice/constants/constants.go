@@ -91,9 +91,12 @@ const (
 
 //NATS Entity Types
 const (
-	Operator = "operator"
-	Account  = "account"
-	User     = "user"
+	Operator            = "operator"
+	Account             = "account"
+	User                = "user"
+	DefaultOperatorName = "ISecL-operator"
+	DefaultAccountName  = "ISecL-account"
+	HvsUserName         = "ISecL-HVS"
 )
 
 var DefaultRoles = [5]string{Administrator, RoleManager, UserManager, UserRoleManager, CustomClaimsCreator}

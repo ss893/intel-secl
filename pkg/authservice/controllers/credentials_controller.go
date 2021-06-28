@@ -8,9 +8,11 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/config"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/intel-secl/intel-secl/v4/pkg/authservice/common"
 	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
@@ -25,7 +27,7 @@ import (
 )
 
 type CredentialsController struct {
-	Username string
+	UserCredentialValidity time.Duration
 }
 
 func (controller CredentialsController) CreateCredentials(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
@@ -38,7 +40,7 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 
 	if r.ContentLength == 0 {
 		secLog.Error("controllers/credentials_controller:CreateCredentials() The request body was not provided")
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body was not provided"}
+		return nil, http.StatusBadRequest, &commErr.BadRequestError{Message: "The request body was not provided"}
 	}
 
 	dec := json.NewDecoder(r.Body)
@@ -49,24 +51,29 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 	if err != nil {
 		secLog.WithError(err).Errorf("controllers/credentials_controller:CreateCredentials() %s : Failed to "+
 			"decode credential creation request JSON", commLogMsg.InvalidInputBadEncoding)
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
+		return nil, http.StatusBadRequest, &commErr.BadRequestError{Message: "Unable to decode JSON request body"}
 	}
 
+	var username string
 	if strings.ToUpper(createCredReq.ComponentType) == constants.ComponentTypeTa {
 		if createCredReq.Parameters != nil && createCredReq.Parameters.TaHostId != nil {
 			err = validation.ValidateHostname(*createCredReq.Parameters.TaHostId)
 			if err != nil {
 				secLog.WithError(err).Errorf("controllers/credentials_controller:CreateCredentials() %s : Invalid "+
 					"host FQDN provided in request body", commLogMsg.InvalidInputBadEncoding)
-				return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid host FQDN provided"}
+				return nil, http.StatusBadRequest, &commErr.BadRequestError{Message: "Invalid host FQDN provided"}
 			}
-			controller.Username = *createCredReq.Parameters.TaHostId
+			username = *createCredReq.Parameters.TaHostId
 		} else {
-			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Host FQDN is not provided"}
+			return nil, http.StatusBadRequest, &commErr.BadRequestError{Message: "Host FQDN is not provided"}
 		}
+	} else if strings.ToUpper(createCredReq.ComponentType) == constants.ComponentTypeHvs {
+		username = constants.HvsUserName
+	} else {
+		return nil, http.StatusBadRequest, &commErr.BadRequestError{Message: "Component specified in type is not supported"}
 	}
 
-	if !validateComponentType(r, strings.ToUpper(createCredReq.ComponentType), controller.Username) {
+	if !validateComponentType(r, strings.ToUpper(createCredReq.ComponentType)) {
 		secLog.Errorf("controllers/credentials_controller:CreateCredentials() %s : Component details in request "+
 			"do not match token context", commLogMsg.InvalidInputBadParam)
 		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Component details in request do not match " +
@@ -97,7 +104,8 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 	}
 
 	userToken, err := common.CreateJWTToken(userKeyPair, accountKeyPair,
-		constants.User, strings.ToUpper(createCredReq.ComponentType), controller.Username)
+		constants.User, strings.ToUpper(createCredReq.ComponentType), config.NatsEntityInfo{Name: username,
+			CredentialValidity: controller.UserCredentialValidity})
 	if err != nil {
 		log.WithError(err).Error("controllers/credentials_controller:CreateCredentials() Error creating token for user")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "controllers/credentials_controller:" +
@@ -114,7 +122,7 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 	return formattedUserCred, http.StatusCreated, nil
 }
 
-func validateComponentType(r *http.Request, componentType string, fqdn string) bool {
+func validateComponentType(r *http.Request, componentType string) bool {
 	roles, err := context.GetUserRoles(r)
 	if err != nil {
 		return false

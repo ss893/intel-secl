@@ -32,7 +32,7 @@ const (
 	HELP_OUTPUT_JSON                  = "Boolean value to indicate if the users and roles should be written to a output file"
 	HELP_GENPASSWORD                  = "Generate passwords if not specified"
 	HELP_REGEN_TOKEN_ONLY             = "Generate token only"
-	HELP_GEN_CUSTOM_CLAIMS_TOKEN_ONLY = "Generate token only"
+	HELP_GEN_CUSTOM_CLAIMS_TOKEN_ONLY = "Generate custom claims token only"
 	HELP_HELP                         = "Show Usage - if specified, all other options will be ignored"
 
 	PASSWORD_SIZE = 20
@@ -405,12 +405,16 @@ func (a *App) LoadAllVariables(envFile string) error {
 		secret      bool
 	}
 
+	var isMandatory = true
+	if a.GenerateCustomClaimsTokenOnly {
+		isMandatory = false
+	}
 	envVars := []envDesc{
 		{&a.AasAPIUrl, "AAS_API_URL", "", "AAS API URL", true, false},
-		{&a.AasAdminUserName, "AAS_ADMIN_USERNAME", "", "AAS ADMIN USERNAME", true, false},
-		{&a.AasAdminPassword, "AAS_ADMIN_PASSWORD", "", "AAS ADMIN PASSWORD", true, true},
+		{&a.AasAdminUserName, "AAS_ADMIN_USERNAME", "", "AAS ADMIN USERNAME", isMandatory, false},
+		{&a.AasAdminPassword, "AAS_ADMIN_PASSWORD", "", "AAS ADMIN PASSWORD", isMandatory, true},
 
-		{&installComps, "ISECL_INSTALL_COMPONENTS", "", "ISecl Components to be installed", true, true},
+		{&installComps, "ISECL_INSTALL_COMPONENTS", "", "ISecl Components to be installed", isMandatory, false},
 
 		{&a.InstallAdminUserName, "INSTALL_ADMIN_USERNAME", "installadmin", "Installation ADMIN USERNAME", false, false},
 		{&a.InstallAdminPassword, "INSTALL_ADMIN_PASSWORD", "", "Installation ADMIN PASSWORD", false, true},
@@ -731,7 +735,7 @@ func (a *App) Setup(args []string) error {
 	}
 
 	if printHelp || (len(args) == 2 && args[1] == "help") {
-		fmt.Println("Usage:\n\n ", args[0], "[--answerfile] [--nosetup] [--genpassword] [--use_json] [--in_json_file] [--output_json] [--out_json_file] [--help]")
+		fmt.Println("Usage:\n\n ", args[0], "[--answerfile] [--nosetup] [--genpassword] [--use_json] [--in_json_file] [--output_json] [--out_json_file] [--gen_custom_claims_token_only] [--help]")
 
 		fs.PrintDefaults()
 		return nil

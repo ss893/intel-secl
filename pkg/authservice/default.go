@@ -10,6 +10,7 @@ import (
 	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/spf13/viper"
 	"os"
+	"time"
 )
 
 // this func sets the default values for viper keys
@@ -53,9 +54,11 @@ func init() {
 	viper.SetDefault("auth-defender-lockout-duration-mins", constants.DefaultAuthDefendLockoutMins)
 
 	viper.SetDefault("create-credentials", false)
-	viper.SetDefault("nats-operator-name", "ISecL-operator")
-	viper.SetDefault("nats-account-name", "ISecL-account")
-	viper.SetDefault("nats-hvs-user-name", "ISecL-HVS")
+	viper.SetDefault("nats-operator-name", constants.DefaultOperatorName)
+	viper.SetDefault("nats-account-name", constants.DefaultAccountName)
+	viper.SetDefault("nats-operator-credential-validity", time.Hour*43800)
+	viper.SetDefault("nats-account-credential-validity", time.Hour*43800)
+	viper.SetDefault("nats-user-credential-validity", time.Hour*8760)
 
 }
 
@@ -87,9 +90,15 @@ func defaultConfig() *config.Configuration {
 			LockoutDurationMins: viper.GetInt("auth-defender-lockout-duration-mins"),
 		},
 		Nats: config.NatsConfig{
-			OperatorName: viper.GetString("nats-operator-name"),
-			AccountName:  viper.GetString("nats-account-name"),
-			HvsUserName:  viper.GetString("nats-hvs-user-name"),
+			Operator: config.NatsEntityInfo{
+				Name:               viper.GetString("nats-operator-name"),
+				CredentialValidity: viper.GetDuration("nats-operator-credential-validity"),
+			},
+			Account: config.NatsEntityInfo{
+				Name:               viper.GetString("nats-account-name"),
+				CredentialValidity: viper.GetDuration("nats-account-credential-validity"),
+			},
+			UserCredentialValidity: viper.GetDuration("nats-user-credential-vaildity"),
 		},
 	}
 }

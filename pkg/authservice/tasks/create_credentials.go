@@ -28,12 +28,22 @@ type CreateCredentials struct {
 const createCredentialsHelpPrompt = "Following environment variables are optional for create-credentials setup:"
 
 var createCredentialsEnvHelp = map[string]string{
-	"CREATE_CREDENTIALS": "Trigger to run create-credentials setup task when set to True. Default is False",
+	"CREATE_CREDENTIALS":                "Trigger to run create-credentials setup task when set to True. Default is False",
+	"NATS_OPERATOR_NAME":                "Set the NATS operator name, default is \"ISecL-operator\"",
+	"NATS_OPERATOR_CREDENTIAL_VALIDITY": "Set the NATS operator credential validity in terms of duration (ex: \"300ms\",\"-1.5h\" or \"2h45m\"), default is 5 years",
+	"NATS_ACCOUNT_NAME":                 "Set the NATS account name, default is \"ISecL-account\"",
+	"NATS_ACCOUNT_CREDENTIAL_VALIDITY":  "Set the NATS account credential validity in terms of duration (ex: \"300ms\",\"-1.5h\" or \"2h45m\"), default is 5 years",
+	"NATS_USER_CREDENTIAL_VALIDITY":     "Set the NATS user credential validity in terms of duration (ex: \"300ms\",\"-1.5h\" or \"2h45m\"), default is 1 year",
 }
 
 func (cc *CreateCredentials) Run() error {
 	defaultLog.Trace("tasks/create_credentials:Run() Entering")
 	defer defaultLog.Trace("tasks/create_credentials:Run() Leaving")
+
+	if !cc.CreateCredentials {
+		fmt.Println("Skipping \"create-credentials\" setup task. Please set CREATE_CREDENTIALS env value to true to run the task.....")
+		return nil
+	}
 
 	operatorKeyPair, err := nkeys.CreateOperator()
 	if err != nil {
@@ -46,7 +56,7 @@ func (cc *CreateCredentials) Run() error {
 	}
 
 	operatorToken, err := common.CreateJWTToken(operatorKeyPair, operatorKeyPair, constants.Operator, "",
-		cc.NatsConfig.OperatorName)
+		cc.NatsConfig.Operator)
 	if err != nil {
 		return errors.Wrap(err, "Error creating operator JWT")
 	}
@@ -74,7 +84,7 @@ func (cc *CreateCredentials) Run() error {
 	}
 
 	accountToken, err := common.CreateJWTToken(accountKeyPair, operatorKeyPair, constants.Account, "",
-		cc.NatsConfig.AccountName)
+		cc.NatsConfig.Account)
 	if err != nil {
 		return errors.Wrap(err, "Error creating account JWT")
 	}
@@ -87,7 +97,7 @@ func (cc *CreateCredentials) Run() error {
 
 	//Create fixed format for server configuration
 	formattedConf := fmt.Sprintf("// Operator %s\noperator: %s\n\nresolver: MEMORY\n\nresolver_preload: {\n"+
-		" // Account %s\n %s: %s\n}", cc.NatsConfig.OperatorName, operatorToken, cc.NatsConfig.AccountName,
+		" // Account %s\n %s: %s\n}", cc.NatsConfig.Operator.Name, operatorToken, cc.NatsConfig.Account.Name,
 		accountPublicKey, accountToken)
 
 	err = ioutil.WriteFile(constants.AccountConfigurationFile, []byte(formattedConf), 0600)
@@ -105,9 +115,6 @@ func (cc *CreateCredentials) Validate() error {
 	defaultLog.Trace("tasks/create_credentials:Validate() Entering")
 	defer defaultLog.Trace("tasks/create_credentials:Validate() Leaving")
 
-	if !cc.CreateCredentials {
-		return nil
-	}
 	_, err := os.Stat(constants.OperatorSeedFile)
 	if err != nil {
 		return err

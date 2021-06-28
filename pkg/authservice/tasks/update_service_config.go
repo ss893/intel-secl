@@ -40,6 +40,11 @@ var envHelp = map[string]string{
 	"SERVER_WRITE_TIMEOUT":                "Request Write Timeout Duration in Seconds",
 	"SERVER_IDLE_TIMEOUT":                 "Request Idle Timeout in Seconds",
 	"SERVER_MAX_HEADER_BYTES":             "Max Length Of Request Header in Bytes",
+	"NATS_OPERATOR_NAME":                  "Set the NATS operator name, default is \"ISecL-operator\"",
+	"NATS_OPERATOR_CREDENTIAL_VALIDITY":   "Set the NATS operator credential validity, default is 5 years",
+	"NATS_ACCOUNT_NAME":                   "Set the NATS account name, default is \"ISecL-account\"",
+	"NATS_ACCOUNT_CREDENTIAL_VALIDITY":    "Set the NATS account credential validity, default is 5 years",
+	"NATS_USER_CREDENTIAL_VALIDITY":       "Set the NATS user credential validity, default is 1 year",
 }
 
 func (uc UpdateServiceConfig) Run() error {
@@ -62,6 +67,19 @@ func (uc UpdateServiceConfig) Run() error {
 		IntervalMins:        viper.GetInt("auth-defender-interval-mins"),
 		LockoutDurationMins: viper.GetInt("auth-defender-lockout-duration-mins"),
 	}
+
+	(*uc.AppConfig).Nats = config.NatsConfig{
+		Operator: config.NatsEntityInfo{
+			Name:               viper.GetString("nats-operator-name"),
+			CredentialValidity: viper.GetDuration("nats-operator-credential-validity"),
+		},
+		Account: config.NatsEntityInfo{
+			Name:               viper.GetString("nats-account-name"),
+			CredentialValidity: viper.GetDuration("nats-account-credential-validity"),
+		},
+		UserCredentialValidity: viper.GetDuration("nats-user-credential-validity"),
+	}
+
 	if uc.ServerConfig.Port < 1024 ||
 		uc.ServerConfig.Port > 65535 {
 		uc.ServerConfig.Port = uc.DefaultPort
@@ -71,6 +89,8 @@ func (uc UpdateServiceConfig) Run() error {
 }
 
 func (uc UpdateServiceConfig) Validate() error {
+	defaultLog.Trace("tasks/update_service_config:Validate() Entering")
+	defer defaultLog.Trace("tasks/update_service_config:Validate() Leaving")
 	if (*uc.AppConfig).Server.Port < 1024 ||
 		(*uc.AppConfig).Server.Port > 65535 {
 		return errors.New("Configured port is not valid")

@@ -18,7 +18,6 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-
 	"strings"
 )
 
@@ -199,14 +198,22 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		CmsBaseURL:    viper.GetString("cms-base-url"),
 		BearerToken:   viper.GetString("bearer-token"),
 	})
+
 	runner.AddTask("create-credentials", "", &tasks.CreateCredentials{
 		CreateCredentials: viper.GetBool("create-credentials"),
 		NatsConfig: config.NatsConfig{
-			OperatorName: viper.GetString("nats-operator-name"),
-			AccountName:  viper.GetString("nats-account-name"),
+			Operator: config.NatsEntityInfo{
+				Name:               viper.GetString("nats-operator-name"),
+				CredentialValidity: viper.GetDuration("nats-operator-credential-validity"),
+			},
+			Account: config.NatsEntityInfo{
+				Name:               viper.GetString("nats-account-name"),
+				CredentialValidity: viper.GetDuration("nats-account-credential-validity"),
+			},
 		},
 		ConsoleWriter: a.consoleWriter(),
 	})
+
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: a.consoleWriter(),
 		ServerConfig: commConfig.ServerConfig{

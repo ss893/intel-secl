@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"os"
+	"time"
 )
 
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
@@ -47,9 +48,14 @@ type AuthDefender struct {
 }
 
 type NatsConfig struct {
-	OperatorName string `yaml:"operator-name" mapstructure:"operator-name"`
-	AccountName  string `yaml:"account-name" mapstructure:"account-name"`
-	HvsUserName  string `yaml:"hvs-user-name" mapstructure:"hvs-user-name"`
+	Operator               NatsEntityInfo `yaml:"operator" mapstructure:"operator"`
+	Account                NatsEntityInfo `yaml:"account" mapstructure:"account"`
+	UserCredentialValidity time.Duration  `yaml:"user-credential-validity" mapstructure:"user-credential-validity"`
+}
+
+type NatsEntityInfo struct {
+	Name               string        `yaml:"name" mapstructure:"name"`
+	CredentialValidity time.Duration `yaml:"credential-validity" mapstructure:"credential-validity"`
 }
 
 // this function sets the configuration file name and type
