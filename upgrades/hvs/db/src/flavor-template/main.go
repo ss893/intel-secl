@@ -76,6 +76,7 @@ const (
 	PlatformFlavor   = "PLATFORM"
 	OsFlavor         = "OS"
 	HostUniqueFlavor = "HOST_UNIQUE"
+	AssetTagFlavor   = "ASSET_TAG"
 	SoftwareFlavor   = "SOFTWARE"
 
 	// Hardware
@@ -469,6 +470,9 @@ func updateDescription(description map[string]interface{}, meta templateModel.Me
 		description[model.BiosVersion] = meta.Description.BiosVersion
 		description[model.OsName] = meta.Description.OsName
 		description[model.OsVersion] = meta.Description.OsVersion
+		description[model.TpmVersion] = meta.Description.TpmVersion
+	case AssetTagFlavor:
+		description[model.HardwareUUID] = meta.Description.HardwareUUID
 		description[model.TpmVersion] = meta.Description.TpmVersion
 	}
 
