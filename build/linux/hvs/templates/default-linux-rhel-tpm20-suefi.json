@@ -21,13 +21,6 @@
                 },
                 {
                     "pcr": {
-                        "index": 1,
-                        "bank": ["SHA384", "SHA256", "SHA1"]
-                    },
-                    "pcr_matches": true
-                },
-                {
-                    "pcr": {
                         "index": 2,
                         "bank": ["SHA384", "SHA256", "SHA1"]
                     },
