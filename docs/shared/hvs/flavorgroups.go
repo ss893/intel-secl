@@ -198,6 +198,7 @@ type FlavorgroupFlavorLinkCollection struct {
 //    |--------------------------------|------------|
 //    | name                           | Name of the flavorgroup to be created. |
 //    | flavor_match_policy_collection | Collection of flavor match policies. Each flavor match policy contains two <br> parts: <br><b>flavor_part</b>:The type or classification of the flavor.<br> <b>match_policy</b>:The policy which defines how the host is verified against the <br> flavors in the flavor group for the specified flavor part. |
+//    | flavorTemplateIds              | (Optional) Flavor template ids that the created flavorgroup will be associated with. If not provided, created flavorgroup will be associated with all the templates associated with the automatic flavor group. |
 //
 // x-permissions: flavorgroups:create
 // security:

@@ -13,6 +13,34 @@ type FlavorTemplate struct {
 	Body hvs.FlavorTemplate
 }
 
+// FlavorTemplateReq request payload
+// swagger:parameters FlavorTemplateReq
+type FlavorTemplateReq struct {
+	// in: body
+	Body hvs.FlavorTemplateReq
+}
+
+// FlavorTemplateFlavorgroup response payload
+// swagger:parameters FlavorTemplateFlavorgroup
+type FlavorTemplateFlavorgroup struct {
+	// in: body
+	Body hvs.FlavorTemplateFlavorgroup
+}
+
+// FlavorTemplateFlavorgroupCreateRequest request payload
+// swagger:parameters FlavorTemplateFlavorgroupCreateRequest
+type FlavorTemplateFlavorgroupCreateRequest struct {
+	// in: body
+	Body hvs.FlavorTemplateFlavorgroupCreateRequest
+}
+
+// FlavorTemplateFlavorgroupCollection response payload
+// swagger:parameters FlavorTemplateFlavorgroupCollection
+type FlavorTemplateFlavorgroupCollection struct {
+	// in: body
+	Body hvs.FlavorTemplateFlavorgroupCollection
+}
+
 // ---
 
 // swagger:operation GET /flavor-templates/{flavortemplate_id} Flavortemplates Retrieve-FlavorTemplate
@@ -113,7 +141,13 @@ type FlavorTemplate struct {
 // swagger:operation POST /flavor-templates Flavortemplates Create-FlavorTemplate
 // ---
 // description: |
+//
 //   Flavor Template: Flavor templates are used to implement dynamic flavor generation. It supports definition of rules for Linux & ESXI hosts. The templates need to be defined in JSON format. The rules defined will be used for matching the templates while generating flavors.
+//
+//    | Attribute                      | Description|
+//    |--------------------------------|------------|
+//    | flavor_template                | Skeleton to generate dynamic flavors  |
+//    | flavorgroup_names              | (Optional) Flavor group names that the created flavor-template(s) will be associated with. If not provided, created flavor-template will be associated with automatic flavor group. |
 //
 //    | Attribute                      | Description|
 //    |--------------------------------|------------|
@@ -154,7 +188,7 @@ type FlavorTemplate struct {
 //   required: true
 //   in: body
 //   schema:
-//    "$ref": "#/definitions/FlavorTemplate"
+//    "$ref": "#/definitions/FlavorTemplateReq"
 // - name: Content-Type
 //   description: Content-Type header
 //   required: true
@@ -182,6 +216,7 @@ type FlavorTemplate struct {
 // x-sample-call-endpoint: https://hvs.com:8443/hvs/v2/flavor-templates
 // x-sample-call-input: |
 //    {
+//    flavor_template : {
 //       "label": "default-uefi",
 //       "condition": [
 //           "//host_info/os_name//*[text()='RedHatEnterprise']",
@@ -229,6 +264,7 @@ type FlavorTemplate struct {
 //               ]
 //           }
 //       }
+//    }
 //    }
 //
 // x-sample-call-output: |
@@ -459,3 +495,216 @@ type FlavorTemplate struct {
 // x-sample-call-endpoint: https://hvs.com:8443/hvs/v2/flavor-templates/d6f81340-b033-4fae-8ccf-795430f486e7
 
 // ---
+// swagger:operation POST /flavor-templates/{flavortemplates_id}/flavorgroups  Flavortemplates  Create-FlavorgroupLink
+// ---
+//
+// description: |
+//   Creates an association between a FlavorTemplate and FlavorGroup record.
+//
+//   The serialized FlavorTemplateFlavorgroupCreateRequest Go struct object represents the content of the request body.
+//
+//    | Attribute                      | Description                                                       |
+//    |--------------------------------|-------------------------------------------------------------------|
+//    | flavorgroup_id                 | ID of the Flavorgroup record to be linked with the FlavorTemplate |
+//
+//
+//
+// x-permissions: flavor-template:create
+// security:
+//  - bearerAuth: []
+// produces:
+// - application/json
+// consumes:
+// - application/json
+// parameters:
+// - name: flavortemplates_id
+//   required: true
+//   in: path
+//   type: string
+//   format: uuid
+// - name: request body
+//   required: true
+//   in: body
+//   schema:
+//    "$ref": "#/definitions/FlavorTemplateFlavorgroupCreateRequest"
+// - name: Content-Type
+//   description: Content-Type header
+//   in: header
+//   type: string
+//   required: true
+//   enum:
+//     - application/json
+// - name: Accept
+//   description: Accept header
+//   in: header
+//   type: string
+//   required: true
+//   enum:
+//     - application/json
+// responses:
+//   '201':
+//     description: Successfully linked the FlavorTemplate and FlavorGroup.
+//     content:
+//       application/json
+//     schema:
+//       $ref: "#/definitions/FlavorTemplateFlavorgroupCreateRequest"
+//   '400':
+//     description: Invalid request body provided/FlavorgroupID provided in request body does not exist/FlavorTemplate-FlavorGroup link already exists
+//   '404':
+//     description: FlavorTemplate ID in request path does not exist
+//   '415':
+//     description: Invalid Content-Type/Accept Header in Request
+//   '500':
+//     description: Internal server error
+//
+// x-sample-call-endpoint: https://hvs.com:8443/hvs/v2/flavor-templates/8d7964db-4e4d-49a0-b441-1beabbcebf78/flavorgroups
+// x-sample-call-input: |
+//    {
+//        "flavorgroup_id":"1429cebf-1c09-4e78-b2aa-da10e58d7446",
+//    }
+// x-sample-call-output: |
+//   {
+//     "flavortemplate_id": "8d7964db-4e4d-49a0-b441-1beabbcebf78",
+//     "flavorgroup_id": "1429cebf-1c09-4e78-b2aa-da10e58d7446"
+//   }
+
+// ---
+
+// swagger:operation GET /flavor-templates/{flavortemplates_id}/flavorgroups/{flavorgroup_id}  Flavor-templates Retrieve-Flavorgrouplink
+// ---
+//
+// description: |
+//   Retrieves a FlavorTemplate-FlavorGroup association.
+//   Returns - The FlavorTemplateFlavorGroupLink in JSON format that represents the association.
+// x-permissions: flavor-template:retrieve
+// security:
+//  - bearerAuth: []
+// produces:
+// - application/json
+// parameters:
+// - name: flavortemplates_id
+//   description: Unique ID of the flavor template.
+//   in: path
+//   required: true
+//   type: string
+//   format: uuid
+// - name: flavorgroup_id
+//   description: Unique ID of the flavorgroup.
+//   in: path
+//   required: true
+//   type: string
+//   format: uuid
+// - name: Accept
+//   description: Accept header
+//   in: header
+//   type: string
+//   required: true
+//   enum:
+//     - application/json
+// responses:
+//   '200':
+//     description: Successfully retrieved the FlavorTemplate Flavorgroup link.
+//     content:
+//       application/json
+//     schema:
+//       $ref: "#/definitions/FlavorTemplateFlavorgroup"
+//   '404':
+//     description: Flavortemplate/Flavorgroup record not found
+//   '415':
+//     description: Invalid Accept Header in Request
+//   '500':
+//     description: Internal server error
+//
+// x-sample-call-endpoint: https://hvs.com:8443/hvs/v2/flavor-templates/8d7964db-4e4d-49a0-b441-1beabbcebf78/flavorgroups/1429cebf-1c09-4e78-b2aa-da10e58d7446
+// x-sample-call-output: |
+//  {
+//    "flavortemplate_id": "8d7964db-4e4d-49a0-b441-1beabbcebf78",
+//    "flavorgroup_id": "1429cebf-1c09-4e78-b2aa-da10e58d7446"
+//  }
+
+// ---
+
+// swagger:operation DELETE /flavor-templates/{flavortemplate_id}/flavorgroups/{flavorgroup_id}  Flavortemplates  Delete-FlavorgroupLink
+// ---
+//
+// description: |
+//   Deletes an individual Flavortemplate Flavorgroup link.
+// x-permissions: flavor-template:delete
+// security:
+//  - bearerAuth: []
+// parameters:
+// - name: flavortemplate_id
+//   description: Unique ID of the flavor template.
+//   in: path
+//   required: true
+//   type: string
+//   format: uuid
+// - name: flavorgroup_id
+//   description: Unique ID of the flavorgroup.
+//   in: path
+//   required: true
+//   type: string
+//   format: uuid
+// responses:
+//   '204':
+//     description: Successfully deleted the Flavortemplate-Flavorgroup link.
+//   '404':
+//     description: Flavortemplate/Flavorgroup record not found
+//   '500':
+//     description: Internal server error
+// x-sample-call-endpoint: https://hvs.com:8443/hvs/v2/flavor-templates/826501bd-3c75-4839-a08f-db5f744f8498/flavorgroups/e5574593-0f92-41f0-8f2d-93b97cea9c06
+// ---
+
+// swagger:operation GET /flavor-templates/{flavortemplate_id}/flavorgroups Flavortemplates Search-Flavorgrouplinks
+// ---
+//
+// description: |
+//   Retrieves a list of FlavorTemplate-FlavorGroup associations corresponding to a flavor template.
+//   Returns - The FlavorTemplateFlavorgroupCollection in JSON format that are associated with the flavor template.
+// x-permissions: flavor-template:search
+// security:
+//  - bearerAuth: []
+// produces:
+// - application/json
+// parameters:
+// - name: flavortemplate_id
+//   description: Unique ID of the flavor template.
+//   in: path
+//   required: true
+//   type: string
+//   format: uuid
+// - name: Accept
+//   description: Accept header
+//   in: header
+//   type: string
+//   required: true
+//   enum:
+//     - application/json
+// responses:
+//   '200':
+//     description: Successfully retrieved the FlavorTemplateFlavorgroupCollection.
+//     content:
+//       application/json
+//     schema:
+//       $ref: "#/definitions/FlavorTemplateFlavorgroupCollection"
+//   '404':
+//     description: Flavor Template record not found
+//   '415':
+//     description: Invalid Accept Header in Request
+//   '500':
+//     description: Internal server error
+//
+// x-sample-call-endpoint: https://hvs.com:8443/hvs/v2/flavor-templates/e5574593-0f92-41f0-8f2d-93b97cea9c06/flavorgroups
+// x-sample-call-output: |
+//  {
+//    "flavorgroup_flavortemplate_links": [
+//    {
+//      "flavortemplate_id": "e5574593-0f92-41f0-8f2d-93b97cea9c06",
+//      "flavorgroup_id": "fdd4240b-2369-4175-80e7-7fbf8ec78ce8"
+//    },
+//    {
+//      "flavortemplate_id": "e5574593-0f92-41f0-8f2d-93b97cea9c06",
+//      "flavorgroup_id": "bf8a9882-8a49-43ca-8052-b666bd7c0172"
+//    }
+//    ]
+//  }
