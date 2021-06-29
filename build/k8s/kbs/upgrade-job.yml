@@ -5,21 +5,21 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: hvs-upgrade
+  name: kbs-upgrade
   namespace: isecl
   labels:
-    app: hvs
+    app: kbs
 spec:
   template:
     metadata:
       labels:
-        app: hvs
+        app: kbs
     spec:
       securityContext:
         fsGroup: 1001
       restartPolicy: Never
       containers:
-        - name: hvs
+        - name: kbs
           image: <upgrade-image-name>:<image-tag>
           command: ["/container_upgrade.sh"]
           imagePullPolicy: Always
@@ -28,27 +28,27 @@ spec:
             runAsGroup: 1001
           env:
             - name: CONFIG_DIR
-              value: "/etc/hvs"
+              value: "/etc/kbs"
             - name: COMPONENT_VERSION
               value: <current deployed version>
           envFrom:
             - configMapRef:
-                name: hvs-config
+                name: kbs-config
           volumeMounts:
-            - name: hvs-config-volume
-              mountPath: /etc/hvs/
-            - name: hvs-logs-volume
-              mountPath: /var/log/hvs/
-            - name: hvs-db-certs
-              mountPath: /etc/postgresql/
+            - name: kbs-config-volume
+              mountPath: /etc/kbs/
+            - name: kbs-logs-volume
+              mountPath: /var/log/kbs/
+            - mountPath: /etc/secret-volume/
+              name: kbs-credentials
+              readOnly: true
       volumes:
-        - name: hvs-logs-volume
+        - name: kbs-logs-volume
           persistentVolumeClaim:
-            claimName: hvs-logs-pvc
-        - name: hvs-config-volume
+            claimName: kbs-logs-pvc
+        - name: kbs-config-volume
           persistentVolumeClaim:
-            claimName: hvs-config-pvc
-        - name: hvs-db-certs
+            claimName: kbs-config-pvc
+        - name: kbs-credentials
           secret:
-            secretName: hvs-db-certs
-            defaultMode: 0640
+            secretName: kbs-secret

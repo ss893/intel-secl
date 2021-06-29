@@ -41,6 +41,10 @@ $(TARGETS):
 %-docker: %
 	docker build ${DOCKER_PROXY_FLAGS} -f build/image/Dockerfile-$* -t isecl/$*:$(VERSION) .
 
+hvs-docker: hvs
+	cd ./upgrades/hvs/db && make all && cd -
+	docker build ${DOCKER_PROXY_FLAGS} -f build/image/Dockerfile-hvs -t isecl/hvs:$(VERSION) .
+
 %-swagger:
 	mkdir -p docs/swagger
 	swagger generate spec -w ./docs/shared/$* -o ./docs/swagger/$*-openapi.yml
@@ -52,12 +56,7 @@ docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 
 %-oci-archive: %-docker
 	skopeo copy docker-daemon:isecl/$*:$(VERSION) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
-	if [ $@ == "hvs-oci-archive" ]; then \
-	    cd ./upgrades/$*/db && make all && cd - ; \
-	    docker build ${DOCKER_PROXY_FLAGS} -f build/image/Dockerfile-upgrade-$* -t isecl/$*-upgrade:$(VERSION) . ; \
-	    skopeo copy docker-daemon:isecl/$*-upgrade:$(VERSION) oci-archive:deployments/container-archive/oci/$*-upgrade-$(VERSION)-$(GITCOMMIT).tar:$(VERSION) ; \
-	fi
-	
+
 aas-manager:
 	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
 	cp tools/aas-manager/populate-users deployments/installer/populate-users.sh
