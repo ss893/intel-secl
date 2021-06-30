@@ -20,7 +20,9 @@ func (secureBootParser *secureBootParser) Init() error {
 
 func (secureBootParser *secureBootParser) Parse(hostInfo *model.HostInfo) error {
 
-	hostInfo.HardwareFeatures.UEFI = &model.UEFI{}
+	if hostInfo.HardwareFeatures.UEFI == nil {
+		hostInfo.HardwareFeatures.UEFI = &model.UEFI{}
+	}
 	// if the secure-boot file does not exists (ex. on older Purley systems) then assume
 	// secure boot is disabled
 	if _, err := os.Stat(secureBootFile); os.IsNotExist(err) {
