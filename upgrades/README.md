@@ -67,3 +67,31 @@ Container deployment:
 | SGX Host Verification Service            | SHVS        |  v3.6.0 |
 | SGX Agent                                | AGENT       |  v3.6.0 |
 | SKC Client/Library                       | SKC Library |  v3.6.0 |
+
+##### Upgrade to v3.6.0:
+*iHUB* :
+iHUB in v3.6.0, has added multi instance installation support. Hence, it requires following ENV variables for the upgrade,
+
+```shell
+HVS_BASE_URL
+SHVS_BASE_URL
+```
+
+##### Upgrade to v4.0.0:
+*TA and WLA* :
+In v4.0.0, TA has modified policies on TPM and NVRAM and it requires to re-provision itself with HVS. This would need following 
+ENV variable for the upgrade. Also, WLA would need to recreate keys as Binding Key gets updated after re-provisioning.
+
+```shell
+BEARER_TOKEN
+```
+
+NOTE:
+If in case some components needs to get upgraded from v3.5.0, directly to the latest version then it would require ENV variables 
+if they are mentioned above and comes in the upgrade path.
+e.g if iHUB needs upgrade from v3.5.0 to v4.0.0 then it would require following ENV variables,
+
+```shell
+HVS_BASE_URL
+SHVS_BASE_URL
+```
