@@ -32,6 +32,3 @@ jobs:
 
     - name: Build-wpm
       run: make wpm
-
-    - name: Test
-      run: make test
