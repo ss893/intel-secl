@@ -212,18 +212,6 @@ var readers = map[uint8]func(*smbiosTable, *model.HostInfo) error{
 			return errors.Wrap(err, "Could not read BiosVersion")
 		}
 
-		// see SMBIOS 7.1.2
-		biosCharacteristicsExensions, err := table.getBYTE(13)
-		if err != nil {
-			return errors.Wrap(err, "Could not read BIOS Characteristics Extensions")
-		}
-
-		if biosCharacteristicsExensions&constUefiFlag == constUefiFlag {
-			hostInfo.HardwareFeatures.UEFI = &model.UEFI{
-				HardwareFeature: model.HardwareFeature{Enabled: true},
-			}
-		}
-
 		return nil
 	},
 	0x1: func(table *smbiosTable, hostInfo *model.HostInfo) error {

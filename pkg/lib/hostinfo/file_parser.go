@@ -34,6 +34,12 @@ func (fileInfoParser *fileInfoParser) Parse(hostInfo *model.HostInfo) error {
 		hostInfo.IsDockerEnvironment = true
 	}
 
+	if _, err := os.Stat(isEFIBootFile); err == nil {
+		hostInfo.HardwareFeatures.UEFI = &model.UEFI{
+			HardwareFeature: model.HardwareFeature{Enabled: true},
+		}
+	}
+
 	return nil
 }
 

@@ -23,16 +23,12 @@ hostInfo, _ := hostInfoParser.Parse()
 |HardwareUUID|Unique hardware id.|Parsed from SMBIOS table type #1, "UIID" at 8h.|
 |TbootInstalled|True when tboot is installed.|True when 'txt-stat -h' executes without error.|
 |IsDockerEnvironment|True when the Trust-Agent is running in a container.| True when `/.dockerenv` file is present on the system.|
-|HardwareFeatures.TXT.Supported||Defaults to 'true' (assuming Intel processor).|
 |HardwareFeatures.TXT.Enabled||Based on /dev/cpu/0/msr bits at offset 0x3A.|
-|HardwareFeatures.TPM.Supported||True when /dev/tpm0 is present.|
 |HardwareFeatures.TPM.Enabled||True when /sys/firmware/acpi/tables/TPM2 is present and starts with magic "TPM2" (for Linux, TPM2.0 is required).|
 |HardwareFeatures.TPM.Meta.TPMVersion|Version of the TPM (ex. "2.0").| "2.0" when /sys/firmware/acpi/tables/TPM2 is present and starts with magic "TPM2".|
-|HardwareFeatures.CBNT.Supported||True when CBNT is enabled.|
 |HardwareFeatures.CBNT.Enabled|True when BootGuard is present.|Based on /dev/cpu/0/msr bits at offset 0x13A.|
 |HardwareFeatures.CBNT.Meta.Profile|The BootGuard profile.  ("BTG0", "BTG3", "BTG4" or "BTG5")|Parsed from bits in /dev/cpu/0/msr at offset 0x13A.|
 |HardwareFeatures.CBNT.Meta.MSR|MSR flags associated with BootGuard.|"mk ris kfm" when CBNT is present.|
-|HardwareFeatures.UEFI.Supported|True when UEFI.Enabled.|Parsed from SMBIOS table type #0, "BIOS Characteristics" at Ah.|
-|HardwareFeatures.UEFI.Enabled|True when the Bios is EFI (not legacy bios).|Parsed from SMBIOS table type #0, "BIOS Characteristics" at Ah.|
+|HardwareFeatures.UEFI.Enabled|True when the Bios is EFI (not legacy bios).|True when /sys/firmware/efi directory is present.|
 |HardwareFeatures.UEFI.Meta.SecureBootEnabled|True when secure-boot is enabled.|Parsed from efi var file /sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c.|
 |InstalledComponents|Always contains 'tagent' (Trust-Agent), also contains 'wlagent' when installed.|Values are determined if the agent executables can be run (ex. `tagent version` and `wlagent version`).|

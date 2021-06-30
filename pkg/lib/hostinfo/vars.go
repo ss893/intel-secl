@@ -14,6 +14,7 @@ var (
 	hostNameFile       = "/etc/hostname"
 	isDockerFile       = "/.dockerenv"
 	isOCIContainerFile = "/.container-env"
+	isEFIBootFile      = "/sys/firmware/efi"
 	tpmDeviceFile      = "/dev/tpm0"
 	secureBootFile     = "/sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c"
 )
