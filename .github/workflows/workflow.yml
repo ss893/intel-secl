@@ -1,4 +1,6 @@
 on:
+  push:
+    branches: [ insights ]
   schedule: 
     # runs once a week on sunday
     - cron: "55 23 * * 0"

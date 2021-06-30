@@ -16,10 +16,25 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.14
 
-    - name: Build
-      run: go build -v ./...
+    - name: Build-cms
+      run: make cms
+
+    - name: Build-authservice
+      run: make authservice
+
+    - name: Build-hvs
+      run: make hvs
+
+    - name: Build-ihub
+      run: make ihub
+
+    - name: Build-wpm
+      run: make wpm
+
+    - name: Build-kbs
+      run: make kbs
 
     - name: Test
-      run: go test -v ./...
+      run: make test
