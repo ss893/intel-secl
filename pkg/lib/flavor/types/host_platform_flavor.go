@@ -254,10 +254,11 @@ func (pf HostPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 			return nil, errors.Wrapf(err, errorMessage, "%s Failure in evaluating certificate digest")
 		}
 
+		//Vmware supports only SHA1 value to be pushed and measure, hence use SHA1 bank here
 		expectedEventLogEntry := hcTypes.TpmEventLog{
 			Pcr: hcTypes.Pcr{
 				Index: constants.PCR22,
-				Bank:  constants.SHA256,
+				Bank:  constants.SHA1,
 			},
 			TpmEvent: []hcTypes.EventLog{
 				{
@@ -275,7 +276,7 @@ func (pf HostPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 			{
 				Pcr: hcTypes.Pcr{
 					Index: constants.PCR22,
-					Bank:  constants.SHA256,
+					Bank:  constants.SHA1,
 				},
 				Measurement: expectedPcrValue,
 				PCRMatches:  true,
