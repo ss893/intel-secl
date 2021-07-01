@@ -47,7 +47,7 @@ func VerifySamlSignature(samlReport, SamlCertPath, CACertDirPath string) bool {
 			if _, err := cert.Verify(verifyRootCAOpts); err != nil {
 				continue
 			} else {
-				log.Info("saml/saml-verifier:VerifySamlSignature() SAML certificate chain verification successful")
+				log.Debug("saml/saml-verifier:VerifySamlSignature() SAML certificate chain verification successful")
 				trustedCertChainFound = true
 				break
 			}
@@ -69,7 +69,7 @@ func VerifySamlSignature(samlReport, SamlCertPath, CACertDirPath string) bool {
 		return false
 	}
 
-	log.Info("saml/saml-verifier:VerifySamlSignature() Successfully validated SAML signature")
+	log.Debug("saml/saml-verifier:VerifySamlSignature() Successfully validated SAML signature")
 	return true
 }
 
