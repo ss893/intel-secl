@@ -52,23 +52,27 @@ func NewNatsTAClient(natsServers []string, natsHostID string, tlsConfig *tls.Con
 func (client *natsTAClient) newNatsConnection() (*nats.EncodedConn, error) {
 
 	conn, err := nats.Connect(strings.Join(client.natsServers, ","),
+		nats.RetryOnFailedConnect(true),
+		nats.MaxReconnects(5),
+		nats.ReconnectWait(5*time.Second),
+		nats.Timeout(10*time.Second),
 		nats.Secure(client.tlsConfig),
 		nats.UserCredentials(client.natsCredentials),
 		nats.ErrorHandler(func(nc *nats.Conn, s *nats.Subscription, err error) {
 			if s != nil {
-				log.Infof("client/nats_client:newNatsConnection() NATS: Could not process subscription for subject %q: %v", s.Subject, err)
+				log.WithError(err).Errorf("client/nats_client:newNatsConnection() NATS: Could not process subscription for subject %q", s.Subject)
 			} else {
-				log.Infof("client/nats_client:newNatsConnection() NATS: Unknown error: %v", err)
+				log.WithError(err).Error("client/nats_client:newNatsConnection() NATS: Unknown error")
 			}
 		}),
 		nats.DisconnectErrHandler(func(_ *nats.Conn, err error) {
-			log.Infof("client/nats_client:newNatsConnection() NATS: Client disconnected: %v", err)
+			log.Debug("client/nats_client:newNatsConnection() NATS: Client disconnected")
 		}),
 		nats.ReconnectHandler(func(_ *nats.Conn) {
-			log.Infof("client/nats_client:newNatsConnection() NATS: Client reconnected")
+			log.Debug("client/nats_client:newNatsConnection() NATS: Client reconnected")
 		}),
 		nats.ClosedHandler(func(_ *nats.Conn) {
-			log.Infof("client/nats_client:newNatsConnection() NATS: Client closed")
+			log.Debug("client/nats_client:newNatsConnection() NATS: Client closed")
 		}))
 
 	if err != nil {
