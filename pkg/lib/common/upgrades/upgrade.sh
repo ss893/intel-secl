@@ -183,6 +183,10 @@ main() {
     fi
   fi
 
+  echo "Running pre upgrade checks"
+  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config $CONFIG_PATH "./checks" ".sh"
+  exit_on_error false "Failed to upgrade as upgrade checks failed."
+
   stop_service
 
   BACKUP_DIR=${BACKUP_PATH}${SERVICE_NAME}_backup
