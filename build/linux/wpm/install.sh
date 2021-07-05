@@ -169,8 +169,8 @@ else
 fi
 
 if [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "y" ] || [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "Y" ] || [ "$WPM_WITH_CONTAINER_SECURITY_CRIO" = "yes" ]; then
-  isinstalled=$(rpm -q skopeo)
-  if [ "$isinstalled" == "package skopeo is not installed" ]; then
+  which skopeo 2>/dev/null
+  if [ $? -ne 0  ]; then
     echo "Prerequisite skopeo is not installed, please install skopeo before proceeding with container confidentiality."
   fi
 fi
