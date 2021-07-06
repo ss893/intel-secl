@@ -3,9 +3,7 @@
 COMPONENT_NAME=kbs
 
 if [ -f "/.container-env" ]; then
-  source /etc/secret-volume/secrets.txt
-  export KMIP_USERNAME
-  export KMIP_PASSWORD
+    set -a; source /etc/secret-volume/secrets.txt; set +a;
 fi
 
 echo "Starting $COMPONENT_NAME config upgrade to v4.0.0"
