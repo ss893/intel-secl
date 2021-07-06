@@ -6,7 +6,6 @@ if [ -f "/.container-env" ]; then
   source /etc/secret-volume/secrets.txt
   export KMIP_USERNAME
   export KMIP_PASSWORD
-  ln -sfT /usr/bin/$COMPONENT_NAME /$COMPONENT_NAME
 fi
 
 echo "Starting $COMPONENT_NAME config upgrade to v4.0.0"
