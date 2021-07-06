@@ -11,6 +11,7 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models/taskstage"
 	"golang.org/x/sync/syncmap"
 	"reflect"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -138,7 +139,13 @@ func (svc *Service) startRetryChannelProcessor(retryMins int) {
 	// start worker go routines
 	svc.wg.Add(1)
 	go func() {
-		defer svc.wg.Done()
+		defer func() {
+			if err := recover(); err != nil {
+				defaultLog.Errorf("Panic occurred: %+v", err)
+				defaultLog.Error(string(debug.Stack()))
+			}
+			svc.wg.Done()
+		}()
 		for {
 			select {
 			case <-svc.quit:
@@ -202,7 +209,13 @@ func (svc *Service) doWork() {
 	defaultLog.Trace("hostfetcher/Service:doWork() Entering")
 	defer defaultLog.Trace("hostfetcher/Service:doWork() Leaving")
 
-	defer svc.wg.Done()
+	defer func() {
+		if err := recover(); err != nil {
+			defaultLog.Errorf("Panic occurred: %+v", err)
+			defaultLog.Error(string(debug.Stack()))
+		}
+		svc.wg.Done()
+	}()
 
 	// receive id of queued work over the channel.
 	// Fetch work context from the map.

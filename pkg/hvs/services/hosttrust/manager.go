@@ -7,6 +7,7 @@ package hosttrust
 
 import (
 	"context"
+	"runtime/debug"
 	"strconv"
 	"sync"
 
@@ -111,7 +112,6 @@ func (svc *Service) startWorkers(workers int) {
 	defer defaultLog.Trace("hosttrust/manager:startWorkers() Leaving")
 
 	// start worker go routines
-
 	for i := 0; i < workers; i++ {
 		svc.wg.Add(1)
 		go svc.doWork()
@@ -411,7 +411,13 @@ func (svc *Service) doWork() {
 	defaultLog.Trace("hosttrust/manager:doWork() Entering")
 	defer defaultLog.Trace("hosttrust/manager:doWork() Leaving")
 
-	defer svc.wg.Done()
+	defer func() {
+		if err := recover(); err != nil {
+			defaultLog.Errorf("Panic occurred: %+v", err)
+			defaultLog.Error(string(debug.Stack()))
+		}
+		svc.wg.Done()
+	}()
 
 	// receive id of queued work over the channel.
 	// Fetch work context from the map.
