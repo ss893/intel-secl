@@ -29,7 +29,7 @@ func TestSecureBootWhitley(t *testing.T) {
 
 	expectedResults := model.HostInfo{}
 	expectedResults.HardwareFeatures.UEFI = &model.UEFI{}
-	expectedResults.HardwareFeatures.UEFI.Meta.SecureBootEnabled = true
+	expectedResults.HardwareFeatures.UEFI.Meta.SecureBootEnabled = false
 
 	testSecureBootParser(t, &expectedResults)
 }

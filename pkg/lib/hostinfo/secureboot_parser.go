@@ -30,9 +30,7 @@ func (secureBootParser *secureBootParser) Parse(hostInfo *model.HostInfo) error 
 		return nil
 	}
 
-	// otherwise, read a 32bit int from the file -- any number other than zero indicates
-	// secure-boot is enabled
-	var results uint32
+	// otherwise, read 'secureBootFile' to determine if secure-boot is enabled
 	file, err := os.Open(secureBootFile)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to open secure-boot file %q", secureBootFile)
@@ -45,12 +43,21 @@ func (secureBootParser *secureBootParser) Parse(hostInfo *model.HostInfo) error 
 		}
 	}()
 
-	err = binary.Read(file, binary.LittleEndian, &results)
+	// the 1st four bytes of the file are efi attributes
+	var attributes uint32
+	err = binary.Read(file, binary.LittleEndian, &attributes)
 	if err != nil {
 		return errors.Errorf("The secure-boot file %q is too small.  SecureBoot will be considered disabled", secureBootFile)
 	}
 
-	if results == 0 {
+	// now read the byte that indicated enabled/disabled (disabled == 0)
+	var enabled byte
+	err = binary.Read(file, binary.LittleEndian, &enabled)
+	if err != nil {
+		return errors.Errorf("The secure-boot file %q is too small.  SecureBoot will be considered disabled", secureBootFile)
+	}
+
+	if enabled == 0 {
 		hostInfo.HardwareFeatures.UEFI.Meta.SecureBootEnabled = false
 	} else {
 		hostInfo.HardwareFeatures.UEFI.Meta.SecureBootEnabled = true
