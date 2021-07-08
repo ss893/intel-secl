@@ -47,7 +47,7 @@ elif [[ "$ISECL_PGDB_INSTANCE_SIZE" == "medium" ]]; then
    isecl_pgdb_shared_buffers=2048MB
 elif [[ "$ISECL_PGDB_INSTANCE_SIZE" == "large" ]]; then
    isecl_pgdb_max_connections=400
-   isecl_pgdb_shared_buffers=4096MB
+   isecl_pgdb_shared_buffers=6144MB
 fi
 
 pgdb_cert_dns=""
