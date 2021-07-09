@@ -261,16 +261,19 @@ func main() {
 			copier.Copy(newFlavor[flavorIndex].Hardware, flavor.Flavor.Hardware)
 
 			// TPM
+			newFlavor[flavorIndex].Hardware.Feature.TPM = new(model.TPM)
 			newFlavor[flavorIndex].Hardware.Feature.TPM.Meta.TPMVersion = flavor.Flavor.Hardware.Feature.TPM.Version
 			newFlavor[flavorIndex].Hardware.Feature.TPM.Meta.PCRBanks = flavor.Flavor.Hardware.Feature.TPM.PcrBanks
 
 			// CBNT
 			if flavor.Flavor.Hardware.Feature.CBNT != nil {
+				newFlavor[flavorIndex].Hardware.Feature.CBNT = new(model.CBNT)
 				newFlavor[flavorIndex].Hardware.Feature.CBNT.Meta.Profile = flavor.Flavor.Hardware.Feature.CBNT.Profile
 			}
 
 			// UEFI
 			if flavor.Flavor.Hardware.Feature.SUEFI != nil {
+				newFlavor[flavorIndex].Hardware.Feature.UEFI = new(model.UEFI)
 				newFlavor[flavorIndex].Hardware.Feature.UEFI.Meta.SecureBootEnabled = flavor.Flavor.Hardware.Feature.SUEFI.Enabled
 			}
 		}
