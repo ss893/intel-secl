@@ -6,7 +6,7 @@ package hvs_test
 
 import (
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

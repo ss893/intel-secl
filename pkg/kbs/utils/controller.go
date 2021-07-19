@@ -7,7 +7,7 @@ package utils
 import (
 	"net/url"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"github.com/pkg/errors"
 )
 

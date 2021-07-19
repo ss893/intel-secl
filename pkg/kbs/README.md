@@ -8,15 +8,10 @@
 
 ## Build Key Broker Service
 
-- Git clone the `libkmip`
-- Run scripts to build the `libkmip`
 - Git clone the `Key Broker Service`
 - Run scripts to build the `Key Broker Service`
 
 ```shell
-$ git clone https://github.com/openkmip/libkmip.git
-$ cd libkmip
-$ make && make install
 $ git clone https://github.com/intel-secl/intel-secl.git
 $ cd intel-secl
 $ make kbs-installer

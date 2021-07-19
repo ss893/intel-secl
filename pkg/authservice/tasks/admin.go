@@ -6,17 +6,17 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/config"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/config"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"io"
 
 	"github.com/pkg/errors"
 
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 )
 
 type Admin struct {

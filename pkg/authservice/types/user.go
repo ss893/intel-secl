@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,7 +25,7 @@ type User struct {
 	PasswordHash []byte     `json:"-"`
 	PasswordSalt []byte     `json:"-"`
 	PasswordCost int        `json:"-"`
-	Roles        []Role     `json:"roles,omitempty"gorm:"many2many:user_roles"`
+	Roles        []Role     `json:"roles,omitempty" gorm:"many2many:user_roles"`
 }
 
 type Users []User

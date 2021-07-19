@@ -6,7 +6,7 @@ package authservice
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/version"
 )
 
 const helpStr = `Usage:
@@ -35,6 +35,7 @@ Usage of authservice setup:
 		admin                    Add authservice admin username and password to database and assign respective 
 		                         roles to the user
 		jwt                      Create jwt signing key and jwt certificate signed by CMS
+		create-credentials       Generates credentials to support third party authentication and authorization
 		update-service-config    Sets or Updates the Service configuration 
 `
 

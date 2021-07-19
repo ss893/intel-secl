@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
-	clog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	clog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"github.com/jinzhu/gorm"
 )
 

@@ -3,9 +3,23 @@
 COMPONENT_NAME=authservice
 # Upgrade if component is already installed
 if command -v $COMPONENT_NAME &>/dev/null; then
-  echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
-  ./${COMPONENT_NAME}_upgrade.sh
-  exit $?
+  n=0
+  until [ "$n" -ge 3 ]
+  do
+  echo "$COMPONENT_NAME is already installed, Do you want to proceed with the upgrade? [y/n]"
+  read UPGRADE_NEEDED
+  if [ $UPGRADE_NEEDED == "y" ] || [ $UPGRADE_NEEDED == "Y" ] ; then
+    echo "Proceeding with the upgrade.."
+    ./${COMPONENT_NAME}_upgrade.sh
+    exit $?
+  elif [ $UPGRADE_NEEDED == "n" ] || [ $UPGRADE_NEEDED == "N" ] ; then
+    echo "Exiting the installation.."
+    exit 0
+  fi
+  n=$((n+1))
+  done
+  echo "Exiting the installation.."
+  exit 0
 fi
 
 # Check OS
@@ -55,8 +69,10 @@ CONFIG_PATH=/etc/$COMPONENT_NAME/
 CERTS_PATH=$CONFIG_PATH/certs
 CERTDIR_TOKENSIGN=$CERTS_PATH/tokensign
 CERTDIR_TRUSTEDJWTCAS=$CERTS_PATH/trustedca
+NATS_DIR_PATH=$CONFIG_PATH/nats
+NATS_NKEYS_DIR_PATH=$NATS_DIR_PATH/nkeys
 
-for directory in $BIN_PATH $DB_SCRIPT_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TOKENSIGN $CERTDIR_TRUSTEDJWTCAS; do
+for directory in $BIN_PATH $DB_SCRIPT_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TOKENSIGN $CERTDIR_TRUSTEDJWTCAS $NATS_DIR_PATH $NATS_NKEYS_DIR_PATH; do
   # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
   mkdir -p $directory
   if [ $? -ne 0 ]; then

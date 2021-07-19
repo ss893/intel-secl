@@ -6,8 +6,8 @@
 package k8splugin
 
 import (
-	types "github.com/intel-secl/intel-secl/v3/pkg/ihub/model"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
+	types "github.com/intel-secl/intel-secl/v4/pkg/ihub/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/k8s"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
-	testutility "github.com/intel-secl/intel-secl/v3/pkg/ihub/test"
-	model "github.com/intel-secl/intel-secl/v3/pkg/model/k8s"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/k8s"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
+	testutility "github.com/intel-secl/intel-secl/v4/pkg/ihub/test"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/k8s"
 )
 
 var sampleSamlCertPath = "../test/resources/saml_certificate.pem"

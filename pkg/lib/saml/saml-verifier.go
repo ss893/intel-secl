@@ -8,8 +8,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"github.com/beevik/etree"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	rtvalidator "github.com/mattermost/xml-roundtrip-validator"
 	dsig "github.com/russellhaering/goxmldsig"
 	"strings"
@@ -47,7 +47,7 @@ func VerifySamlSignature(samlReport, SamlCertPath, CACertDirPath string) bool {
 			if _, err := cert.Verify(verifyRootCAOpts); err != nil {
 				continue
 			} else {
-				log.Info("saml/saml-verifier:VerifySamlSignature() SAML certificate chain verification successful")
+				log.Debug("saml/saml-verifier:VerifySamlSignature() SAML certificate chain verification successful")
 				trustedCertChainFound = true
 				break
 			}
@@ -69,7 +69,7 @@ func VerifySamlSignature(samlReport, SamlCertPath, CACertDirPath string) bool {
 		return false
 	}
 
-	log.Info("saml/saml-verifier:VerifySamlSignature() Successfully validated SAML signature")
+	log.Debug("saml/saml-verifier:VerifySamlSignature() Successfully validated SAML signature")
 	return true
 }
 

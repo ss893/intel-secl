@@ -10,10 +10,10 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/binary"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/lib/privacyca/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/privacyca/tpm2utils"
-	model "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/privacyca/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/privacyca/tpm2utils"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 )
 
@@ -111,7 +111,7 @@ func (privacycatpm2 *PrivacyCATpm2) GetEkCert(identityChallengePayload model.Ide
  * This function will encrypt a blob of data using randomly generated key using CBC AES Encryption scheme.
  * The symmetric key is encrypted with RSA SHA256 algorithm using public portion of Privacyca Cert
  * param payload data to be encrypted
- * param pubKey public portion of privacyca certificae
+ * param pubKey public portion of privacyca certificate
  * param identity Request.
  * return IdentityChallengePayload
  */

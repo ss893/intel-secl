@@ -6,7 +6,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/wpm"
+	"github.com/intel-secl/intel-secl/v4/pkg/wpm"
 	"os"
 )
 

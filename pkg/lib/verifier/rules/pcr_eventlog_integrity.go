@@ -6,29 +6,33 @@ package rules
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+
+	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
 // NewPcrEventLogIntegrity creates a rule that will check if a PCR (in the host-manifest only)
 // has a "calculated hash" (i.e. from event log replay) that matches its actual hash.
-func NewPcrEventLogIntegrity(expectedPcr *types.Pcr, marker common.FlavorPart) (Rule, error) {
+func NewPcrEventLogIntegrity(expectedPcr *types.FlavorPcrs, marker common.FlavorPart) (Rule, error) {
+	var rule pcrEventLogIntegrity
+
 	if expectedPcr == nil {
 		return nil, errors.New("The expected pcr cannot be nil")
 	}
 
-	rule := pcrEventLogIntegrity{
-		expectedPcr: expectedPcr,
+	rule = pcrEventLogIntegrity{
+		expectedPcr: *expectedPcr,
 		marker:      marker,
 	}
+
 	return &rule, nil
 }
 
 type pcrEventLogIntegrity struct {
-	expectedPcr *types.Pcr
+	expectedPcr types.FlavorPcrs
 	marker      common.FlavorPart
 }
 
@@ -37,47 +41,53 @@ type pcrEventLogIntegrity struct {
 // - If the hostmanifest does not have an event log at 'expected' bank/index, create a
 //   PcrEventLogMissing fault.
 // - Otherwise, replay the hostmanifest's event log at 'expected' bank/index and verify the
-//   the calculated hash matches the pcr value in the host-manifest.  If not, crete a PcrEventLogInvalid fault.
+//   the calculated hash matches the pcr value in the host-manifest.  If not, create a PcrEventLogInvalid fault.
 func (rule *pcrEventLogIntegrity) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
-
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = constants.RulePcrEventLogIntegrity
-	result.Rule.ExpectedPcr = rule.expectedPcr
+
+	result.Rule.ExpectedPcr = &rule.expectedPcr
 	result.Rule.Markers = append(result.Rule.Markers, rule.marker)
 
 	if hostManifest.PcrManifest.IsEmpty() {
 		result.Faults = append(result.Faults, newPcrManifestMissingFault())
 	} else {
-
-		actualPcr, err := hostManifest.PcrManifest.GetPcrValue(rule.expectedPcr.PcrBank, rule.expectedPcr.Index)
+		actualPcr, err := hostManifest.PcrManifest.GetPcrValue(types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), types.PcrIndex(rule.expectedPcr.Pcr.Index))
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Error in getting actual Pcr in Pcr Eventlog Integrity rule")
 		}
 
 		if actualPcr == nil {
-			result.Faults = append(result.Faults, newPcrValueMissingFault(rule.expectedPcr.PcrBank, rule.expectedPcr.Index))
+			result.Faults = append(result.Faults, newPcrValueMissingFault(types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), types.PcrIndex(rule.expectedPcr.Pcr.Index)))
 		} else {
-			actualEventLog, err := hostManifest.PcrManifest.PcrEventLogMap.GetEventLog(rule.expectedPcr.PcrBank, rule.expectedPcr.Index)
+			actualEventLogCriteria, pIndex, bank, err := hostManifest.PcrManifest.PcrEventLogMap.GetEventLogNew(rule.expectedPcr.Pcr.Bank, rule.expectedPcr.Pcr.Index)
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "Error in getting actual eventlogs in Pcr Eventlog Integrity rule")
 			}
 
-			if actualEventLog == nil {
-				result.Faults = append(result.Faults, newPcrEventLogMissingFault(rule.expectedPcr.Index))
+			if actualEventLogCriteria == nil {
+				result.Faults = append(result.Faults, newPcrEventLogMissingFault(types.PcrIndex(rule.expectedPcr.Pcr.Index), types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank)))
 			} else {
+				actualEventLog := &types.TpmEventLog{}
+				actualEventLog.TpmEvent = actualEventLogCriteria
+				actualEventLog.Pcr.Index = pIndex
+				actualEventLog.Pcr.Bank = bank
+
 				calculatedValue, err := actualEventLog.Replay()
 				if err != nil {
-					return nil, err
+					return nil, errors.Wrap(err, "Error in calculating replay in Pcr Eventlog Integrity rule")
 				}
 
 				if calculatedValue != actualPcr.Value {
+					PI := types.PcrIndex(rule.expectedPcr.Pcr.Index)
 					fault := hvs.Fault{
-						Name:        constants.FaultPcrEventLogInvalid,
-						Description: fmt.Sprintf("PCR %d Event Log is invalid", rule.expectedPcr.Index),
-						PcrIndex:    &rule.expectedPcr.Index,
+						Name:            constants.FaultPcrEventLogInvalid,
+						Description:     fmt.Sprintf("PCR %d Event Log is invalid,mismatches between calculated event log values %s and actual pcr values %s", rule.expectedPcr.Pcr.Index, calculatedValue, actualPcr.Value),
+						PcrIndex:        &PI,
+						CalculatedValue: &calculatedValue,
+						ActualPcrValue:  &actualPcr.Value,
 					}
-
 					result.Faults = append(result.Faults, fault)
 				}
 			}

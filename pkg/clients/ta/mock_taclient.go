@@ -4,10 +4,10 @@
  */
 package ta
 
-//go:generate mockgen -destination=mock_taclient.go -package=ta github.com/intel-secl/intel-secl/v3/pkg/lib/clients/ta TAClient
+//go:generate mockgen -destination=mock_taclient.go -package=ta github.com/intel-secl/intel-secl/v4/pkg/lib/clients/ta TAClient
 
 import (
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/stretchr/testify/mock"
 	"net/url"
 )

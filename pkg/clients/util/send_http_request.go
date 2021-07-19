@@ -6,14 +6,14 @@ package util
 
 import (
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"sync"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
 
 	"github.com/pkg/errors"
 )

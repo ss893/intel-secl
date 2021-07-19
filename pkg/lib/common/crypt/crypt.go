@@ -206,7 +206,7 @@ func RetrieveValidatedPeerCert(baseUrl string, trustFirstCert bool, trustedThumb
 
 	//InsecureSkipVerify is set to true as connection is validated manually
 	conn, err := tls.Dial("tcp", dialString, &tls.Config{
-		MinVersion:         tls.VersionTLS12,
+		MinVersion:         tls.VersionTLS13,
 		InsecureSkipVerify: true})
 	if err != nil {
 		return nil, fmt.Errorf("could not tcp connect to %s, error: %s: ", dialString, err)

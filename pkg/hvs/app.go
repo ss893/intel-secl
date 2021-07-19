@@ -6,19 +6,19 @@ package hvs
 
 import (
 	"fmt"
-	"io"
-	"os"
-	"os/exec"
-
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	commLogInt "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/setup"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	commLogInt "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"io"
+	"os"
+	"os/exec"
+	"runtime/debug"
 )
 
 var errInvalidCmd = errors.New("Invalid input after command")
@@ -44,6 +44,7 @@ func (a *App) Run(args []string) error {
 	defer func() {
 		if err := recover(); err != nil {
 			defaultLog.Errorf("Panic occurred: %+v", err)
+			defaultLog.Error(string(debug.Stack()))
 		}
 	}()
 	if len(args) < 2 {

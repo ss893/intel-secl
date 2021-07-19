@@ -7,8 +7,8 @@ package authservice
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	e "github.com/intel-secl/intel-secl/v3/pkg/lib/common/exec"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	e "github.com/intel-secl/intel-secl/v4/pkg/lib/common/exec"
 	"os"
 )
 

@@ -6,9 +6,9 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/controllers"
 )
 
 //setSessionRoutes registers routes to perform session management operations

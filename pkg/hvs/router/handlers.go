@@ -8,16 +8,17 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/auth"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	comctx "github.com/intel-secl/intel-secl/v3/pkg/lib/common/context"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/auth"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	comctx "github.com/intel-secl/intel-secl/v4/pkg/lib/common/context"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	ct "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"net/http"
+	"runtime/debug"
 )
 
 // endpointHandler which writes generic response
@@ -161,6 +162,7 @@ func ErrorHandler(eh endpointHandler) http.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				defaultLog.Errorf("Panic occurred: %+v", err)
+				defaultLog.Error(string(debug.Stack()))
 				http.Error(w, "Unknown Error", http.StatusInternalServerError)
 			}
 		}()

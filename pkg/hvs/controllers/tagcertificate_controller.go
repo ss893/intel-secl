@@ -9,29 +9,30 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/gorilla/mux"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/utils"
-	asset_tag "github.com/intel-secl/intel-secl/v3/pkg/lib/asset-tag"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor"
-	fc "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/util"
-	hostConnector "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/utils"
+	asset_tag "github.com/intel-secl/intel-secl/v4/pkg/lib/asset-tag"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor"
+	fc "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/util"
+	hostConnector "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 // TagCertificateController contains logic for handling TagCertificate API requests
@@ -474,7 +475,7 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 	}
 
 	// Create AssetTag Flavor for the Host
-	fProvider, err := flavor.NewPlatformFlavorProvider(&hmanifest, newX509TC)
+	fProvider, err := flavor.NewPlatformFlavorProvider(&hmanifest, newX509TC, nil)
 	if err != nil {
 		defaultLog.WithField("Certid", dtcReq.CertID).Errorf("controllers/tagcertificate_controller:Deploy() %s : Failed to initialize FlavorProvider %s", commLogMsg.AppRuntimeErr, err.Error())
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Deploy failure"}

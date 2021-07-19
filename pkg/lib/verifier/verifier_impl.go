@@ -9,9 +9,9 @@ package verifier
 //
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/verifier/rules"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier/rules"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
@@ -19,6 +19,7 @@ type verifierImpl struct {
 	verifierCertificates VerifierCertificates
 }
 
+//Verify method implements the flavor verification
 func (v *verifierImpl) Verify(hostManifest *types.HostManifest, signedFlavor *hvs.SignedFlavor, skipSignedFlavorVerification bool) (*hvs.TrustReport, error) {
 
 	var err error
@@ -34,12 +35,12 @@ func (v *verifierImpl) Verify(hostManifest *types.HostManifest, signedFlavor *hv
 	ruleFactory := NewRuleFactory(v.verifierCertificates, hostManifest, signedFlavor, skipSignedFlavorVerification)
 	verificationRules, policyName, err := ruleFactory.GetVerificationRules()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error in getting Verification rules")
 	}
 
 	results, overallTrust, err := v.applyRules(verificationRules, hostManifest, signedFlavor)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error in applying Verification rules")
 	}
 
 	trustReport := hvs.TrustReport{
@@ -63,6 +64,7 @@ func (v *verifierImpl) applyRules(rulesToApply []rules.Rule, hostManifest *types
 
 		log.Debugf("Applying verifier rule %T", rule)
 		result, err := rule.Apply(hostManifest)
+
 		if err != nil {
 			return nil, overallTrust, errors.Wrapf(err, "Error ocrurred applying rule type '%T'", rule)
 		}

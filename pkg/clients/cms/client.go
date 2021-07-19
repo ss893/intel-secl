@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"errors"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
 	"net/http"
 )
 
@@ -26,7 +26,7 @@ var (
 func (c *Client) httpClient() *http.Client {
 	if c.HTTPClient == nil {
 		tlsConfig := tls.Config{
-			MinVersion:         tls.VersionTLS12,
+			MinVersion:         tls.VersionTLS13,
 			InsecureSkipVerify: true,
 		}
 		// Skipping verification as it is done manually using digest of the TLS certificate as this is step of setting up service

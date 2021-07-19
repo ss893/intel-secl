@@ -7,21 +7,22 @@ package router
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	cmw "github.com/intel-secl/intel-secl/v3/pkg/lib/common/middleware"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	cmw "github.com/intel-secl/intel-secl/v4/pkg/lib/common/middleware"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
 	"github.com/pkg/errors"
 )
 
@@ -73,6 +74,7 @@ func defineSubRoutes(router *mux.Router, service string, cfg *config.Configurati
 		constants.TrustedRootCACertsDir, cfgRouter.fnGetJwtCerts,
 		cacheTime))
 	subRouter = SetFlavorGroupRoutes(subRouter, dataStore, fgs, hostTrustManager)
+	subRouter = SetFlavorTemplateRoutes(subRouter, dataStore, fgs)
 	subRouter = SetFlavorRoutes(subRouter, dataStore, fgs, certStore, hostTrustManager, hostControllerConfig)
 	subRouter = SetTpmEndorsementRoutes(subRouter, dataStore)
 	subRouter = SetCertifyAiksRoutes(subRouter, dataStore, certStore, cfg.AikCertValidity)

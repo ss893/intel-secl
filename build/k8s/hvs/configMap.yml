@@ -14,6 +14,7 @@ data:
   SAN_LIST:
   HVS_DB_HOSTNAME: hvsdb-svc.isecl.svc.cluster.local
   HVS_DB_NAME: hvsdb
-  HVS_DB_SSLCERTSRC: /etc/postgresql/server.crt
+  HVS_DB_SSLCERT: /etc/postgresql/server.crt
   HVS_DB_PORT: "5432"
   HVS_DB_SSLMODE: verify-full
+  NATS_SERVERS:

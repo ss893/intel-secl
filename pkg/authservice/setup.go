@@ -7,18 +7,17 @@ package authservice
 import (
 	"crypto/x509/pkix"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/tasks"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/tasks"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-
 	"strings"
 )
 
@@ -199,6 +198,22 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		CmsBaseURL:    viper.GetString("cms-base-url"),
 		BearerToken:   viper.GetString("bearer-token"),
 	})
+
+	runner.AddTask("create-credentials", "", &tasks.CreateCredentials{
+		CreateCredentials: viper.GetBool("create-credentials"),
+		NatsConfig: config.NatsConfig{
+			Operator: config.NatsEntityInfo{
+				Name:               viper.GetString("nats-operator-name"),
+				CredentialValidity: viper.GetDuration("nats-operator-credential-validity"),
+			},
+			Account: config.NatsEntityInfo{
+				Name:               viper.GetString("nats-account-name"),
+				CredentialValidity: viper.GetDuration("nats-account-credential-validity"),
+			},
+		},
+		ConsoleWriter: a.consoleWriter(),
+	})
+
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: a.consoleWriter(),
 		ServerConfig: commConfig.ServerConfig{

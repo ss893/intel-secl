@@ -11,15 +11,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/mocks"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	hvsRoutes "github.com/intel-secl/intel-secl/v3/pkg/hvs/router"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/utils"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	wlaModel "github.com/intel-secl/intel-secl/v3/pkg/model/wlagent"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/mocks"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	hvsRoutes "github.com/intel-secl/intel-secl/v4/pkg/hvs/router"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/utils"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	wlaModel "github.com/intel-secl/intel-secl/v4/pkg/model/wlagent"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"math/big"
@@ -103,7 +103,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(201))
+				Expect(w.Code).To(Equal(http.StatusCreated))
 			})
 		})
 
@@ -137,7 +137,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -172,7 +172,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(201))
+				Expect(w.Code).To(Equal(http.StatusCreated))
 			})
 		})
 
@@ -205,7 +205,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -239,7 +239,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(400))
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})

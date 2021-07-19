@@ -4,7 +4,7 @@
  */
 package flavor
 
-import "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
+import "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 
 /**
  *

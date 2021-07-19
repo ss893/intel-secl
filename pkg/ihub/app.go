@@ -7,9 +7,9 @@ package ihub
 import (
 	"fmt"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -20,9 +20,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	commLogInt "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/setup"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	commLogInt "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/setup"
 )
 
 var errInvalidCmd = errors.New("Invalid input after command")

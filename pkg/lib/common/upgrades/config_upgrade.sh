@@ -2,27 +2,31 @@
 #iterate over all files in "config" directory which installer must copy
 # run all config upgrade scripts from current version to the latest version
 # e.g. v3.5.0 to v3.7.0 upgrade should run all following scripts
-# v3.5.1_{comopnent}_config.sh
-# v3.6.0_{comopnent}_config.sh
-# v3.6.1_{comopnent}_config.sh
-# v3.6.2_{comopnent}_config.sh
-# v3.7.0_{comopnent}_config.sh
+# v3.5.1_{component}_config.sh
+# v3.6.0_{component}_config.sh
+# v3.6.1_{component}_config.sh
+# v3.6.2_{component}_config.sh
+# v3.7.0_{component}_config.sh
 # but config update script should not run anything like
-# v3.2.0_{comopnent}_config.sh
-# v3.4.0_{comopnent}_config.sh
-# v3.4.1_{comopnent}_config.sh
-# v3.5.0_{comopnent}_config.sh
+# v3.2.0_{component}_config.sh
+# v3.4.0_{component}_config.sh
+# v3.4.1_{component}_config.sh
+# v3.5.0_{component}_config.sh
+# Same applies to database scripts
 
 #Upgrade config
 #get currently installed version number after removing '.'
 COMPONENT_VERSION=$(echo $1 | sed 's/v//' | sed 's/\.//g')
 READ_FILES=false
-CONFIG_DIR="./config"
-if [ -d "$CONFIG_DIR" ]; then
-  chmod +x $CONFIG_DIR/*.sh
+BACKEDUP_CONFIG_PATH=$2
+CONFIG_PATH=$3
+ASSET_DIR=$4
+EXT=$5
+if [ -d "$ASSET_DIR" ]; then
+  chmod +x ${ASSET_DIR}/*${EXT}
+  cd $ASSET_DIR
   #Sort files
-  cd $CONFIG_DIR && ls -1 *.sh | sort -n -k1.4 >temp_configs
-  IFS=$'\r\n' GLOBIGNORE='*' command eval 'configUpgradeFiles=($(cat temp_configs))'
+  IFS=$'\r\n' GLOBIGNORE='*' command eval 'configUpgradeFiles=($(ls | sort))'
   rm -rf temp_configs
   cd -
 
@@ -37,17 +41,12 @@ if [ -d "$CONFIG_DIR" ]; then
 
     #Run all config files which are post current release
     if $READ_FILES; then
-      echo "Running upgrade script - $CONFIG_DIR/$i with arguments $2"
-      $CONFIG_DIR/$i $2
+      echo "Running upgrade script - $ASSET_DIR/$i with arguments $BACKEDUP_CONFIG_PATH $CONFIG_PATH"
+      $ASSET_DIR/$i $BACKEDUP_CONFIG_PATH $CONFIG_PATH
       if [ $? != 0 ]; then
         echo "Failed to apply $i upgrade script"
         exit 1
       fi
     fi
   done
-fi
-if $READ_FILES; then
-  echo "Config upgraded successfully"
-else
-  echo "Existing config is good for the latest release"
 fi

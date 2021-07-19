@@ -7,13 +7,13 @@ package hosttrust
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/hosttrust/rules"
-	cf "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	flavorVerifier "github.com/intel-secl/intel-secl/v3/pkg/lib/verifier"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hosttrust/rules"
+	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	flavorVerifier "github.com/intel-secl/intel-secl/v4/pkg/lib/verifier"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"reflect"
 )
@@ -68,7 +68,7 @@ func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[cf.Fl
 		if err != nil {
 			return nil, errors.Wrap(err, "error searching flavor for host id "+hostId.String())
 		}
-		defaultLog.Debugf("%v from Flavorgroup %v Flavors retrieved with ALL_OF policy", fg.ID, len(reqs.AllOfFlavors))
+		defaultLog.Debugf("From Flavorgroup %v, %v Flavors retrieved with ALL_OF policy", fg.ID, len(reqs.AllOfFlavors))
 	}
 
 	reqPartsMap := fgRequirePolicyMap[hvs.FlavorRequired]

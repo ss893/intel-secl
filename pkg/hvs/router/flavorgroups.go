@@ -7,11 +7,11 @@ package router
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 )
 
 // SetFlavorGroupRoutes registers routes for flavorgroups
@@ -21,11 +21,13 @@ func SetFlavorGroupRoutes(router *mux.Router, store *postgres.DataStore, flavorg
 
 	flavorStore := postgres.NewFlavorStore(store)
 	hostStore := postgres.NewHostStore(store)
+	flavorTemplateStore := postgres.NewFlavorTemplateStore(store)
 	flavorgroupController := controllers.FlavorgroupController{
-		FlavorGroupStore: flavorgroupStore,
-		FlavorStore:      flavorStore,
-		HostStore:        hostStore,
-		HTManager:        hostTrustManager,
+		FlavorGroupStore:    flavorgroupStore,
+		FlavorTemplateStore: flavorTemplateStore,
+		FlavorStore:         flavorStore,
+		HostStore:           hostStore,
+		HTManager:           hostTrustManager,
 	}
 
 	flavorGroupIdExpr := fmt.Sprintf("%s%s", "/flavorgroups/", validation.IdReg)

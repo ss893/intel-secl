@@ -7,10 +7,11 @@ package hrrs
 
 import (
 	"context"
+	"runtime/debug"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 
 	"github.com/pkg/errors"
 )
@@ -25,6 +26,7 @@ type HostReportRefresher interface {
 
 var (
 	firstFromTime, _ = time.Parse(time.RFC3339, "1970-01-01T00:00:00Z") // i.e. epoch
+	defaultLog       = commLog.GetDefaultLogger()
 )
 
 func NewHostReportRefresher(cfg HRRSConfig, reportStore domain.ReportStore, hostTrustManager domain.HostTrustManager) (HostReportRefresher, error) {
@@ -36,10 +38,6 @@ func NewHostReportRefresher(cfg HRRSConfig, reportStore domain.ReportStore, host
 		fromTime:         firstFromTime,
 	}, nil
 }
-
-var (
-	defaultLog = commLog.GetDefaultLogger()
-)
 
 type hostReportRefresherImpl struct {
 	reportStore      domain.ReportStore
@@ -61,6 +59,12 @@ func (refresher *hostReportRefresherImpl) Run() error {
 	refresher.ctx = context.Background()
 
 	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				defaultLog.Errorf("Panic occurred: %+v", err)
+				defaultLog.Error(string(debug.Stack()))
+			}
+		}()
 		for {
 			err := refresher.refreshReports()
 			if err != nil {

@@ -21,22 +21,22 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/keymanager"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/keytransfer"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/utils"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/auth"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	comctx "github.com/intel-secl/intel-secl/v3/pkg/lib/common/context"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/saml"
-	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/keymanager"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/keytransfer"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/utils"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/auth"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	comctx "github.com/intel-secl/intel-secl/v4/pkg/lib/common/context"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
+	ct "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	"github.com/pkg/errors"
 )
 
@@ -57,7 +57,7 @@ func NewKeyController(rm *keymanager.RemoteManager, ps domain.KeyTransferPolicyS
 var keySearchParams = map[string]bool{"algorithm": true, "keyLength": true, "curveType": true, "transferPolicyId": true}
 var allowedAlgorithms = map[string]bool{"AES": true, "RSA": true, "EC": true, "aes": true, "rsa": true, "ec": true}
 var allowedCurveTypes = map[string]bool{"secp256r1": true, "secp384r1": true, "secp521r1": true, "prime256v1": true}
-var allowedKeyLengths = map[int]bool{128: true, 192: true, 256: true, 2048: true, 3072: true, 4096: true, 7680: true, 15360: true}
+var allowedKeyLengths = map[int]bool{128: true, 192: true, 256: true, 2048: true, 3072: true, 4096: true, 7680: true}
 
 //Create : Function to create key
 func (kc KeyController) Create(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {

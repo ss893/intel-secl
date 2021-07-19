@@ -4,22 +4,36 @@
  */
 package model
 
-type CBNT struct {
+type HardwareFeature struct {
 	Enabled bool `json:"enabled,string"`
-	Meta    struct {
-		ForceBit bool   `json:"force_bit,string"`
-		Profile  string `json:"profile"`
-		MSR      string `json:"msr"`
+}
+
+type CBNT struct {
+	HardwareFeature
+	Meta struct {
+		Profile string `json:"profile"`
+		MSR     string `json:"msr"`
 	} `json:"meta"`
 }
 
-type HardwareFeature struct {
-	Enabled bool `json:"enabled,string"`
+type TPM struct {
+	HardwareFeature
+	Meta struct {
+		TPMVersion string `json:"tpm_version"`
+	} `json:"meta"`
+}
+
+type UEFI struct {
+	HardwareFeature
+	Meta struct {
+		SecureBootEnabled bool `json:"secure_boot_enabled"`
+	} `json:"meta"`
 }
 
 type HostInfo struct {
 	OSName              string           `json:"os_name"`
 	OSVersion           string           `json:"os_version"`
+	OSType              string           `json:"os_type"`
 	BiosVersion         string           `json:"bios_version"`
 	VMMName             string           `json:"vmm_name"`
 	VMMVersion          string           `json:"vmm_version"`
@@ -27,22 +41,27 @@ type HostInfo struct {
 	HostName            string           `json:"host_name"`
 	BiosName            string           `json:"bios_name"`
 	HardwareUUID        string           `json:"hardware_uuid"`
-	ProcessorFlags      string           `json:"process_flags,omitempty"`
-	NumberOfSockets     int              `json:"no_of_sockets,string,omitempty"`
-	TbootInstalled      bool             `json:"tboot_installed,string,omitempty"`
-	IsDockerEnvironment bool             `json:"is_docker_env,string,omitempty"`
+	ProcessorFlags      string           `json:"process_flags"`
+	NumberOfSockets     int              `json:"no_of_sockets,string"`
+	TbootInstalled      bool             `json:"tboot_installed,string"`
+	IsDockerEnvironment bool             `json:"is_docker_env,string"`
 	HardwareFeatures    HardwareFeatures `json:"hardware_features"`
 	InstalledComponents []string         `json:"installed_components"`
 }
 
 type HardwareFeatures struct {
-	TXT *HardwareFeature `json:"TXT"`
-	TPM struct {
-		Enabled bool `json:"enabled,string"`
-		Meta    struct {
-			TPMVersion string `json:"tpm_version,omitempty"`
-		} `json:"meta"`
-	} `json:"TPM,omitempty"`
-	CBNT  *CBNT            `json:"CBNT,omitempty"`
-	SUEFI *HardwareFeature `json:"SUEFI,omitempty"`
+	TXT  *HardwareFeature `json:"TXT,omitempty"`
+	TPM  *TPM             `json:"TPM,omitempty"`
+	CBNT *CBNT            `json:"CBNT,omitempty"`
+	UEFI *UEFI            `json:"UEFI,omitempty"`
+	PFR  *HardwareFeature `json:"PFR,omitempty"`
+	BMC  *HardwareFeature `json:"BMC,omitempty"`
 }
+
+type OSType string
+
+const (
+	OsTypeLinux   = "linux"
+	OsTypeVMWare  = "vmware"
+	OsTypeWindows = "windows"
+)

@@ -6,7 +6,7 @@ package version
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
 )
 
 // Automatically filled in by linker

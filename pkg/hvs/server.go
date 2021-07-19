@@ -10,38 +10,39 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
-	lru "github.com/hashicorp/golang-lru"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/vcss"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	lru "github.com/hashicorp/golang-lru"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/vcss"
+
 	"github.com/pkg/errors"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/auditlog"
-	hostfetcher "github.com/intel-secl/intel-secl/v3/pkg/hvs/services/host-fetcher"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/hosttrust"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/hrrs"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	hostconnector "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/saml"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/verifier"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/auditlog"
+	hostfetcher "github.com/intel-secl/intel-secl/v4/pkg/hvs/services/host-fetcher"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hosttrust"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hrrs"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	hostconnector "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier"
 
 	"github.com/gorilla/handlers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/router"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/utils"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/router"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/utils"
 
 	stdlog "log"
 
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 )
 
 var defaultLog = commLog.GetDefaultLogger()
@@ -170,7 +171,7 @@ func initHostControllerConfig(cfg *config.Configuration, certStore *models.Certi
 	defer defaultLog.Trace("server:initHostControllerConfig() Leaving")
 
 	rootCAs := (*certStore)[models.CaCertTypesRootCa.String()]
-	hcProvider := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates)
+	hcProvider := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates, cfg.NATS.Servers)
 
 	hcc := domain.HostControllerConfig{
 		HostConnectorProvider: hcProvider,
@@ -251,7 +252,7 @@ func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataSto
 	}
 
 	// Initialize Host Fetcher service
-	htcFactory := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates)
+	htcFactory := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates, cfg.NATS.Servers)
 
 	c := domain.HostDataFetcherConfig{
 		HostConnectorProvider: htcFactory,

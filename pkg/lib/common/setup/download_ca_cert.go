@@ -17,7 +17,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"github.com/pkg/errors"
 )
 
@@ -108,7 +108,7 @@ func downloadRootCaCertificate(cmsBaseUrl string, dirPath string, trustedTlsCert
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS12,
+				MinVersion:         tls.VersionTLS13,
 				InsecureSkipVerify: true,
 			},
 		},

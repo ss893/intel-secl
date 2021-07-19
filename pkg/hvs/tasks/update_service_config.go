@@ -7,15 +7,16 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/hrrs"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hrrs"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io"
+	"strings"
 )
 
 type UpdateServiceConfig struct {
@@ -24,6 +25,7 @@ type UpdateServiceConfig struct {
 	AppConfig     **config.Configuration
 	ServerConfig  commConfig.ServerConfig
 	DefaultPort   int
+	NatServers    string
 	ConsoleWriter io.Writer
 }
 
@@ -38,16 +40,17 @@ var envHelp = map[string]string{
 	"AAS_BASE_URL":                           "AAS Base URL",
 	"HRRS_REFRESH_PERIOD":                    "Host report refresh service period",
 	"VCSS_REFRESH_PERIOD":                    "VCenter refresh service period",
-	"FVS_NUMBER_OF_VERIFIERS":                "NUmber of Flavor verification verifier threads",
+	"FVS_NUMBER_OF_VERIFIERS":                "Number of Flavor verification verifier threads",
 	"FVS_NUMBER_OF_DATA_FETCHERS":            "Number of Flavor verification data fetcher threads",
 	"FVS_SKIP_FLAVOR_SIGNATURE_VERIFICATION": "Skips flavor signature verification when set to true",
 	"HOST_TRUST_CACHE_THRESHOLD":             "Maximum number of entries to be cached in the Trust/Flavor caches",
-	"SERVER_PORT":                            "The Port on which Server Listens to",
+	"SERVER_PORT":                            "The Port on which Server listens to",
 	"SERVER_READ_TIMEOUT":                    "Request Read Timeout Duration in Seconds",
 	"SERVER_READ_HEADER_TIMEOUT":             "Request Read Header Timeout Duration in Seconds",
 	"SERVER_WRITE_TIMEOUT":                   "Request Write Timeout Duration in Seconds",
 	"SERVER_IDLE_TIMEOUT":                    "Request Idle Timeout in Seconds",
-	"SERVER_MAX_HEADER_BYTES":                "Max Length Of Request Header in Bytes",
+	"SERVER_MAX_HEADER_BYTES":                "Max Length of Request Header in Bytes",
+	"NAT_SERVERS":                            "List of NATs servers to establish connection with outbound TAs",
 }
 
 func (uc UpdateServiceConfig) Run() error {
@@ -88,6 +91,11 @@ func (uc UpdateServiceConfig) Run() error {
 		HostTrustCacheThreshold:         viper.GetInt(constants.FvsHostTrustCacheThreshold),
 	}
 
+	if uc.NatServers != "" {
+		(*uc.AppConfig).NATS = config.NatsConfig{
+			Servers: strings.Split(uc.NatServers, ","),
+		}
+	}
 	return nil
 }
 

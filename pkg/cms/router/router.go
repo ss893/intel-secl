@@ -8,12 +8,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/middleware"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/middleware"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
@@ -93,7 +93,7 @@ func (r *Router) fnGetJwtCerts() error {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS12,
+				MinVersion:         tls.VersionTLS13,
 				InsecureSkipVerify: false,
 				RootCAs:            rootCAs,
 			},

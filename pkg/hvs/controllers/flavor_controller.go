@@ -14,27 +14,29 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/antchfx/jsonquery"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	dm "github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/utils"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/auth"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	comctx "github.com/intel-secl/intel-secl/v3/pkg/lib/common/context"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor"
-	fc "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	fConst "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/constants"
-	fm "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	fType "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/types"
-	fu "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/util"
-	hcType "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	dm "github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/utils"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/auth"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	comctx "github.com/intel-secl/intel-secl/v4/pkg/lib/common/context"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor"
+	fc "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	fConst "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/constants"
+	fm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	fType "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/types"
+	fu "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/util"
+	hcType "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	ct "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
@@ -46,11 +48,13 @@ type FlavorController struct {
 	HTManager domain.HostTrustManager
 	CertStore *dm.CertificatesStore
 	HostCon   HostController
+	FTStore   domain.FlavorTemplateStore
+	IsExsi    bool
 }
 
 var flavorSearchParams = map[string]bool{"id": true, "key": true, "value": true, "flavorgroupId": true, "flavorParts": true}
 
-func NewFlavorController(fs domain.FlavorStore, fgs domain.FlavorGroupStore, hs domain.HostStore, tcs domain.TagCertificateStore, htm domain.HostTrustManager, certStore *dm.CertificatesStore, hcConfig domain.HostControllerConfig) *FlavorController {
+func NewFlavorController(fs domain.FlavorStore, fgs domain.FlavorGroupStore, hs domain.HostStore, tcs domain.TagCertificateStore, htm domain.HostTrustManager, certStore *dm.CertificatesStore, hcConfig domain.HostControllerConfig, fts domain.FlavorTemplateStore) *FlavorController {
 	// certStore should have an entry for Flavor Signing CA
 	if _, found := (*certStore)[dm.CertTypesFlavorSigning.String()]; !found {
 		defaultLog.Errorf("controllers/flavor_controller:NewFlavorController() %s : Flavor Signing KeyPair not found in CertStore", commLogMsg.AppRuntimeErr)
@@ -77,6 +81,7 @@ func NewFlavorController(fs domain.FlavorStore, fgs domain.FlavorGroupStore, hs 
 		HTManager: htm,
 		CertStore: certStore,
 		HostCon:   hController,
+		FTStore:   fts,
 	}
 }
 
@@ -139,6 +144,9 @@ func (fcon *FlavorController) Create(w http.ResponseWriter, r *http.Request) (in
 		if strings.Contains(err.Error(), "403") {
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Authorization with trust agent failed"}
 		}
+		if strings.Contains(err.Error(), "No templates found") {
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "No templates found to create flavors"}
+		}
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error creating flavors, error connecting to trust agent"}
 	}
 
@@ -161,6 +169,25 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 	var platformFlavor *fType.PlatformFlavor
 	flavorFlavorPartMap := make(map[fc.FlavorPart][]hvs.SignedFlavor)
 
+	// add all flavorparts to default flavorgroups if flavorgroup name is not given
+	if flavorReq.FlavorgroupNames == nil && len(flavorReq.FlavorParts) == 0 {
+		for _, flavorPart := range fc.GetFlavorTypes() {
+			flavorParts = append(flavorParts, flavorPart)
+		}
+	}
+
+	// get the flavorgroup names
+	if len(flavorReq.FlavorgroupNames) == 0 {
+		flavorReq.FlavorgroupNames = []string{dm.FlavorGroupsAutomatic.String()}
+	}
+
+	// check if the flavorgroup is already created, else create flavorgroup
+	flavorgroups, err := CreateMissingFlavorgroups(fcon.FGStore, flavorReq.FlavorgroupNames, nil)
+	if err != nil {
+		defaultLog.Error("controllers/flavor_controller:createFlavors() Error getting flavorgroups")
+		return nil, err
+	}
+
 	if flavorReq.ConnectionString != "" {
 		// get flavor from host
 		// get host manifest from the host
@@ -175,11 +202,26 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 			return nil, errors.Wrap(err, "Error while generating a formatted connection string")
 		}
 		defaultLog.Debug("Getting manifest from host...")
+
 		hostManifest, err := fcon.getHostManifest(connectionString)
 		if err != nil {
 			defaultLog.Error("controllers/flavor_controller:CreateFlavors() Error getting host manifest")
 			return nil, errors.Wrap(err, "Error getting host manifest")
 		}
+
+		var flavorTemplates []hvs.FlavorTemplate
+		defaultLog.Debug("Getting flavor templates...")
+		flavorTemplates, err = fcon.findTemplatesToApply(flavorgroups, hostManifest)
+		if len(flavorTemplates) == 0 {
+			defaultLog.WithError(err).Error("controllers/flavor_controller:CreateFlavors() No templates found to apply")
+			return nil, errors.Wrap(err, "No templates found to create flavors")
+		} else if err != nil {
+			defaultLog.WithError(err).Error("controllers/flavor_controller:CreateFlavors() Error in finding templates")
+			return nil, errors.Wrap(err, "Error in finding templates")
+		}
+
+		defaultLog.Debugf("Matched Flavor templates: %v", flavorTemplates)
+
 		tagCertificate := hvs.TagCertificate{}
 		var tagX509Certificate *x509.Certificate
 
@@ -194,6 +236,7 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 		tagCertificates, err := fcon.TCStore.Search(&tcFilterCriteria)
 		if err != nil {
 			defaultLog.Debugf("Unable to retrieve tag certificate for host with hardware UUID %s", hostManifest.HostInfo.HardwareUUID)
+			return nil, errors.Wrap(err, "Error getting host manifest")
 		}
 		if len(tagCertificates) >= 1 {
 			tagCertificate = *tagCertificates[0]
@@ -206,7 +249,7 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 		}
 		// create a platform flavor with the host manifest information
 		defaultLog.Debug("Creating flavor from host manifest using flavor library")
-		newPlatformFlavor, err := flavor.NewPlatformFlavorProvider(hostManifest, tagX509Certificate)
+		newPlatformFlavor, err := flavor.NewPlatformFlavorProvider(hostManifest, tagX509Certificate, flavorTemplates)
 		if err != nil {
 			defaultLog.Errorf("controllers/flavor_controller:createFlavors() Error while creating platform flavor instance from host manifest and tag certificate")
 			return nil, errors.Wrap(err, "Error while creating platform flavor instance from host manifest and tag certificate")
@@ -237,7 +280,7 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 			}
 			// get flavor part form the content
 			var fp fc.FlavorPart
-			if err := (&fp).Parse(flavor.Flavor.Meta.Description.FlavorPart); err != nil {
+			if err := (&fp).Parse(flavor.Flavor.Meta.Description[fm.FlavorPart].(string)); err != nil {
 				defaultLog.Error("controllers/flavor_controller:createFlavors() Valid flavor part must be given")
 				return nil, errors.Wrap(err, "Error parsing flavor part")
 			}
@@ -265,23 +308,6 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 			return nil, errors.New("Valid flavor content must be given")
 		}
 	}
-	var err error
-	// add all flavorparts to default flavorgroups if flavorgroup name is not given
-	if flavorReq.FlavorgroupNames == nil && len(flavorReq.FlavorParts) == 0 {
-		for _, flavorPart := range fc.GetFlavorTypes() {
-			flavorParts = append(flavorParts, flavorPart)
-		}
-	}
-	// get the flavorgroup names
-	if len(flavorReq.FlavorgroupNames) == 0 {
-		flavorReq.FlavorgroupNames = []string{dm.FlavorGroupsAutomatic.String()}
-	}
-	// check if the flavorgroup is already created, else create flavorgroup
-	flavorgroups, err := CreateMissingFlavorgroups(fcon.FGStore, flavorReq.FlavorgroupNames)
-	if err != nil {
-		defaultLog.Error("controllers/flavor_controller:createFlavors() Error getting flavorgroups")
-		return nil, err
-	}
 
 	// if platform flavor was retrieved from host, break it into the flavor part flavor map using the flavorgroups
 	if platformFlavor != nil {
@@ -305,13 +331,12 @@ func getFlavorCreateReq(r *http.Request) (dm.FlavorCreateRequest, error) {
 		return flavorCreateReq, errors.New("Invalid Content-Type")
 	}
 
-	secLog.Infof("Request to create host_unique flavors received")
 	if r.ContentLength == 0 {
 		secLog.Error("controllers/flavor_controller:getFlavorCreateReq() The request body is not provided")
 		return flavorCreateReq, errors.New("The request body is not provided")
 	}
 
-	// Decode the incoming json data to note struct
+	//Decode the incoming json data to note struct
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
@@ -352,6 +377,56 @@ func (fcon *FlavorController) getHostManifest(cs string) (*hcType.HostManifest, 
 	}
 	hostManifest, err := hostConnector.GetHostManifest(nil)
 	return &hostManifest, err
+}
+
+func (fcon *FlavorController) findTemplatesToApply(flavorgroups []hvs.FlavorGroup, hostManifest *hcType.HostManifest) ([]hvs.FlavorTemplate, error) {
+	defaultLog.Trace("controllers/flavor_controller:findTemplatesToApply() Entering")
+	defer defaultLog.Trace("controllers/flavor_controller:findTemplatesToApply() Leaving")
+	var filteredTemplates []hvs.FlavorTemplate
+
+	var flavorTemplateIds []uuid.UUID
+	for _, flavorGroup := range flavorgroups {
+		templateIds, err := fcon.FGStore.SearchFlavorTemplatesByFlavorGroup(flavorGroup.ID)
+		if err != nil {
+			return nil, errors.Wrap(err, "controllers/flavor_controller:findTemplatesToApply() Error retrieving flavor templates associated with flavorgroup")
+		}
+		flavorTemplateIds = append(flavorTemplateIds, templateIds...)
+	}
+	ftc := models.FlavorTemplateFilterCriteria{Ids: flavorTemplateIds, IncludeDeleted: false}
+	flavorTemplates, err := fcon.FTStore.Search(&ftc)
+	if err != nil {
+		return nil, errors.Wrap(err, "controllers/flavor_controller:findTemplatesToApply() Error retrieving all flavor templates")
+	}
+
+	hostManifestBytes, err := json.Marshal(hostManifest)
+	if err != nil {
+		return nil, errors.Wrap(err, "controllers/flavor_controller:findTemplatesToApply() Error Marshalling hostmanifest")
+	}
+
+	hostManifestJSON, err := jsonquery.Parse(strings.NewReader(string(hostManifestBytes)))
+	if err != nil {
+		return nil, errors.Wrap(err, "controllers/flavor_controller:findTemplatesToApply() Error in parsing the host manifest")
+	}
+
+	for _, flavorTemplate := range flavorTemplates {
+		conditionEval := true
+		for _, condition := range flavorTemplate.Condition {
+			expectedData, _ := jsonquery.Query(hostManifestJSON, condition)
+			if expectedData == nil {
+				conditionEval = false
+				break
+			}
+		}
+		if conditionEval == true {
+			filteredTemplates = append(filteredTemplates, flavorTemplate)
+		}
+	}
+
+	if len(filteredTemplates) == 0 {
+		return nil, errors.New("No templates found")
+	}
+
+	return filteredTemplates, nil
 }
 
 func (fcon *FlavorController) addFlavorToFlavorgroup(flavorFlavorPartMap map[fc.FlavorPart][]hvs.SignedFlavor, fgs []hvs.FlavorGroup) ([]hvs.SignedFlavor, error) {
@@ -399,16 +474,18 @@ func (fcon *FlavorController) addFlavorToFlavorgroup(flavorFlavorPartMap map[fc.
 					// get hostId
 					var hostHardwareUUID uuid.UUID
 					if !reflect.DeepEqual(signedFlavorCreated.Flavor.Meta, fm.Meta{}) &&
-						!reflect.DeepEqual(signedFlavorCreated.Flavor.Meta.Description, fm.Description{}) &&
-						signedFlavorCreated.Flavor.Meta.Description.HardwareUUID != nil {
-						hostHardwareUUID = *signedFlavorCreated.Flavor.Meta.Description.HardwareUUID
+						signedFlavorCreated.Flavor.Meta.Description[fm.HardwareUUID] != nil {
+						hostHardwareUUID, err = uuid.Parse(signedFlavorCreated.Flavor.Meta.Description[fm.HardwareUUID].(string))
+						if err != nil {
+							return nil, errors.Wrap(err, "controllers/flavor_controller:addFlavorToFlavorgroup() Unable to parse Hardware UUID")
+						}
 					} else {
-						defaultLog.Error("controllers/flavor_controller:addFlavorToFlavorgroup() hardware UUID must be specified in the flavor document")
+						defaultLog.Error("controllers/flavor_controller:addFlavorToFlavorgroup() Hardware UUID must be specified in the flavor document")
 						if cleanUpErr := fcon.createCleanUp(flavorgroupFlavorMap); cleanUpErr != nil {
 							defaultLog.WithError(cleanUpErr).Errorf("controllers/flavor_controller: addFlavorToFlavorgroup() : " +
 								"Error cleaning up already existing flavors on flavor creation failure")
 						}
-						return nil, errors.New("hardware UUID must be specified in the HOST_UNIQUE flavor")
+						return nil, errors.New("Hardware UUID must be specified in the HOST_UNIQUE flavor")
 					}
 
 					hosts, err := fcon.HStore.Search(&dm.HostFilterCriteria{
@@ -433,9 +510,9 @@ func (fcon *FlavorController) addFlavorToFlavorgroup(flavorFlavorPartMap map[fc.
 				} else if flavorPart == fc.FlavorPartSoftware {
 					var softwareFgName string
 					addToNonSoftwareGroup := false
-					if strings.Contains(signedFlavorCreated.Flavor.Meta.Description.Label, fConst.DefaultSoftwareFlavorPrefix) {
+					if strings.Contains(signedFlavorCreated.Flavor.Meta.Description[fm.Label].(string), fConst.DefaultSoftwareFlavorPrefix) {
 						softwareFgName = dm.FlavorGroupsPlatformSoftware.String()
-					} else if strings.Contains(signedFlavorCreated.Flavor.Meta.Description.Label, fConst.DefaultWorkloadFlavorPrefix) {
+					} else if strings.Contains(signedFlavorCreated.Flavor.Meta.Description[fm.Label].(string), fConst.DefaultWorkloadFlavorPrefix) {
 						softwareFgName = dm.FlavorGroupsWorkloadSoftware.String()
 					} else {
 						addToNonSoftwareGroup = true
@@ -677,8 +754,13 @@ func getHostsAssociatedWithFlavor(hStore domain.HostStore, fgStore domain.Flavor
 	for _, flavorGroup := range flavorGroups {
 		//Host unique flavors are associated with only host_unique flavorgroup and associated with only one host uniquely
 		if flavorGroup.Name == dm.FlavorGroupsHostUnique.String() {
+			hardwareUUID, err := uuid.Parse(flavor.Flavor.Meta.Description[fm.HardwareUUID].(string))
+			if err != nil {
+				return nil, errors.Wrap(err, "controllers/flavor_controller:getHostsAssociatedWithFlavor() Failed to parse hardwareUUID")
+			}
 			hosts, err := hStore.Search(&dm.HostFilterCriteria{
-				HostHardwareId: *flavor.Flavor.Meta.Description.HardwareUUID}, nil)
+				HostHardwareId: hardwareUUID,
+			}, nil)
 			if err != nil {
 				return nil, errors.Wrapf(err, "controllers/flavor_controller:getHostsAssociatedWithFlavor() Failed to retrieve hosts "+
 					"associated with flavor %v for trust re-verification", id)
@@ -716,6 +798,7 @@ func (fcon *FlavorController) Retrieve(w http.ResponseWriter, r *http.Request) (
 		}
 	}
 	return signedFlavor, http.StatusOK, nil
+
 }
 
 func validateFlavorFilterCriteria(key, value, flavorgroupId string, ids, flavorParts []string) (*dm.FlavorFilterCriteria, error) {
@@ -802,11 +885,12 @@ func validateFlavorCreateRequest(criteria dm.FlavorCreateRequest) error {
 func validateFlavorMetaContent(meta *fm.Meta) error {
 	defaultLog.Trace("controllers/flavor_controller:validateFlavorMetaContent() Entering")
 	defer defaultLog.Trace("controllers/flavor_controller:validateFlavorMetaContent() Leaving")
-	if meta == nil || reflect.DeepEqual(meta.Description, fm.Description{}) || meta.Description.Label == "" {
+
+	if meta == nil || meta.Description == nil || len(meta.Description) == 0 || meta.Description[fm.Label].(string) == "" {
 		return errors.New("Invalid flavor meta content : flavor label missing")
 	}
 	var fp fc.FlavorPart
-	if err := (&fp).Parse(meta.Description.FlavorPart); err != nil {
+	if err := (&fp).Parse(meta.Description[fm.FlavorPart].(string)); err != nil {
 		return errors.New("Flavor Part must be ASSET_TAG, SOFTWARE, HOST_UNIQUE, PLATFORM or OS")
 	}
 	return nil

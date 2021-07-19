@@ -10,18 +10,18 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/keymanager"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/keytransfer"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/keymanager"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/keytransfer"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	"github.com/pkg/errors"
 )
 
@@ -109,7 +109,7 @@ func (kc *SKCController) TransferApplicationKey(responseWriter http.ResponseWrit
 			secLog.WithError(err).Errorf("controllers/skc_controller:TransferApplicationKey() Failed to generate challenge")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error in building the challenge request"}
 		} else if !(reflect.DeepEqual(challenge, kbs.ChallengeRequest{})) {
-			var t kbs.Fault ///if session is  not valid then NOt Authorized.
+			var t kbs.Fault // if session is  not valid then send Not-Authorized.
 			t.Type = "not-authorized"
 			challenge.Faults = append(challenge.Faults, t)
 			challenge.Operation = constants.KeyTransferOpertaion
@@ -120,7 +120,7 @@ func (kc *SKCController) TransferApplicationKey(responseWriter http.ResponseWrit
 		}
 	}
 
-	///check for return value also.
+	// check for return value also.
 	isValidSession, isValidSGXAttributes, isSessionActive := keyInfo.IsValidSession(stmChallenge)
 	if isValidSession {
 		if !isSessionActive {
@@ -128,7 +128,7 @@ func (kc *SKCController) TransferApplicationKey(responseWriter http.ResponseWrit
 			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Session is expired. Create new."}
 		}
 		if !isValidSGXAttributes {
-			var challenge kbs.NotFoundResponse ///if session is valid but sgx attributes incorrect then Not Found
+			var challenge kbs.NotFoundResponse // if session is valid but sgx attributes incorrect then Not Found
 			var t kbs.Fault
 			t.Message = "sgx attributes verification failed"
 			t.Type = "not-found"

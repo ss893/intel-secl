@@ -7,9 +7,9 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -28,8 +28,8 @@ type UpdateServiceConfig struct {
 
 const envHelpPrompt = "Following environment variables are required for update-service-config setup:"
 
-var allowedSKCChallengeTypes = map[string]bool{"sgx": true, "sw": true, "sgx,sw": true, "sw,sgx": true}
-var allowedKeyManagers = map[string]bool{"directory": true, "kmip": true}
+var allowedSKCChallengeTypes = map[string]bool{"sgx": true}
+var allowedKeyManagers = map[string]bool{"kmip": true}
 
 var envHelp = map[string]string{
 	"SERVICE_USERNAME":           "The service username as configured in AAS",
@@ -40,6 +40,9 @@ var envHelp = map[string]string{
 	"AAS_BASE_URL":               "AAS Base URL",
 	"KMIP_SERVER_IP":             "IP of KMIP server",
 	"KMIP_SERVER_PORT":           "PORT of KMIP server",
+	"KMIP_HOSTNAME":              "HOSTNAME of KMIP server",
+	"KMIP_USERNAME":              "USERNAME of KMIP server",
+	"KMIP_PASSWORD":              "PASSWORD of KMIP server",
 	"KMIP_CLIENT_CERT_PATH":      "KMIP Client certificate path",
 	"KMIP_CLIENT_KEY_PATH":       "KMIP Client key path",
 	"KMIP_ROOT_CERT_PATH":        "KMIP Root Certificate path",
@@ -78,12 +81,15 @@ func (uc UpdateServiceConfig) Run() error {
 	}
 	(*uc.AppConfig).EndpointURL = viper.GetString("endpoint-url")
 	(*uc.AppConfig).Kmip = config.KmipConfig{
-		Version:    viper.GetString("kmip-version"),
-		ServerIP:   viper.GetString("kmip-server-ip"),
-		ServerPort: viper.GetString("kmip-server-port"),
-		ClientCert: viper.GetString("kmip-client-cert-path"),
-		ClientKey:  viper.GetString("kmip-client-key-path"),
-		RootCert:   viper.GetString("kmip-root-cert-path"),
+		Version:                   viper.GetString("kmip-version"),
+		ServerIP:                  viper.GetString("kmip-server-ip"),
+		ServerPort:                viper.GetString("kmip-server-port"),
+		Hostname:                  viper.GetString("kmip-hostname"),
+		Username:                  viper.GetString("kmip-username"),
+		Password:                  viper.GetString("kmip-password"),
+		ClientKeyFilePath:         viper.GetString("kmip-client-key-path"),
+		ClientCertificateFilePath: viper.GetString("kmip-client-cert-path"),
+		RootCertificateFilePath:   viper.GetString("kmip-root-cert-path"),
 	}
 	(*uc.AppConfig).Skc = config.SKCConfig{
 		StmLabel:          viper.GetString("skc-challenge-type"),
@@ -103,11 +109,11 @@ func (uc UpdateServiceConfig) Validate() error {
 		return errors.New("Configured port is not valid")
 	}
 	if _, validInput := allowedKeyManagers[strings.ToLower((*uc.AppConfig).KeyManager)]; !validInput {
-		return errors.New("Invalid value provided for KEY_MANAGER. Value should be either directory or kmip")
+		return errors.New("Invalid value provided for KEY_MANAGER. Value should be kmip")
 	}
 	if (*uc.AppConfig).Skc.StmLabel != "" {
 		if _, validInput := allowedSKCChallengeTypes[strings.ToLower((*uc.AppConfig).Skc.StmLabel)]; !validInput {
-			return errors.New("Invalid value provided for SKC_CHALLENGE_TYPE. List of allowed values SGX, SW or any combination for SGX and SW")
+			return errors.New("Invalid value provided for SKC_CHALLENGE_TYPE. allowed value is SGX")
 		}
 	}
 	return nil

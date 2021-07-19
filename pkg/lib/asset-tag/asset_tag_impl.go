@@ -11,7 +11,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"fmt"
-	hc "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector"
+	hc "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
 	"github.com/pkg/errors"
 	"math/big"
 	"reflect"

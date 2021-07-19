@@ -5,14 +5,14 @@
 package attestationPlugin
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/skchvsclient"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/skchvsclient"
 	"io/ioutil"
 	"reflect"
 	"testing"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
-	testutility "github.com/intel-secl/intel-secl/v3/pkg/ihub/test"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
+	testutility "github.com/intel-secl/intel-secl/v4/pkg/ihub/test"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 )
 
 func TestGetHostReportsSGX(t *testing.T) {

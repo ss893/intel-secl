@@ -15,7 +15,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
 )
 
 var authenticationResponseFilePath = "../../ihub/test/resources/auth_response.json"
@@ -140,7 +140,7 @@ func TestSendRequest(t *testing.T) {
 		return
 	}
 
-	errAuthUrl, err := url.Parse("http://localhost" + portString + "/v3/auth/tok")
+	errAuthUrl, err := url.Parse("http://localhost" + portString + "/v4/auth/tok")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestSendRequest(): unable to parse the err auth url,error = %v", err)
 		return

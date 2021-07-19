@@ -6,10 +6,11 @@ package types
 
 import (
 	"encoding/xml"
-	cf "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	cm "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
-	hcConstants "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/constants"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+
+	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	cm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	hcConstants "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 )
 

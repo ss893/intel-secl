@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/tasks"
-	e "github.com/intel-secl/intel-secl/v3/pkg/lib/common/exec"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/tasks"
+	e "github.com/intel-secl/intel-secl/v4/pkg/lib/common/exec"
 	"github.com/pkg/errors"
 )
 
@@ -129,6 +129,8 @@ var tablesToDrop = []string{
 	"trust_cache",
 	"hostunique_flavor",
 	"audit_log_entry",
+	"flavor_template",
+	"flavortemplate_flavorgroup",
 }
 
 func (a *App) eraseData() error {
@@ -158,6 +160,18 @@ func (a *App) eraseData() error {
 	}
 	if err := t.Validate(); err != nil {
 		return errors.Wrap(err, "Failed to validate setup task CreateDefaultFlavor")
+	}
+
+	// create default flavor templates
+	ft := tasks.CreateDefaultFlavorTemplate{
+		DBConf:    dbConf,
+		Directory: constants.DefaultFlavorTemplatesDirectory,
+	}
+	if err := ft.Run(); err != nil {
+		return errors.Wrap(err, "Failed to run setup task CreateDefaultFlavorTemplate")
+	}
+	if err := ft.Validate(); err != nil {
+		return errors.Wrap(err, "Failed to validate setup task CreateDefaultFlavorTemplate")
 	}
 
 	err = a.configDBRotation()

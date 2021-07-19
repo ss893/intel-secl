@@ -7,11 +7,11 @@ package tasks
 
 import (
 	"errors"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	ct "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"golang.org/x/crypto/bcrypt"
 )
 

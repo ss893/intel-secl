@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/pkg/errors"
 )
 

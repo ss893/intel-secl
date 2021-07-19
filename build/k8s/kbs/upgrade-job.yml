@@ -1,0 +1,54 @@
+#  Copyright (C) 2021 Intel Corporation
+#  SPDX-License-Identifier: BSD-3-Clause
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kbs-upgrade
+  namespace: isecl
+  labels:
+    app: kbs
+spec:
+  template:
+    metadata:
+      labels:
+        app: kbs
+    spec:
+      securityContext:
+        fsGroup: 1001
+      restartPolicy: Never
+      containers:
+        - name: kbs
+          image: <upgrade-image-name>:<image-tag>
+          command: ["/container_upgrade.sh"]
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
+          env:
+            - name: CONFIG_DIR
+              value: "/etc/kbs"
+            - name: COMPONENT_VERSION
+              value: <current deployed version>
+          envFrom:
+            - configMapRef:
+                name: kbs-config
+          volumeMounts:
+            - name: kbs-config-volume
+              mountPath: /etc/kbs/
+            - name: kbs-logs-volume
+              mountPath: /var/log/kbs/
+            - mountPath: /etc/secret-volume/
+              name: kbs-credentials
+              readOnly: true
+      volumes:
+        - name: kbs-logs-volume
+          persistentVolumeClaim:
+            claimName: kbs-logs-pvc
+        - name: kbs-config-volume
+          persistentVolumeClaim:
+            claimName: kbs-config-pvc
+        - name: kbs-credentials
+          secret:
+            secretName: kbs-secret

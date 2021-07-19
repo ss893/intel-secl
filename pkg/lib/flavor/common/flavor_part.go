@@ -5,7 +5,7 @@
 package common
 
 import (
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"github.com/pkg/errors"
 	"strings"
 )

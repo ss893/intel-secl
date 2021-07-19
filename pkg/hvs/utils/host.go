@@ -5,10 +5,10 @@
 package utils
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
-	model "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"strings"
 )
 

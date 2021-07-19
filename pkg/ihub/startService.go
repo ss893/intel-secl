@@ -6,10 +6,10 @@ package ihub
 
 import (
 	"encoding/pem"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/k8s"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/openstack"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/k8s"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/openstack"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -17,12 +17,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/k8splugin"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/openstackplugin"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/k8splugin"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/openstackplugin"
 	"github.com/pkg/errors"
 
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 )
 
 var log = commLog.GetDefaultLogger()

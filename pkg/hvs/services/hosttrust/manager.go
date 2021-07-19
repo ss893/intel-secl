@@ -7,18 +7,20 @@ package hosttrust
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models/taskstage"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/chnlworkq"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
-	"github.com/pkg/errors"
-	"golang.org/x/sync/syncmap"
+	"runtime/debug"
 	"strconv"
 	"sync"
+
+	"github.com/google/uuid"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models/taskstage"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/chnlworkq"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/syncmap"
 )
 
 var defaultLog = commLog.GetDefaultLogger()
@@ -110,7 +112,6 @@ func (svc *Service) startWorkers(workers int) {
 	defer defaultLog.Trace("hosttrust/manager:startWorkers() Leaving")
 
 	// start worker go routines
-
 	for i := 0; i < workers; i++ {
 		svc.wg.Add(1)
 		go svc.doWork()
@@ -410,7 +411,13 @@ func (svc *Service) doWork() {
 	defaultLog.Trace("hosttrust/manager:doWork() Entering")
 	defer defaultLog.Trace("hosttrust/manager:doWork() Leaving")
 
-	defer svc.wg.Done()
+	defer func() {
+		if err := recover(); err != nil {
+			defaultLog.Errorf("Panic occurred: %+v", err)
+			defaultLog.Error(string(debug.Stack()))
+		}
+		svc.wg.Done()
+	}()
 
 	// receive id of queued work over the channel.
 	// Fetch work context from the map.
@@ -437,10 +444,22 @@ func (svc *Service) doWork() {
 					HostId:        hId,
 					LatestPerHost: true,
 				})
-				if err != nil || len(hostStatusCollection) == 0 || hostStatusCollection[0].HostStatusInformation.HostState != hvs.HostStateConnected {
-					defaultLog.Errorf("hosttrust/manager:doWork() - could not retrieve host data from store for host - %s  | error: %s ", hostId.String(), err.Error())
+
+				if err != nil {
+					defaultLog.Errorf("hosttrust/manager:doWork() - an error occurred retrieving host data from store for host - %s  | error: %s ", hId.String(), err.Error())
 					return
 				}
+
+				if hostStatusCollection == nil || len(hostStatusCollection) == 0 {
+					defaultLog.Errorf("hosttrust/manager:doWork() - a report refresh was requested for host %s, but it does not exists", hId.String())
+					return
+				}
+
+				if hostStatusCollection[0].HostStatusInformation.HostState != hvs.HostStateConnected {
+					defaultLog.Debugf("hosttrust/manager:doWork() - the host is not connected - %s", hId.String())
+					return
+				}
+
 				hostId = hId
 				hostData = &hostStatusCollection[0].HostManifest
 			}

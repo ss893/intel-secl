@@ -6,16 +6,17 @@ package hosttrust
 
 import (
 	"fmt"
-	faultsConst "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/saml"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/ta"
-	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strconv"
 	"strings"
+
+	faultsConst "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	log "github.com/sirupsen/logrus"
 )
 
 type SamlReportGenerator struct {
@@ -119,17 +120,20 @@ func getHardwareFeaturesMap(features model.HardwareFeatures) map[string]string {
 
 	hwFeaturesMap := make(map[string]string)
 	featurePrefix := "FEATURE_"
-	if features.CBNT != nil && features.CBNT.Meta.Profile != "" {
+	if features.CBNT != nil && features.CBNT.Enabled && features.CBNT.Meta.Profile != "" {
 		hwFeaturesMap[featurePrefix+constants.Cbnt] = strconv.FormatBool(features.CBNT.Enabled)
 		hwFeaturesMap["FEATURE_cbntProfile"] = features.CBNT.Meta.Profile
 	}
-	if features.SUEFI != nil && features.SUEFI.Enabled {
-		hwFeaturesMap[featurePrefix+constants.Suefi] = strconv.FormatBool(features.SUEFI.Enabled)
+	if features.UEFI != nil {
+		hwFeaturesMap[featurePrefix+constants.Uefi] = strconv.FormatBool(features.UEFI.Enabled)
 	}
-	if features.TPM.Enabled {
+	if features.UEFI != nil {
+		hwFeaturesMap[featurePrefix+constants.SecureBootEnabled] = strconv.FormatBool(features.UEFI.Meta.SecureBootEnabled)
+	}
+	if features.TPM != nil {
 		hwFeaturesMap[featurePrefix+constants.Tpm] = strconv.FormatBool(features.TPM.Enabled)
 	}
-	if features.TXT != nil && features.TXT.Enabled {
+	if features.TXT != nil {
 		hwFeaturesMap[featurePrefix+constants.Txt] = strconv.FormatBool(features.TXT.Enabled)
 	}
 	return hwFeaturesMap

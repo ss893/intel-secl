@@ -13,14 +13,14 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/keymanager"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	cmw "github.com/intel-secl/intel-secl/v3/pkg/lib/common/middleware"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/keymanager"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	cmw "github.com/intel-secl/intel-secl/v4/pkg/lib/common/middleware"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
 	"github.com/pkg/errors"
 )
 
@@ -106,7 +106,7 @@ func (router *Router) fnGetJwtCerts() error {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS12,
+				MinVersion:         tls.VersionTLS13,
 				InsecureSkipVerify: false,
 				RootCAs:            rootCAs,
 			},

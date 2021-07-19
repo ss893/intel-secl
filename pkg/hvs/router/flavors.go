@@ -6,13 +6,14 @@ package router
 
 import (
 	"fmt"
+
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 )
 
 // SetFlavorRoutes registers routes for flavors
@@ -23,7 +24,8 @@ func SetFlavorRoutes(router *mux.Router, store *postgres.DataStore, flavorGroupS
 	hostStore := postgres.NewHostStore(store)
 	flavorStore := postgres.NewFlavorStore(store)
 	tagCertStore := postgres.NewTagCertificateStore(store)
-	flavorController := controllers.NewFlavorController(flavorStore, flavorGroupStore, hostStore, tagCertStore, hostTrustManager, certStore, flavorControllerConfig)
+	flavorTemplateStore := postgres.NewFlavorTemplateStore(store)
+	flavorController := controllers.NewFlavorController(flavorStore, flavorGroupStore, hostStore, tagCertStore, hostTrustManager, certStore, flavorControllerConfig, flavorTemplateStore)
 
 	flavorIdExpr := fmt.Sprintf("%s%s", "/flavors/", validation.IdReg)
 

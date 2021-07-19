@@ -10,11 +10,9 @@ COMPONENT_NAME=kbs
 SERVICE_USERNAME=kbs
 SERVICE_ENV=kbs.env
 
-# Upgrade if component is already installed
-if command -v $COMPONENT_NAME &>/dev/null; then
-  echo "$COMPONENT_NAME is installed, proceeding with the upgrade"
-  ./${COMPONENT_NAME}_upgrade.sh
-  exit $?
+if [[ $EUID -ne 0 ]]; then
+    echo "This installer must be run as root"
+    exit 1
 fi
 
 # find .env file
@@ -27,11 +25,6 @@ elif [ -f ../$SERVICE_ENV ]; then
     env_file=../$SERVICE_ENV
 fi
 
-if [[ $EUID -ne 0 ]]; then
-    echo "This installer must be run as root"
-    exit 1
-fi
-
 if [ -z $env_file ]; then
     echo "No .env file found"
     KBS_NOSETUP="true"
@@ -39,6 +32,27 @@ else
     source $env_file
     env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
     if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+fi
+
+# Upgrade if component is already installed
+if command -v $COMPONENT_NAME &>/dev/null; then
+  n=0
+  until [ "$n" -ge 3 ]
+  do
+  echo "$COMPONENT_NAME is already installed, Do you want to proceed with the upgrade? [y/n]"
+  read UPGRADE_NEEDED
+  if [ $UPGRADE_NEEDED == "y" ] || [ $UPGRADE_NEEDED == "Y" ] ; then
+    echo "Proceeding with the upgrade.."
+    ./${COMPONENT_NAME}_upgrade.sh
+    exit $?
+  elif [ $UPGRADE_NEEDED == "n" ] || [ $UPGRADE_NEEDED == "N" ] ; then
+    echo "Exiting the installation.."
+    exit 0
+  fi
+  n=$((n+1))
+  done
+  echo "Exiting the installation.."
+  exit 0
 fi
 
 echo "Setting up KBS Linux User..."
@@ -49,7 +63,6 @@ echo "Installing Key Broker Service..."
 
 PRODUCT_HOME=/opt/$COMPONENT_NAME
 BIN_PATH=$PRODUCT_HOME/bin
-LIB_PATH=$PRODUCT_HOME/lib
 LOG_PATH=/var/log/$COMPONENT_NAME/
 CONFIG_PATH=/etc/$COMPONENT_NAME/
 CERTS_PATH=$CONFIG_PATH/certs
@@ -60,7 +73,7 @@ KEYS_TRANSFER_POLICY_PATH=$PRODUCT_HOME/keys-transfer-policy
 SAML_CERTS_PATH=$CERTS_PATH/saml/
 TPM_IDENTITY_CERTS_PATH=$CERTS_PATH/tpm-identity/
 
-for directory in $BIN_PATH $LIB_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TRUSTEDCAS $CERTDIR_TRUSTEDJWTCERTS $KEYS_PATH $KEYS_TRANSFER_POLICY_PATH $SAML_CERTS_PATH $TPM_IDENTITY_CERTS_PATH; do
+for directory in $BIN_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TRUSTEDCAS $CERTDIR_TRUSTEDJWTCERTS $KEYS_PATH $KEYS_TRANSFER_POLICY_PATH $SAML_CERTS_PATH $TPM_IDENTITY_CERTS_PATH; do
     mkdir -p $directory
     if [ $? -ne 0 ]; then
         echo "Cannot create directory: $directory"
@@ -74,12 +87,7 @@ cp $COMPONENT_NAME $BIN_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $BIN_
 chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
-cp libkmip.so.0.2 $LIB_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $LIB_PATH/*
-chmod 700 $LIB_PATH/*
-ln -sfT $LIB_PATH/libkmip.so.0.2 $LIB_PATH/libkmip.so
-ln -sfT $LIB_PATH/libkmip.so.0.2 $LIB_PATH/libkmip.so.0
-
-# log file permission change
+# make log files world readable
 chmod 740 $LOG_PATH
 
 # Install systemd script

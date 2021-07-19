@@ -6,8 +6,8 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"io/ioutil"
 	"net/http"
 	"strings"

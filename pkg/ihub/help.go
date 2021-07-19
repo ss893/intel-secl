@@ -7,7 +7,7 @@ package ihub
 import (
 	"fmt"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/version"
 )
 
 const helpStr = `Usage:

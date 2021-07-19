@@ -5,21 +5,7 @@
 
 package types
 
-import "encoding/xml"
-
-type Module struct {
-	PcrBank   string   `xml:"pcrBank"`
-	PcrNumber PcrIndex `xml:"pcrNumber"`
-	Name      string   `xml:"name"`
-	Value     string   `xml:"value"`
-}
-
 type MeasureLog struct {
-	XMLName xml.Name `xml:"measureLog"`
-	Txt     struct {
-		TxtStatus string `xml:"txtStatus"`
-		Modules   struct {
-			Module []Module `xml:"module"`
-		} `xml:"modules"`
-	} `xml:"txt"`
+	Pcr       Pcr        `json:"pcr"`
+	TpmEvents []EventLog `json:"tpm_events"`
 }

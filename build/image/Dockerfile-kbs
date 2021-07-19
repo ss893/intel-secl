@@ -5,16 +5,19 @@ FROM centos:8
 
 COPY cmd/kbs/kbs /usr/bin/kbs
 
-COPY build/image/libkmip.so.0.2 /usr/lib64/libkmip.so.0.2
-
-RUN chmod 755 /usr/lib64/libkmip.so.0.2
-
-RUN ln -sfT /usr/lib64/libkmip.so.0.2 /usr/lib64/libkmip.so
-
-RUN ln -sfT /usr/lib64/libkmip.so.0.2  /usr/lib64/libkmip.so.0
-
 COPY build/image/entrypoint-kbs.sh /entrypoint.sh
 
-RUN touch /.container-env && chmod +x /entrypoint.sh
+# Copy upgrade scripts
+RUN mkdir -p /config
+
+COPY upgrades/kbs/config/* /config/
+
+COPY pkg/lib/common/upgrades/container_upgrade.sh /container_upgrade.sh
+
+COPY pkg/lib/common/upgrades/config_upgrade.sh /config_upgrade.sh
+
+RUN touch /.container-env && chmod -R +x /entrypoint.sh /container_upgrade.sh /config_upgrade.sh /config
+
+RUN ln -sfT /usr/bin/kbs /kbs
 
 ENTRYPOINT ["/entrypoint.sh"]

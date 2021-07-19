@@ -5,6 +5,7 @@
 package k8s
 
 import (
+	"crypto/tls"
 	"crypto/x509"
 	"io"
 	"io/ioutil"
@@ -12,10 +13,10 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 	"github.com/pkg/errors"
 )
 
@@ -169,7 +170,7 @@ func (k8sClient *Client) getK8sHTTPClient() (*http.Client, error) {
 		log.Debug("K8s/client:getK8sHTTPClient() Creating Insecure K8s Client")
 		k8sHTTPClient = clients.HTTPClientTLSNoVerify()
 	}
-
+	k8sHTTPClient.Transport.(*http.Transport).TLSClientConfig.MinVersion = tls.VersionTLS12
 	return k8sHTTPClient, nil
 
 }

@@ -7,9 +7,9 @@ package kbs
 import (
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/spf13/viper"
 )
 
@@ -30,7 +30,7 @@ func init() {
 	viper.SetDefault("log-level", constants.DefaultLogLevel)
 
 	// Set default value for kmip version
-	viper.SetDefault("kmip-version", "2.0")
+	viper.SetDefault("kmip-version", constants.KMIP_2_0)
 
 	// Set default values for server
 	viper.SetDefault("server-port", constants.DefaultKBSListenerPort)
@@ -76,12 +76,15 @@ func defaultConfig() *config.Configuration {
 			MaxHeaderBytes:    viper.GetInt("server-max-header-bytes"),
 		},
 		Kmip: config.KmipConfig{
-			Version:    viper.GetString("kmip-version"),
-			ServerIP:   viper.GetString("kmip-server-ip"),
-			ServerPort: viper.GetString("kmip-server-port"),
-			ClientCert: viper.GetString("kmip-client-cert-path"),
-			ClientKey:  viper.GetString("kmip-client-key-path"),
-			RootCert:   viper.GetString("kmip-root-cert-path"),
+			Version:                   viper.GetString("kmip-version"),
+			ServerIP:                  viper.GetString("kmip-server-ip"),
+			ServerPort:                viper.GetString("kmip-server-port"),
+			Hostname:                  viper.GetString("kmip-hostname"),
+			Username:                  viper.GetString("kmip-username"),
+			Password:                  viper.GetString("kmip-password"),
+			ClientKeyFilePath:         viper.GetString("kmip-client-key-path"),
+			ClientCertificateFilePath: viper.GetString("kmip-client-cert-path"),
+			RootCertificateFilePath:   viper.GetString("kmip-root-cert-path"),
 		},
 		Skc: config.SKCConfig{
 			StmLabel:          viper.GetString("skc-challenge-type"),

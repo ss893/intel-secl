@@ -6,19 +6,20 @@
 package controllers_test
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/mocks"
-	hvsRoutes "github.com/intel-secl/intel-secl/v3/pkg/hvs/router"
-	smocks "github.com/intel-secl/intel-secl/v3/pkg/hvs/services/hosttrust/mocks"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	mocks2 "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/mocks"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+
+	"github.com/gorilla/mux"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/mocks"
+	hvsRoutes "github.com/intel-secl/intel-secl/v4/pkg/hvs/router"
+	smocks "github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hosttrust/mocks"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	mocks2 "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/mocks"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("DeploySoftwareManifestController", func() {
@@ -70,7 +71,7 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
 					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
 				deployManifestRequestJson := `{
-												"flavor_id":"339a7ac6-b8be-4356-ab34-be6e3bdfa1ed",
+												"flavor_id":"7f0683c1-a038-4ed4-8b29-286410f2e753",
 												"host_id":"ee37c360-7eae-4250-a677-6ee12adce8e2"
 											  }`
 

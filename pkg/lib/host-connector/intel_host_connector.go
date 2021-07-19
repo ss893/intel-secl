@@ -10,10 +10,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
-	client "github.com/intel-secl/intel-secl/v3/pkg/clients/ta"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/util"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+
+	client "github.com/intel-secl/intel-secl/v4/pkg/clients/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 	"github.com/vmware/govmomi/vim25/mo"
 )
@@ -56,16 +57,12 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 
 	var verificationNonce string
 	var hostManifest types.HostManifest
-	var pcrBankList []string
 
 	//Hardcoded pcr list here since there is no use case for customized pcr list
 	if pcrList == nil || len(pcrList) == 0 {
 		log.Infof("intel_host_connector:GetHostManifestAcceptNonce() pcrList is empty")
 		pcrList = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}
 	}
-
-	//always request sha1/sha256 PCR banks from TA
-	pcrBankList = []string{"SHA1", "SHA256"}
 
 	//check if AIK Certificate is present on host before getting host manifest
 	aikInDER, err := ic.client.GetAIK()
@@ -81,7 +78,7 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 			"host details from TA")
 	}
 
-	tpmQuoteResponse, err := ic.client.GetTPMQuote(nonce, pcrList, pcrBankList)
+	tpmQuoteResponse, err := ic.client.GetTPMQuote(nonce, pcrList, []string{})
 	if err != nil {
 		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error getting TPM "+
 			"quote response")
@@ -114,14 +111,6 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 			"AIK certicate")
 	}
 
-	eventLogBytes, err := base64.StdEncoding.DecodeString(tpmQuoteResponse.EventLog)
-	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error converting "+
-			"event log to bytes")
-	}
-	decodedEventLog := string(eventLogBytes)
-	log.Info("intel_host_connector:GetHostManifestAcceptNonce() Retrieved event log from TPM quote response")
-
 	tpmQuoteInBytes, err := base64.StdEncoding.DecodeString(tpmQuoteResponse.Quote)
 	if err != nil {
 		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error converting "+
@@ -135,7 +124,7 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	}
 	log.Info("intel_host_connector:GetHostManifestAcceptNonce() Verifying quote and retrieving PCR manifest from TPM quote " +
 		"response ...")
-	pcrManifest, pcrsDigest, err := util.VerifyQuoteAndGetPCRManifest(decodedEventLog, verificationNonceInBytes,
+	pcrManifest, pcrsDigest, err := util.VerifyQuoteAndGetPCRManifest(tpmQuoteResponse.EventLog, verificationNonceInBytes,
 		tpmQuoteInBytes, aikCertificate)
 	if err != nil {
 		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error verifying "+
@@ -159,8 +148,9 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 			if bindingKeyCertificate == nil {
 				log.Warn("intel_host_connector:GetHostManifestAcceptNonce() - " +
 					"Could not decode Binding key certificate. Unexpected response from client")
+			} else {
+				bindingKeyCertificateBase64 = base64.StdEncoding.EncodeToString(bindingKeyCertificate.Bytes)
 			}
-			bindingKeyCertificateBase64 = base64.StdEncoding.EncodeToString(bindingKeyCertificate.Bytes)
 		} else {
 			log.Warn("intel_host_connector:GetHostManifestAcceptNonce() " +
 				"Empty Binding Key received")

@@ -7,7 +7,7 @@ package hvs
 import (
 	"fmt"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/version"
 )
 
 const helpStr = `Usage:
@@ -35,6 +35,7 @@ Available Tasks for setup:
 	all                             Runs all setup tasks
 	database                        Setup hvs database
 	create-default-flavorgroup      Create default flavor groups in database
+	create-default-flavor-template  Create default flavor templates in database
 	create-dek                      Create data encryption key for HVS
 	download-ca-cert                Download CMS root CA certificate
 	download-cert-tls               Download CA certificate from CMS for tls

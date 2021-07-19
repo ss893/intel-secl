@@ -6,8 +6,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
 	"os"
 	"os/user"
 	"strconv"

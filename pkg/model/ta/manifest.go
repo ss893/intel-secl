@@ -17,7 +17,6 @@ type ManifestType interface{}
 // </Manifest>
 type Manifest struct {
 	XMLName   xml.Name              `xml:"Manifest"`
-	Text      string                `xml:",chardata"`
 	Xmlns     string                `xml:"xmlns,attr"`
 	Label     string                `xml:"Label,attr"`
 	Uuid      string                `xml:"Uuid,attr"`
@@ -28,7 +27,6 @@ type Manifest struct {
 }
 
 type DirManifestType struct {
-	Text       string `xml:",chardata"`
 	Exclude    string `xml:"Exclude,attr,omitempty"`
 	FilterType string `xml:"FilterType,attr,omitempty"`
 	Include    string `xml:"Include,attr,omitempty"`
@@ -37,13 +35,11 @@ type DirManifestType struct {
 }
 
 type FileManifestType struct {
-	Text       string `xml:",chardata"`
 	Path       string `xml:"Path,attr"`
 	SearchType string `xml:"SearchType,attr,omitempty"`
 }
 
 type SymlinkManifestType struct {
-	Text       string `xml:",chardata"`
 	Path       string `xml:"Path,attr"`
 	SearchType string `xml:"SearchType,attr,omitempty"`
 }

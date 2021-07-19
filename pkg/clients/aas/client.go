@@ -7,13 +7,13 @@ package aas
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
-	types "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	types "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -330,4 +330,38 @@ func (c *Client) AddRoleToUser(userID string, r types.RoleIDs) error {
 		return ErrHTTPAddRoleToUser
 	}
 	return nil
+}
+
+func (c *Client) GetCredentials(createCredentailsReq types.CreateCredentialsReq) ([]byte, error) {
+	credentialsUrl := clients.ResolvePath(c.BaseURL, "credentials")
+	payload, err := json.Marshal(&createCredentailsReq)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, credentialsUrl, bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, err
+	}
+	c.prepReqHeader(req)
+	req.Header.Set("Accept", "text/plain")
+
+	if c.HTTPClient == nil {
+		return nil, errors.New("aas/client:GetCredentials() HTTPClient should not be null")
+	}
+
+	rsp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if rsp.StatusCode != http.StatusCreated {
+		return nil, errors.Errorf("aas/client:GetCredentials() Request made to %s returned status %d", credentialsUrl, rsp.StatusCode)
+	}
+
+	creds, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "aas/client:GetCredentials() Error reading response")
+	}
+	return creds, nil
 }

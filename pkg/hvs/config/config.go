@@ -5,14 +5,14 @@
 package config
 
 import (
-	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/hrrs"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hrrs"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
@@ -42,6 +42,7 @@ type Configuration struct {
 	HRRS   hrrs.HRRSConfig         `yaml:"hrrs" mapstructure:"hrrs"`
 	FVS    FVSConfig               `yaml:"fvs" mapstructure:"fvs"`
 	VCSS   VCSSConfig              `yaml:"vcss" mapstructure:"vcss"`
+	NATS   NatsConfig              `yaml:"nats" mapstructure:"nats"`
 }
 
 type FVSConfig struct {
@@ -66,6 +67,10 @@ type AuditLogConfig struct {
 type VCSSConfig struct {
 	// RefreshPeriod determines how frequently the VCSS checks the vCenter cluster for updated hosts
 	RefreshPeriod time.Duration `yaml:"refresh-period" mapstructure:"refresh-period"`
+}
+
+type NatsConfig struct {
+	Servers []string `yaml:"servers" mapstructure:"servers"`
 }
 
 // this function sets the configure file name and type

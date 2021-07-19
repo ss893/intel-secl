@@ -5,7 +5,7 @@
 package controllers
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/version"
 	"net/http"
 )
 

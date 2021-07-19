@@ -6,10 +6,10 @@ package mocks
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	cf "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"strings"
 )
@@ -163,6 +163,10 @@ func (store *MockFlavorgroupStore) RetrieveFlavor(fgId uuid.UUID, fId uuid.UUID)
 }
 
 // SearchHostsByFlavorGroup is used to fetch a list of hosts which are linked to the provided FlavorGroup
+func (store *MockFlavorgroupStore) SearchFlavorTemplatesByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error) {
+	return nil, nil
+}
+
 func (store *MockFlavorgroupStore) SearchHostsByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error) {
 	var hIds []uuid.UUID
 	for _, hf := range store.HostFlavorgroupStore {
@@ -174,8 +178,11 @@ func (store *MockFlavorgroupStore) SearchHostsByFlavorGroup(fgID uuid.UUID) ([]u
 }
 
 func (store *MockFlavorgroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[cf.FlavorPart]bool, error) {
-
 	return make(map[cf.FlavorPart]bool), nil
+}
+
+func (store *MockFlavorgroupStore) AddFlavorTemplates(fgId uuid.UUID, ftIds []uuid.UUID) error {
+	return nil
 }
 
 // NewFakeFlavorgroupStore provides two dummy data for Flavorgroups

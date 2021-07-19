@@ -7,11 +7,11 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
 )
 
 //SetFlavorFromAppManifestRoute registers routes for APIs that return software flavor from manifest
@@ -23,7 +23,8 @@ func SetFlavorFromAppManifestRoute(router *mux.Router, store *postgres.DataStore
 	flavorStore := postgres.NewFlavorStore(store)
 	hostStore := postgres.NewHostStore(store)
 	tagCertStore := postgres.NewTagCertificateStore(store)
-	flavorController := controllers.NewFlavorController(flavorStore, flavorGroupStore, hostStore, tagCertStore, hostTrustManager, certStore, hcConfig)
+	flavorTemplateStore := postgres.NewFlavorTemplateStore(store)
+	flavorController := controllers.NewFlavorController(flavorStore, flavorGroupStore, hostStore, tagCertStore, hostTrustManager, certStore, hcConfig, flavorTemplateStore)
 	flavorFromAppManifestController := controllers.NewFlavorFromAppManifestController(*flavorController)
 
 	router.Handle("/flavor-from-app-manifest",

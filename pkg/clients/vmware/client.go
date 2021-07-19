@@ -8,9 +8,12 @@ package vmware
 import (
 	"context"
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"net/url"
+	"strings"
+
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/session"
@@ -20,8 +23,6 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
-	"net/url"
-	"strings"
 )
 
 var log = commLog.GetDefaultLogger()
@@ -89,14 +90,16 @@ func (vc *vmwareClient) GetHostInfo() (taModel.HostInfo, error) {
 	hostInfo.VMMName = vc.hostReference.Config.Product.Name
 	hostInfo.OSName = vc.hostReference.Config.Product.Name
 	hostInfo.OSVersion = vc.hostReference.Config.Product.Version
+	hostInfo.OSType = taModel.OsTypeVMWare
 	hostInfo.VMMVersion = vc.hostReference.Config.Product.Build
 	hostInfo.BiosName = vc.hostReference.Hardware.SystemInfo.Vendor
 	hostInfo.BiosVersion = vc.hostReference.Hardware.BiosInfo.BiosVersion
 	hostInfo.NumberOfSockets = int(vc.hostReference.Hardware.CpuInfo.NumCpuPackages)
 	hostInfo.ProcessorInfo = vc.hostReference.Summary.MaxEVCModeKey
 	hostInfo.HardwareUUID = strings.ToUpper(vc.hostReference.Hardware.SystemInfo.Uuid)
+	hostInfo.HardwareFeatures.TPM = &taModel.TPM{}
 	hostInfo.HardwareFeatures.TPM.Enabled = false
-	if vc.hostReference.Capability.TpmSupported != nil && *vc.hostReference.Capability.TpmSupported == true {
+	if vc.hostReference.Capability.TpmSupported != nil {
 		hostInfo.HardwareFeatures.TPM.Enabled = true
 	}
 	if strings.Contains(vcenterVersion, "6.5") && hostInfo.HardwareFeatures.TPM.Enabled {

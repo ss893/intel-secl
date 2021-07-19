@@ -15,9 +15,9 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/binary"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/lib/privacyca/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/privacyca/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/privacyca/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/privacyca/types"
 	"io"
 	"math"
 

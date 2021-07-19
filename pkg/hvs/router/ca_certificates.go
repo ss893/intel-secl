@@ -7,9 +7,9 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
 )
 
 func SetCaCertificatesRoutes(router *mux.Router, certStore *models.CertificatesStore) *mux.Router {

@@ -5,9 +5,9 @@
 package types
 
 import (
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	cm "github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	cm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 )
 
 var log = commLog.GetDefaultLogger()

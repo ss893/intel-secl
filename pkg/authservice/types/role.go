@@ -5,7 +5,7 @@
 package types
 
 import (
-	. "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	. "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"time"
 )
 
@@ -17,8 +17,8 @@ type Role struct {
 
 	//embed
 	RoleInfo
-	Permissions Permissions `json:"permissions,omitempty"gorm:"many2many:role_permissions"`
-	Users       []*User     `json:"users,omitempty"gorm:"many2many:user_roles"`
+	Permissions Permissions `json:"permissions,omitempty" gorm:"many2many:role_permissions"`
+	Users       []*User     `json:"users,omitempty" gorm:"many2many:user_roles"`
 }
 
 type RoleSearch struct {

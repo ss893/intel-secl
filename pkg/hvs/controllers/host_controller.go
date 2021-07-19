@@ -9,17 +9,17 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/utils"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
-	hcConstants "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/constants"
-	hcUtil "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/util"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
-	model "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/utils"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
+	hcConstants "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
+	hcUtil "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
@@ -536,7 +536,7 @@ func (hc *HostController) linkFlavorgroupsToHost(flavorgroupNames []string, host
 	defer defaultLog.Trace("controllers/host_controller:linkFlavorgroupsToHost() Leaving")
 
 	flavorgroupIds := []uuid.UUID{}
-	flavorgroups, err := CreateMissingFlavorgroups(hc.FGStore, flavorgroupNames)
+	flavorgroups, err := CreateMissingFlavorgroups(hc.FGStore, flavorgroupNames, nil)
 	if err != nil {
 		return errors.Wrapf(err, "Could not fetch flavorgroup Ids")
 	}
@@ -594,14 +594,17 @@ func (hc *HostController) linkHostUniqueFlavorsToHost(newHost *hvs.Host) error {
 	return nil
 }
 
-func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames []string) ([]hvs.FlavorGroup, error) {
+func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames []string, flavorTemplateIds []uuid.UUID) ([]hvs.FlavorGroup, error) {
 	flavorgroups := []hvs.FlavorGroup{}
 	for _, flavorgroupName := range flavorgroupNames {
-		existingFlavorGroups, _ := fGStore.Search(&models.FlavorGroupFilterCriteria{
+		existingFlavorGroups, err := fGStore.Search(&models.FlavorGroupFilterCriteria{
 			NameEqualTo: flavorgroupName,
 		})
+		if err != nil {
+			return nil, errors.Wrapf(err, "Could not find flavorgroup with name : %s", flavorgroupName)
+		}
 		if existingFlavorGroups == nil || len(existingFlavorGroups) == 0 {
-			flavorgroup, err := createNewFlavorGroup(fGStore, flavorgroupName)
+			flavorgroup, err := createNewFlavorGroup(fGStore, flavorgroupName, flavorTemplateIds)
 			if err != nil {
 				return nil, errors.Wrapf(err, "Could not create flavorgroup with name : %s", flavorgroupName)
 			}
@@ -613,11 +616,12 @@ func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames
 	return flavorgroups, nil
 }
 
-func createNewFlavorGroup(fGStore domain.FlavorGroupStore, flavorgroupName string) (*hvs.FlavorGroup, error) {
+func createNewFlavorGroup(fGStore domain.FlavorGroupStore, flavorgroupName string, flavorTemplateIds []uuid.UUID) (*hvs.FlavorGroup, error) {
 	defaultLog.Trace("controllers/host_controller:createNewFlavorGroup() Entering")
 	defer defaultLog.Trace("controllers/host_controller:createNewFlavorGroup() Leaving")
 
 	fg := utils.CreateFlavorGroupByName(flavorgroupName)
+	fg.FlavorTemplateIds = flavorTemplateIds
 	flavorGroup, err := fGStore.Create(&fg)
 	if err != nil {
 		return nil, err

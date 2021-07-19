@@ -8,13 +8,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/xml"
-	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/util"
-	ta "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/google/uuid"
+	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	ta "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestXmlMeasurementLogIntegrityNoFault(t *testing.T) {
@@ -33,20 +33,20 @@ func TestXmlMeasurementLogIntegrityNoFault(t *testing.T) {
 		MeasurementXmls: []string{testIntegrityMeasurementsXml},
 	}
 
-	eventLogEntry := types.EventLogEntry{
-		PcrIndex: types.PCR15,
-		PcrBank:  types.SHA256,
-		EventLogs: []types.EventLog{
+	eventLogEntry := types.TpmEventLog{
+		Pcr: types.Pcr{
+			Index: 15,
+			Bank:  "SHA256",
+		},
+		TpmEvent: []types.EventLog{
 			{
-				DigestType: util.EVENT_LOG_DIGEST_SHA256,
-				Value:      getSha256String(testExpectedMeasurement.CumulativeHash),
-				Label:      testExpectedMeasurement.Label + "-" + testExpectedMeasurement.Uuid,
+				Measurement: getSha256String(testExpectedMeasurement.CumulativeHash),
+				Tags:        []string{testExpectedMeasurement.Label + "-" + testExpectedMeasurement.Uuid},
 			},
 		},
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, eventLogEntry)
-
 	// apply the manifest to the rule and expect no faults/trusted
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
@@ -210,14 +210,15 @@ func TestXmlMeasurementLogIntegrityValueMismatchFromInvalidPcrEventLog(t *testin
 		MeasurementXmls: []string{testIntegrityMeasurementsXml},
 	}
 
-	eventLogEntry := types.EventLogEntry{
-		PcrIndex: types.PCR15,
-		PcrBank:  types.SHA256,
-		EventLogs: []types.EventLog{
+	eventLogEntry := types.TpmEventLog{
+		Pcr: types.Pcr{
+			Index: 15,
+			Bank:  "SHA256",
+		},
+		TpmEvent: []types.EventLog{
 			{
-				DigestType: util.EVENT_LOG_DIGEST_SHA256,
-				Value:      "0000000000000000000000000000000000", // ==> NOT RIGHT
-				Label:      testExpectedMeasurement.Label + "-" + testExpectedMeasurement.Uuid,
+				Measurement: "0000000000000000000000000000000000", // ==> NOT RIGHT
+				Tags:        []string{testExpectedMeasurement.Label + "-" + testExpectedMeasurement.Uuid},
 			},
 		},
 	}
@@ -272,14 +273,15 @@ func TestXmlMeasurementLogIntegrityValueMismatchFromMissingPcrEventLabel(t *test
 		MeasurementXmls: []string{testIntegrityMeasurementsXml},
 	}
 
-	eventLogEntry := types.EventLogEntry{
-		PcrIndex: types.PCR15,
-		PcrBank:  types.SHA256,
-		EventLogs: []types.EventLog{
+	eventLogEntry := types.TpmEventLog{
+		Pcr: types.Pcr{
+			Index: 15,
+			Bank:  "SHA256",
+		},
+		TpmEvent: []types.EventLog{
 			{
-				DigestType: util.EVENT_LOG_DIGEST_SHA256,
-				Value:      getSha256String(testExpectedMeasurement.CumulativeHash),
-				Label:      "invalid labor", // ==> won't match the flavor
+				Measurement: getSha256String(testExpectedMeasurement.CumulativeHash),
+				Tags:        []string{"invalid labor"}, // ==> won't match the flavor
 			},
 		},
 	}

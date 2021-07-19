@@ -7,7 +7,7 @@ package kbs
 import (
 	"fmt"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/version"
 )
 
 const helpStr = `Usage:

@@ -6,12 +6,12 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/postgres"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/postgres"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 	"io"
 	"os"
 	"strings"

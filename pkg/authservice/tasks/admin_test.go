@@ -6,10 +6,10 @@ package tasks
 
 import (
 	"errors"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/postgres/mock"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/postgres/mock"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
 	"os"
 	"testing"
 

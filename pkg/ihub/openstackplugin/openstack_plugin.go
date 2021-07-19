@@ -7,8 +7,8 @@ package openstackplugin
 import (
 	"bytes"
 	"encoding/json"
-	types "github.com/intel-secl/intel-secl/v3/pkg/ihub/model"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/util"
+	types "github.com/intel-secl/intel-secl/v4/pkg/ihub/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -16,13 +16,13 @@ import (
 	"strconv"
 	"strings"
 
-	openstackClient "github.com/intel-secl/intel-secl/v3/pkg/clients/openstack"
-	vsPlugin "github.com/intel-secl/intel-secl/v3/pkg/ihub/attestationPlugin"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
-	commonLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/saml"
-	model "github.com/intel-secl/intel-secl/v3/pkg/model/openstack"
+	openstackClient "github.com/intel-secl/intel-secl/v4/pkg/clients/openstack"
+	vsPlugin "github.com/intel-secl/intel-secl/v4/pkg/ihub/attestationPlugin"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
+	commonLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/openstack"
 	"github.com/pkg/errors"
 )
 
@@ -600,7 +600,7 @@ func SendDataToEndPoint(openstack OpenstackDetails) error {
 	for index := range openstack.HostDetails {
 		err := filterHostReportsForOpenstack(&openstack.HostDetails[index], &openstack)
 		if err != nil {
-			log.WithError(err).Errorf("openstackplugin/openstack_plugin:SendDataToEndPoint() Error in Filtering"+
+			log.WithError(err).Warnf("openstackplugin/openstack_plugin:SendDataToEndPoint() Could not Filter"+
 				" Host details for Openstack host %s", openstack.HostDetails[index].HostID.String())
 		}
 	}
@@ -608,7 +608,7 @@ func SendDataToEndPoint(openstack OpenstackDetails) error {
 	log.Info("openstackplugin/openstack_plugin:SendDataToEndPoint() Updating traits to Openstack for host : ", openstack.HostDetails)
 	err = updateOpenstackTraits(&openstack)
 	if err != nil {
-		return errors.Wrap(err, "openstackplugin/openstack_plugin:SendDataToEndPoint() Error in Filtering Host details for Openstack")
+		return errors.Wrap(err, "openstackplugin/openstack_plugin:SendDataToEndPoint() Error in updating Host traits for Openstack")
 	}
 
 	return nil

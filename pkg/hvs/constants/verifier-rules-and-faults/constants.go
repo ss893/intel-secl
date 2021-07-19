@@ -5,11 +5,9 @@
 
 package constants
 
-const PolicyPrefix = "com.intel.mtwilson.core.verifier.policy."
-
 // Verifier Rules
 const (
-	RulePrefix                      = PolicyPrefix + "rule."
+	RulePrefix                      = "rule."
 	RuleAikCertificateTrusted       = RulePrefix + "AikCertificateTrusted"
 	RuleAssetTagMatches             = RulePrefix + "AssetTagMatches"
 	RuleFlavorTrusted               = RulePrefix + "FlavorTrusted"
@@ -26,7 +24,7 @@ const (
 
 // Verifier Faults
 const (
-	FaultPrefix                                     = PolicyPrefix + "fault."
+	FaultPrefix                                     = "fault."
 	FaultAikCertificateExpired                      = FaultPrefix + "AikCertificateExpired"
 	FaultAikCertificateMissing                      = FaultPrefix + "AikCertificateMissing"
 	FaultAikCertificateNotTrusted                   = FaultPrefix + "AikCertificateNotTrusted"
@@ -59,4 +57,19 @@ const (
 	FaultXmlMeasurementLogValueMismatchEntries384   = FaultPrefix + "XmlMeasurementLogValueMismatchEntriesSha384"
 	FaultXmlMeasurementsDigestValueMismatch         = FaultPrefix + "XmlMeasurementsDigestValueMismatch"
 	FaultXmlMeasurementValueMismatch                = FaultPrefix + "XmlMeasurementValueMismatch"
+	PcrEventLogUnexpectedFields                     = "PcrEventLogUnexpectedFields"
+	PcrEventLogMissingFields                        = "PcrEventLogMissingFields"
+)
+
+//Builder names
+const (
+	IntelBuilder  = "Intel Host Trust Policy"
+	VmwareBuilder = "VMware Host Trust Policy"
+)
+
+//Rule names
+const (
+	EventlogEqualRule    = "EventlogEqual"
+	EventlogIncludesRule = "EventlogIncludes"
+	PCRMatchesRule       = "PCRMatches"
 )

@@ -5,18 +5,18 @@
 package middleware
 
 import (
-	authcommon "github.com/intel-secl/intel-secl/v3/pkg/authservice/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/context"
-	_ "github.com/intel-secl/intel-secl/v3/pkg/authservice/defender"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/types"
+	authcommon "github.com/intel-secl/intel-secl/v4/pkg/authservice/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/context"
+	_ "github.com/intel-secl/intel-secl/v4/pkg/authservice/defender"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
 	"net/http"
 	_ "time"
 
 	"github.com/gorilla/mux"
 
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 )
 
 var defaultLogger = commLog.GetDefaultLogger()

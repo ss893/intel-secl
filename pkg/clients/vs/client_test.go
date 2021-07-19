@@ -15,7 +15,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
 )
 
 var SampleSamlReportPath = "../../ihub/test/resources/saml_report.xml"

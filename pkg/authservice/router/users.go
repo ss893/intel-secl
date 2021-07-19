@@ -7,9 +7,9 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/domain"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/domain"
 )
 
 func SetUsersRoutes(r *mux.Router, db domain.AASDatabase) *mux.Router {

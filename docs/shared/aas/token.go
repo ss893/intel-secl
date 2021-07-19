@@ -4,7 +4,7 @@
  */
 package aas
 
-import "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+import "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 
 // UserCredInfo request payload
 // swagger:parameters UserCredInfo

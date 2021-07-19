@@ -4,7 +4,11 @@
  */
 package tasks
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestDekGenerate(t *testing.T) {
 	dek := "hello"
@@ -29,4 +33,25 @@ func TestDefaultFlavorGroupDes(t *testing.T) {
 	for _, fg := range defaultFlavorGroups() {
 		t.Log(fg)
 	}
+}
+
+func TestDefaultFlavorTemplateDes(t *testing.T) {
+	// check if default flavor templates are retrieved
+	ft := CreateDefaultFlavorTemplate{
+		Directory: "../../../build/linux/hvs/templates/",
+	}
+	flavorTemplates, err := ft.getTemplates()
+	assert.NoError(t, err)
+	for template, _ := range flavorTemplates {
+		t.Log(template)
+	}
+}
+
+func TestDefaultFlavorTemplateFaultDes(t *testing.T) {
+	// check if default flavor templates are retrieved
+	ft := CreateDefaultFlavorTemplate{
+		Directory: "",
+	}
+	_, err := ft.readDefaultTemplates()
+	assert.Error(t, err)
 }

@@ -7,7 +7,7 @@ package hosttrust
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
 type hostTrustCache struct {
@@ -19,7 +19,7 @@ type hostTrustCache struct {
 
 // TODO:
 // These functions should have been implemented in
-// "github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+// "github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 // for the structure hvs.FlavorCollection
 func (htc *hostTrustCache) addTrustedFlavors(f *hvs.Flavor) {
 	htc.trustedFlavors = append(htc.trustedFlavors, *f)

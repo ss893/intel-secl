@@ -41,16 +41,6 @@ export GOROOT=/usr/local/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 ```
 
-### Install Docker-CE
-Docker-CE is only required for the container confidentiality with secure-docker-daemon use case. Red Hat no longer supports Docker-CE natively, so the packages must be manually installed. The build was validated with version 19.03 of Docker-CE. 
-```shell
-yum install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
-yum config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
-yum install docker-ce
-systemctl disable firewalld
-systemctl enable --now docker
-```
-
 ## Build Workload Policy Manager (WPM)
 
 - Git clone the WPM
@@ -60,18 +50,8 @@ systemctl enable --now docker
 
 Supports the following use cases:
 - Virtual machine confidentiality
-- Container confidentiality using secure-docker-daemon
 - Container confidentiality using skopeo and cri-o
 
-```shell
-git clone https://github.com/intel-secl/intel-secl.git
-cd intel-secl
-make wpm-docker-installer
-```
-
-### Build installer without the secure docker daemon
-### This is used for Skopeo encryption and Cri-o decryption for container confidentiality.
-### Note: This installer should be built if exclusively using ISecL for virtual machine confidentiality.
 
 ```shell
 git clone https://github.com/intel-secl/intel-secl.git

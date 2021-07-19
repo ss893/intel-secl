@@ -8,14 +8,16 @@ package host_connector
 import (
 	"encoding/json"
 	"errors"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/vmware"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
-	"github.com/stretchr/testify/assert"
-	vim25Types "github.com/vmware/govmomi/vim25/types"
-	"github.com/vmware/govmomi/vim25/xml"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/vmware"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	"github.com/stretchr/testify/assert"
+	"github.com/vmware/govmomi/vim25/mo"
+	vim25Types "github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 func TestVmwareConnectorGetHostDetails(t *testing.T) {
@@ -173,4 +175,61 @@ func parseTpmAttestationReportResponse(t *testing.T) *vim25Types.QueryTpmAttesta
 	assert.NoError(t, err)
 
 	return tpmAttestationReportResponse
+}
+
+func TestGetClusterReferenceFault(t *testing.T) {
+	mockVMwareClient, err := vmware.NewMockVMWareClient()
+	assert.NoError(t, err)
+
+	mockVMwareClient.On("GetVmwareClusterReference").Return([]mo.HostSystem{}, nil)
+
+	vmwareConnector := VmwareConnector{
+		client: mockVMwareClient,
+	}
+
+	hostInfoList, err := vmwareConnector.GetClusterReference("")
+	assert.NoError(t, err)
+	assert.NotNil(t, hostInfoList)
+}
+
+func TestVmwareDeployAssetTag(t *testing.T) {
+	mockVMwareClient, err := vmware.NewMockVMWareClient()
+	assert.NoError(t, err)
+
+	mockVMwareClient.On("DeployAssetTag").Return(nil)
+
+	vmwareConnector := VmwareConnector{
+		client: mockVMwareClient,
+	}
+
+	err = vmwareConnector.DeployAssetTag("068b5e88-1886-4ac2-a908-175cf723723f", "")
+	assert.Error(t, err)
+}
+
+func TestVmwareDeploySoftwareManifest(t *testing.T) {
+	mockVMwareClient, err := vmware.NewMockVMWareClient()
+	assert.NoError(t, err)
+
+	mockVMwareClient.On("DeploySoftwareManifest").Return(nil)
+
+	vmwareConnector := VmwareConnector{
+		client: mockVMwareClient,
+	}
+
+	err = vmwareConnector.DeploySoftwareManifest(taModel.Manifest{})
+	assert.Error(t, err)
+}
+
+func TestVmwareGetMeasurementFromManifest(t *testing.T) {
+	mockVMwareClient, err := vmware.NewMockVMWareClient()
+	assert.NoError(t, err)
+
+	mockVMwareClient.On("GetMeasurementFromManifest").Return(taModel.Measurement{}, nil)
+
+	vmwareConnector := VmwareConnector{
+		client: mockVMwareClient,
+	}
+
+	_, err = vmwareConnector.GetMeasurementFromManifest(taModel.Manifest{})
+	assert.Error(t, err)
 }

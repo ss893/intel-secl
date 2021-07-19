@@ -6,7 +6,7 @@ package proc
 
 import (
 	"errors"
-	cLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	cLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"os"
 	"os/signal"
 	"sync"

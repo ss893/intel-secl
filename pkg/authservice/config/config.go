@@ -5,13 +5,14 @@
 package config
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"os"
+	"time"
 )
 
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
@@ -26,6 +27,7 @@ type Configuration struct {
 	JWT              JWT                      `yaml:"jwt" mapstructure:"jwt"`
 	TLS              commConfig.TLSCertConfig `yaml:"tls" mapstructure:"tls"`
 	Server           commConfig.ServerConfig  `yaml:"server" mapstructure:"server"`
+	Nats             NatsConfig               `yaml:"nats" mapstructure:"nats"`
 }
 
 type AASConfig struct {
@@ -43,6 +45,17 @@ type AuthDefender struct {
 	MaxAttempts         int `yaml:"max-attempts" mapstructure:"max-attempts"`
 	IntervalMins        int `yaml:"interval-mins" mapstructure:"interval-mins"`
 	LockoutDurationMins int `yaml:"lockout-duration-mins" mapstructure:"lockout-duration-mins"`
+}
+
+type NatsConfig struct {
+	Operator               NatsEntityInfo `yaml:"operator" mapstructure:"operator"`
+	Account                NatsEntityInfo `yaml:"account" mapstructure:"account"`
+	UserCredentialValidity time.Duration  `yaml:"user-credential-validity" mapstructure:"user-credential-validity"`
+}
+
+type NatsEntityInfo struct {
+	Name               string        `yaml:"name" mapstructure:"name"`
+	CredentialValidity time.Duration `yaml:"credential-validity" mapstructure:"credential-validity"`
 }
 
 // this function sets the configuration file name and type

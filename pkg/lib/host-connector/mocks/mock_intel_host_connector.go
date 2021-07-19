@@ -4,13 +4,13 @@
  */
 package mocks
 
-//go:generate mockgen -destination=mock_intel_host_connector.go -package=host_connector github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector MockIntelConnector
+//go:generate mockgen -destination=mock_intel_host_connector.go -package=host_connector github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector MockIntelConnector
 
 import (
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/ta"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/govmomi/vim25/mo"
 	"io/ioutil"

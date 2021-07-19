@@ -9,16 +9,16 @@ import (
 	"bytes"
 	"crypto/x509"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 	"github.com/pkg/errors"
 )
 

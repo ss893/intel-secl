@@ -7,14 +7,14 @@ package ihub
 import (
 	"crypto/x509/pkix"
 	"fmt"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/tasks"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/tasks"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )

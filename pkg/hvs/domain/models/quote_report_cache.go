@@ -4,7 +4,7 @@
  */
 package models
 
-import "github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+import "github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 
 type QuoteReportCache struct {
 	QuoteDigest  string

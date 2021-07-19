@@ -20,14 +20,14 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients"
-	aasClient "github.com/intel-secl/intel-secl/v3/pkg/clients/aas"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	aasClient "github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -256,7 +256,7 @@ func (keyInfo *KeyDetails) doesAttestTypeMatchKeyTransferPolicy() bool {
 			return false
 		} else {
 			defaultLog.Debug("keytransfer/skc_key_transfer:doesAttestTypeMatchKeyTransferPolicy() Stm label (attestation type) matches with the key transfer policy")
-			keyInfo.ActiveStmLabel = prioritizeStmLabels(stmLabels)
+			keyInfo.ActiveStmLabel = constants.DefaultSGXLabel
 			return true
 		}
 	} else {
@@ -268,19 +268,6 @@ func (keyInfo *KeyDetails) doesAttestTypeMatchKeyTransferPolicy() bool {
 		}
 	}
 	return false
-}
-
-// prioritizeStmLabels - Function to prioritize stm labels
-func prioritizeStmLabels(stmLabels []string) string {
-	defaultLog.Trace("keytransfer/skc_key_transfer:prioritizeStmLabels() Entering")
-	defer defaultLog.Trace("keytransfer/skc_key_transfer:prioritizeStmLabels() Leaving")
-
-	for _, label := range stmLabels {
-		if label == constants.DefaultSGXLabel {
-			return constants.DefaultSGXLabel
-		}
-	}
-	return constants.DefaultSWLabel
 }
 
 // doesCertcontextListMatchKeyTransferPolicy - Function to check context list matches with KeyTransferPoilcy
@@ -361,7 +348,7 @@ func (keyInfo *KeyDetails) IsValidSession(stmLabel string) (validSession, validS
 
 			if expiryTime.Before(time.Now()) {
 				defaultLog.Debug("session has expired hence exiting")
-				///delete session from map
+				// delete session from map
 				delete(keyInfo.SessionMap, sessionID)
 				return true, true, false
 			}
@@ -389,7 +376,7 @@ func (keyInfo *KeyDetails) IsValidSession(stmLabel string) (validSession, validS
 					defaultLog.Debug("keytransfer/skc_key_transfer:IsValidSession() All sgx attributes in stm attestation report match key transfer policy")
 					return true, true, true
 				} else {
-					///delete session from map
+					// delete session from map
 					delete(keyInfo.SessionMap, sessionID)
 					defaultLog.Debug("keytransfer/skc_key_transfer:IsValidSession() Sgx attribute validation failed")
 					return true, false, true
@@ -399,7 +386,6 @@ func (keyInfo *KeyDetails) IsValidSession(stmLabel string) (validSession, validS
 				keyInfo.ActiveSessionID = sessionID
 				return true, true, true
 			}
-			//}
 		}
 	}
 	return false, false, false
@@ -625,11 +611,6 @@ func (keyInfo *KeyDetails) FetchApplicationKey(keyData []byte, algorithm string)
 		if err != nil {
 			return "", errors.Wrap(err, "keytransfer/skc_key_transfer:FetchApplicationKey() Error in getting sgx mode key")
 		}
-	case constants.DefaultSWLabel:
-		transferredKeyData, err = keyInfo.getKeyForSW(keyData)
-		if err != nil {
-			return "", errors.Wrap(err, "keytransfer/skc_key_transfer:FetchApplicationKey() Error in getting sw mode key")
-		}
 	default:
 		return "", errors.New("keytransfer/skc_key_transfer:FetchApplicationKey() Invalid stm label")
 	}
@@ -679,7 +660,6 @@ func (keyInfo *KeyDetails) getKeyForSGX(privateKey []byte, algorithm string) (st
 			return "", errors.Wrap(err, "keytransfer/skc_key_transfer:getKeyForSGX() Failed to encrypt data")
 		}
 	} else if algorithm == constants.CRYPTOALG_EC {
-		///TODO: This needs to be tested.
 		defaultLog.Trace("EC key to be transferred")
 		privatePem := pem.EncodeToMemory(
 			&pem.Block{
@@ -711,63 +691,6 @@ func (keyInfo *KeyDetails) getKeyForSGX(privateKey []byte, algorithm string) (st
 	keyData = append(keyData, bytes...)
 
 	return base64.StdEncoding.EncodeToString(keyData), nil
-}
-
-// getKeyForSW - Function to get the key for SW node
-func (keyInfo KeyDetails) getKeyForSW(keyBytes []byte) (string, error) {
-	defaultLog.Trace("keytransfer/skc_key_transfer:getKeyForSW() Entering")
-	defer defaultLog.Trace("keytransfer/skc_key_transfer:getKeyForSW() Leaving")
-
-	keyTransferSession := keyInfo.GetSessionObj(keyInfo.ActiveSessionID)
-	if reflect.DeepEqual(keyTransferSession, kbs.KeyTransferSession{}) {
-		defaultLog.Error("keytransfer/skc_key_transfer:getKeyForSW() session map is empty. Hence can't get swk")
-		return "", errors.New("keytransfer/skc_key_transfer:getKeyForSW() session map is empty. Hence can't get swk")
-	}
-
-	swkKey := keyTransferSession.SWK
-
-	var wrappedBytes []byte
-
-	alignment := (len(keyBytes)) % 8
-
-	if alignment != 0 {
-		size := len(keyBytes) + (8 - alignment)
-		paddedArr := []byte{}
-		paddedArr = append(paddedArr, keyBytes...)
-
-		paddingLength := size - len(paddedArr)
-		zeroPadding := make([]byte, paddingLength)
-		paddedArr = append(paddedArr, zeroPadding...)
-
-		bytes, err := keyWrap(swkKey, paddedArr)
-		if err != nil {
-			return "", errors.Wrap(err, "keytransfer/skc_key_transfer:getKeyForSW() Failed to encrypt data")
-		}
-		wrappedBytes = bytes
-	} else {
-		bytes, _, err := AesEncrypt(keyBytes, swkKey)
-		if err != nil {
-			return "", errors.Wrap(err, "keytransfer/skc_key_transfer:getKeyForSW() Failed to encrypt data")
-		}
-		wrappedBytes = bytes
-	}
-
-	ivLength := 0
-	tagLength := 0
-
-	keyMetaDataSize := ivSize + tagSize + wrapSize
-
-	keyMetaData := make([]byte, keyMetaDataSize)
-	binary.LittleEndian.PutUint32(keyMetaData[0:], uint32(ivLength))
-	binary.LittleEndian.PutUint32(keyMetaData[4:], uint32(tagLength))
-	binary.LittleEndian.PutUint32(keyMetaData[8:], uint32(len(wrappedBytes)))
-
-	keyData := []byte{}
-	keyData = append(keyData, keyMetaData...)
-	keyData = append(keyData, wrappedBytes...)
-
-	return base64.StdEncoding.EncodeToString(keyData), nil
-
 }
 
 // AesEncrypt encrypts plain bytes using AES key passed as param

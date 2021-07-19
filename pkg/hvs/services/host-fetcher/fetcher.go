@@ -8,24 +8,25 @@ package hostfetcher
 import (
 	"context"
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models/taskstage"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models/taskstage"
 	"golang.org/x/sync/syncmap"
 	"reflect"
+	"runtime/debug"
 	"sync"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/utils"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/utils"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/chnlworkq"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	hc "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/chnlworkq"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	hc "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
@@ -138,7 +139,13 @@ func (svc *Service) startRetryChannelProcessor(retryMins int) {
 	// start worker go routines
 	svc.wg.Add(1)
 	go func() {
-		defer svc.wg.Done()
+		defer func() {
+			if err := recover(); err != nil {
+				defaultLog.Errorf("Panic occurred: %+v", err)
+				defaultLog.Error(string(debug.Stack()))
+			}
+			svc.wg.Done()
+		}()
 		for {
 			select {
 			case <-svc.quit:
@@ -202,7 +209,13 @@ func (svc *Service) doWork() {
 	defaultLog.Trace("hostfetcher/Service:doWork() Entering")
 	defer defaultLog.Trace("hostfetcher/Service:doWork() Leaving")
 
-	defer svc.wg.Done()
+	defer func() {
+		if err := recover(); err != nil {
+			defaultLog.Errorf("Panic occurred: %+v", err)
+			defaultLog.Error(string(debug.Stack()))
+		}
+		svc.wg.Done()
+	}()
 
 	// receive id of queued work over the channel.
 	// Fetch work context from the map.
@@ -456,9 +469,13 @@ func (svc *Service) updateMissingHostDetails(hostId uuid.UUID, manifest *types.H
 			// get flavorgroupID to create host-flavorgroup links
 			var fgIDs []uuid.UUID
 			for _, fgName := range host.FlavorgroupNames {
-				existingFlavorGroups, _ := svc.fgs.Search(&models.FlavorGroupFilterCriteria{
+				existingFlavorGroups, err := svc.fgs.Search(&models.FlavorGroupFilterCriteria{
 					NameEqualTo: fgName,
 				})
+				if err != nil {
+					defaultLog.Error("hostfetcher/Service:updateMissingHostDetails() Failed to search flavorgroup")
+					return
+				}
 				fgIDs = append(fgIDs, existingFlavorGroups[0].ID)
 			}
 			// add host-flavorgroup link

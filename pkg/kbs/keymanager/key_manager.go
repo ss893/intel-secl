@@ -7,30 +7,32 @@ package keymanager
 import (
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/kmipclient"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/kmipclient"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	"github.com/pkg/errors"
 )
 
 var defaultLog = log.GetDefaultLogger()
 
-func NewKeyManager(cfg *config.KmipConfig, provider string) (KeyManager, error) {
+func NewKeyManager(cfg *config.Configuration) (KeyManager, error) {
 	defaultLog.Trace("keymanager/key_manager:NewKeyManager() Entering")
 	defer defaultLog.Trace("keymanager/key_manager:NewKeyManager() Leaving")
 
-	if strings.ToLower(provider) == constants.KmipKeyManager {
+	if strings.ToLower(cfg.KeyManager) == constants.KmipKeyManager {
 		kmipClient := kmipclient.NewKmipClient()
-		err := kmipClient.InitializeClient(cfg.Version, cfg.ServerIP, cfg.ServerPort, cfg.ClientCert, cfg.ClientKey, cfg.RootCert)
+		err := kmipClient.InitializeClient(cfg.Kmip.Version, cfg.Kmip.ServerIP, cfg.Kmip.ServerPort, cfg.Kmip.Hostname, cfg.Kmip.Username, cfg.Kmip.Password, cfg.Kmip.ClientKeyFilePath, cfg.Kmip.ClientCertificateFilePath, cfg.Kmip.RootCertificateFilePath)
 		if err != nil {
-			return nil, errors.Wrap(err, "keymanager/key_manager:NewKeyManager() Failed to initialize client")
+			defaultLog.WithError(err).Error("keymanager/key_manager:NewKeyManager() Failed to initialize client")
+			return nil, errors.New("Failed to initialize KeyManager")
 		}
-		return &KmipManager{kmipClient}, nil
+		return NewKmipManager(kmipClient), nil
 	} else {
-		return &DirectoryManager{}, nil
+		defaultLog.Errorf("keymanager/key_manager:NewKeyManager() No Key Manager supported for provider: %s", cfg.KeyManager)
+		return nil, errors.Errorf("No Key Manager supported for provider: %s", cfg.KeyManager)
 	}
 }
 

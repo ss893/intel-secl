@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/external-artifacts/time/rate"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/external-artifacts/time/rate"
 )
 
 const Factor = 10

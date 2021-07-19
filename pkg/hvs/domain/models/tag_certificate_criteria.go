@@ -6,7 +6,7 @@ package models
 
 import (
 	"github.com/google/uuid"
-	asset_tag "github.com/intel-secl/intel-secl/v3/pkg/lib/asset-tag"
+	asset_tag "github.com/intel-secl/intel-secl/v4/pkg/lib/asset-tag"
 	"time"
 )
 

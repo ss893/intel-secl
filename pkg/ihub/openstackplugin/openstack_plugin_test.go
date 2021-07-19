@@ -15,11 +15,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/openstack"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
-	testutility "github.com/intel-secl/intel-secl/v3/pkg/ihub/test"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/saml"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/openstack"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
+	testutility "github.com/intel-secl/intel-secl/v4/pkg/ihub/test"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
 	"github.com/pkg/errors"
 )
 
@@ -120,7 +120,7 @@ func mockGetHostReports(h string, c *config.Configuration, t *testing.T) (*saml.
 	osurl = fmt.Sprintf(osurl, strings.ToLower(h))
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			MinVersion:         tls.VersionTLS12,
+			MinVersion:         tls.VersionTLS13,
 			InsecureSkipVerify: true}, // As this is test code
 	}
 	client := &http.Client{Transport: tr}

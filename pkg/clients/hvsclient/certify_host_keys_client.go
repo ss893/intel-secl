@@ -7,7 +7,7 @@ package hvsclient
 import (
 	"bytes"
 	"encoding/json"
-	wlaModel "github.com/intel-secl/intel-secl/v3/pkg/model/wlagent"
+	wlaModel "github.com/intel-secl/intel-secl/v4/pkg/model/wlagent"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"

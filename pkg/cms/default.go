@@ -7,9 +7,9 @@ package cms
 import (
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/constants"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/constants"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/spf13/viper"
 )
 

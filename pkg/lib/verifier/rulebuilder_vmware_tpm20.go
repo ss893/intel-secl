@@ -9,10 +9,11 @@ package verifier
 //
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/verifier/rules"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	hvsconstants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier/rules"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
 type ruleBuilderVMWare20 struct {
@@ -33,7 +34,7 @@ func newRuleBuilderVMWare20(verifierCertificates VerifierCertificates, hostManif
 }
 
 func (builder *ruleBuilderVMWare20) GetName() string {
-	return "VMware Host Trust Policy"
+	return hvsconstants.VmwareBuilder
 }
 
 // From 'design' repo at isecl/libraries/verifier/verifier.md...
@@ -67,134 +68,9 @@ func (builder *ruleBuilderVMWare20) GetAssetTagRules() ([]rules.Rule, error) {
 }
 
 // From 'design' repo at isecl/libraries/verifier/verifier.md...
-// PcrMatchesConstant rule for PCR 0, 17, 18
-// PcrEventLogEquals for 17,18
-// PcrEventLogIntegrity rule for 17,18
-func (builder *ruleBuilderVMWare20) GetPlatformRules() ([]rules.Rule, error) {
-
-	var results []rules.Rule
-
-	pcrs17and18 := []types.PcrIndex{types.PCR17, types.PCR18}
-	pcrsZero17and18 := append(pcrs17and18, types.PCR0)
-
-	//
-	// Add 'PcrMatchesConstant' rules...
-	//
-	pcrMatchesContantsRules, err := getPcrMatchesConstantRules(pcrsZero17and18, &builder.signedFlavor.Flavor, common.FlavorPartPlatform)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrMatchesContantsRules...)
-
-	//
-	// Add 'PcrEventLogEquals' rules...
-	//
-	pcrEventLogEqualsRules, err := getPcrEventLogEqualsRules(pcrs17and18, &builder.signedFlavor.Flavor, common.FlavorPartPlatform)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrEventLogEqualsRules...)
-
-	//
-	// Add 'PcrEventLogIntegrity' rules...
-	//
-	pcrEventLogIntegrityRules, err := getPcrEventLogIntegrityRules(pcrs17and18, &builder.signedFlavor.Flavor, common.FlavorPartPlatform)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrEventLogIntegrityRules...)
-
-	return results, nil
-}
-
-// From 'design' repo at isecl/libraries/verifier/verifier.md...
-// PcrMatchesConstant rule for PCR 19
-// PcrEventLogEquals rule for PCR 19
-// PcrEventLogIntegrity rule for PCR 19, 20, 21
-// PcrEventLogEqualsExcluding rule for PCR 20,21
-func (builder *ruleBuilderVMWare20) GetOsRules() ([]rules.Rule, error) {
-
-	var results []rules.Rule
-
-	pcr19 := []types.PcrIndex{types.PCR19}
-	pcrs20and21 := []types.PcrIndex{types.PCR20, types.PCR21}
-	pcrs19thru21 := append(pcr19, pcrs20and21...)
-
-	//
-	// Add 'PcrMatchesConstant' rules...
-	//
-	pcrMatchesContantsRules, err := getPcrMatchesConstantRules(pcr19, &builder.signedFlavor.Flavor, common.FlavorPartOs)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrMatchesContantsRules...)
-
-	//
-	// Add 'PcrEventLogEquals' rules...
-	//
-	pcrEventLogEqualsRules, err := getPcrEventLogEqualsRules(pcr19, &builder.signedFlavor.Flavor, common.FlavorPartOs)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrEventLogEqualsRules...)
-
-	//
-	// Add 'PcrEventLogIntegrity' rules...
-	//
-	pcrEventLogIntegrityRules, err := getPcrEventLogIntegrityRules(pcrs19thru21, &builder.signedFlavor.Flavor, common.FlavorPartOs)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrEventLogIntegrityRules...)
-
-	//
-	// Add 'PcrEventLogEqualsExcluding' rules...
-	//
-	pcrEventLogEqualsExcludingRules, err := getPcrEventLogEqualsExcludingRules(pcrs20and21, &builder.signedFlavor.Flavor, common.FlavorPartOs)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrEventLogEqualsExcludingRules...)
-
-	return results, nil
-}
-
-// From 'design' repo at isecl/libraries/verifier/verifier.md...
-// PcrEventLogIncludes rule for PCR 20,21
-// PcrEventLogIntegrity rule for PCR 20,21
-func (builder *ruleBuilderVMWare20) GetHostUniqueRules() ([]rules.Rule, error) {
-
-	var results []rules.Rule
-	pcrs20and21 := []types.PcrIndex{types.PCR20, types.PCR21}
-
-	//
-	// Add 'PcrEventLogIncludes' rules...
-	//
-	pcrEventLogIncludesRules, err := getPcrEventLogIncludesRules(pcrs20and21, &builder.signedFlavor.Flavor, common.FlavorPartHostUnique)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrEventLogIncludesRules...)
-
-	//
-	// Add 'PcrEventLogIntegrity' rules...
-	//
-	pcrEventLogIntegrityRules, err := getPcrEventLogIntegrityRules(pcrs20and21, &builder.signedFlavor.Flavor, common.FlavorPartHostUnique)
-	if err != nil {
-		return nil, err
-	}
-
-	results = append(results, pcrEventLogIntegrityRules...)
-
-	return results, nil
+//(none)
+func (builder *ruleBuilderVMWare20) GetAikCertificateTrustedRule(fp common.FlavorPart) ([]rules.Rule, error) {
+	return nil, nil
 }
 
 // From 'design' repo at isecl/libraries/verifier/verifier.md...

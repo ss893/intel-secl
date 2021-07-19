@@ -8,6 +8,8 @@ package chnlworkq
 
 import (
 	"container/list"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"runtime/debug"
 	"sync"
 )
 import (
@@ -16,6 +18,8 @@ import (
 
 type procReq = func(interface{}) interface{}
 type procWork = func(interface{})
+
+var defaultLog = commLog.GetDefaultLogger()
 
 // New make a work queue. It creates a channel that can be used to submit requests and another channel from which
 // queued items can be pulled out. Here internal storage (using double linked list) is used instead of allocating a
@@ -32,7 +36,14 @@ func New(reqBufSize, workBufSize int, procReq procReq, procWork procWork, quit c
 	}
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
+		defer func() {
+			if err := recover(); err != nil {
+				defaultLog.Errorf("Panic occurred: %+v", err)
+				defaultLog.Error(string(debug.Stack()))
+			}
+			wg.Done()
+		}()
+
 		l := list.New()
 		var w interface{}
 		var getNext bool

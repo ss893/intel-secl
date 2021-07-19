@@ -10,9 +10,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/util"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/util"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
@@ -234,8 +234,6 @@ func (tc *taClient) DeploySoftwareManifest(manifest taModel.Manifest) error {
 
 	buffer := new(bytes.Buffer)
 	err = xml.NewEncoder(buffer).Encode(manifest)
-	//This is added due to bug in xml encode where LF is escaped into &#xA;
-	buffer = bytes.NewBuffer(bytes.Replace(buffer.Bytes(), []byte("&#xA;"), []byte("\n"), -1))
 	log.Debugf("Manifest request: %s", buffer.String())
 	httpRequest, err := http.NewRequest("POST", requestURL.String(), buffer)
 	if err != nil {
@@ -266,8 +264,6 @@ func (tc *taClient) GetMeasurementFromManifest(manifest taModel.Manifest) (taMod
 
 	buffer := new(bytes.Buffer)
 	err = xml.NewEncoder(buffer).Encode(manifest)
-	//This is added due to bug in xml encode where LF is escaped into &#xA;
-	buffer = bytes.NewBuffer(bytes.Replace(buffer.Bytes(), []byte("&#xA;"), []byte("\n"), -1))
 	log.Debugf("Manifest request: %s", buffer.String())
 	httpRequest, err := http.NewRequest("POST", requestURL.String(), buffer)
 	if err != nil {

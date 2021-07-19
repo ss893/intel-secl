@@ -7,17 +7,19 @@ package hvs
 import (
 	"crypto/x509/pkix"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/config"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
+	types "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
+
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
 	"reflect"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/services/hrrs"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/tasks"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hrrs"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/tasks"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -135,6 +137,7 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		ConnectionRetryAttempts: viper.GetInt("db-conn-retry-attempts"),
 		ConnectionRetryTime:     viper.GetInt("db-conn-retry-time"),
 	}
+
 	runner.AddTask("database", "", &tasks.DBSetup{
 		DBConfigPtr:   &a.Config.DB,
 		DBConfig:      dbConf,
@@ -187,6 +190,7 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		},
 		DefaultPort:   constants.DefaultHVSListenerPort,
 		AppConfig:     &a.Config,
+		NatServers:    viper.GetString("nats-servers"),
 		ConsoleWriter: a.consoleWriter(),
 	})
 	runner.AddTask("download-cert-saml", "saml", a.downloadCertTask("saml"))
@@ -195,7 +199,22 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("create-privacy-ca", "privacy-ca", a.selfSignTask("privacy-ca"))
 	runner.AddTask("create-endorsement-ca", "endorsement-ca", a.selfSignTask("endorsement-ca"))
 	runner.AddTask("create-tag-ca", "tag-ca", a.selfSignTask("tag-ca"))
+	runner.AddTask("create-default-flavor-template", "", &tasks.CreateDefaultFlavorTemplate{
+		DBConf:    a.Config.DB,
+		Directory: constants.DefaultFlavorTemplatesDirectory,
+	})
 
+	if strings.TrimSpace(viper.GetString("nats-servers")) != "" || len(a.Config.NATS.Servers) != 0 {
+		runner.AddTask("download-credential", "", &setup.DownloadCredential{
+			AasBaseUrL:         viper.GetString("aas-base-url"),
+			BearerToken:        viper.GetString("bearer-token"),
+			CaCertDirPath:      constants.TrustedRootCACertsDir,
+			CredentialFilePath: constants.NatsCredentials,
+			CreateCredentialReq: types.CreateCredentialsReq{
+				ComponentType: constants.ServiceName,
+			},
+		})
+	}
 	return runner, nil
 }
 

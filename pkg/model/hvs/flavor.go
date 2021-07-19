@@ -5,7 +5,7 @@
 package hvs
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 )
 
 // Flavor sourced from the lib/flavor - this is a external request/response on the HVS API
@@ -31,7 +31,7 @@ type SignedFlavorCollection struct {
 func (s SignedFlavorCollection) GetFlavors(flavorPart string) []SignedFlavor {
 	signedFlavors := []SignedFlavor{}
 	for _, flavor := range s.SignedFlavors {
-		if flavor.Flavor.Meta.Description.FlavorPart == flavorPart {
+		if flavor.Flavor.Meta.Description[model.FlavorPart] == flavorPart {
 			signedFlavors = append(signedFlavors, flavor)
 		}
 	}

@@ -17,6 +17,7 @@ data:
   TLS_SAN_LIST: kbs-svc.isecl.svc.cluster.local
   ENDPOINT_URL: https://kbs-svc.isecl.svc.cluster.local:9443/v1
   KEY_MANAGER: KMIP
+  KMIP_HOSTNAME:
   KMIP_SERVER_IP:
   KMIP_SERVER_PORT:
   KMIP_CLIENT_CERT_PATH:

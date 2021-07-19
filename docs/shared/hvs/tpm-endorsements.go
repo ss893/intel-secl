@@ -5,7 +5,7 @@
 
 package hvs
 
-import "github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+import "github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 
 // TpmEndorsement response payload
 // swagger:parameters TpmEndorsement

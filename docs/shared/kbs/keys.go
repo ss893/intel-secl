@@ -4,7 +4,7 @@
  */
 package kbs
 
-import "github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+import "github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 
 type KeyResponses []kbs.KeyResponse
 
@@ -58,7 +58,7 @@ type KeyTransferAttributes struct {
 //    | Attribute   | Description |
 //    |-------------|-------------|
 //    | algorithm   | Encryption algorithm used to create or register key. Supported algorithms are AES, RSA and EC. |
-//    | key_length  | Key length used to create key. Supported key lengths are 128,192,256 bits for AES and 2048,3072,4096,7680,15360 bits for RSA. |
+//    | key_length  | Key length used to create key. Supported key lengths are 128,192,256 bits for AES and 2048,3072,4096,7680 bits for RSA. |
 //    | curve_type  | Elliptic curve used to create key. Supported curves are secp256r1, secp384r1 and secp521r1. |
 //    | key_string  | Base64 encoded private key to be registered. Supported only if key is created locally. |
 //    | kmip_key_id | Unique KMIP identifier of key to be registered. Supported only if key is created on KMIP server. |
@@ -298,7 +298,7 @@ type KeyTransferAttributes struct {
 //   in: query
 //   type: integer
 //   required: false
-//   enum: [128, 192, 256, 2048, 3072, 4096, 7680, 15360]
+//   enum: [128, 192, 256, 2048, 3072, 4096, 7680]
 // - name: curveType
 //   description: Elliptic Curve name.
 //   in: query

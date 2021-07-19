@@ -7,9 +7,9 @@ package config
 import (
 	"os"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -41,12 +41,15 @@ type KBSConfig struct {
 }
 
 type KmipConfig struct {
-	Version    string `yaml:"version" mapstructure:"version"`
-	ServerIP   string `yaml:"server-ip" mapstructure:"server-ip"`
-	ServerPort string `yaml:"server-port" mapstructure:"server-port"`
-	ClientCert string `yaml:"client-cert-path" mapstructure:"client-cert-path"`
-	ClientKey  string `yaml:"client-key-path" mapstructure:"client-key-path"`
-	RootCert   string `yaml:"root-cert-path" mapstructure:"root-cert-path"`
+	Version                   string `yaml:"version" mapstructure:"version"`
+	ServerIP                  string `yaml:"server-ip" mapstructure:"server-ip"`
+	ServerPort                string `yaml:"server-port" mapstructure:"server-port"`
+	Hostname                  string `yaml:"hostname" mapstructure:"hostname"`
+	Username                  string `yaml:"username" mapstructure:"username"`
+	Password                  string `yaml:"password" mapstructure:"password"`
+	ClientKeyFilePath         string `yaml:"client-key-path" mapstructure:"client-key-path"`
+	ClientCertificateFilePath string `yaml:"client-cert-path" mapstructure:"client-cert-path"`
+	RootCertificateFilePath   string `yaml:"root-cert-path" mapstructure:"root-cert-path"`
 }
 
 type SKCConfig struct {

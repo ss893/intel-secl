@@ -166,20 +166,26 @@ main() {
     fi
   fi
 
-  if [ "$UPGRADE_VERSION" = "$COMPONENT_VERSION" ]; then
-    echo "Installed component is already up to date, no need of upgrade"
-    echo "Exiting upgrade"
-    exit 125
+  if [ -z "$BACKUP_ONLY" ]; then
+    if [ "$UPGRADE_VERSION" = "$COMPONENT_VERSION" ]; then
+      echo "Installed component is already up to date, upgrade not required"
+      echo "Exiting upgrade"
+      exit 125
+    fi
+
+    UPGRADE_MANIFEST="./manifest/supported_versions"
+    IFS=$'\r\n' GLOBIGNORE='*' command eval 'SUPPORTED_VERSION=($(cat ${UPGRADE_MANIFEST}))'
+    if $(echo ${SUPPORTED_VERSION[@]} | grep -q "$COMPONENT_VERSION"); then
+      echo "Upgrade path from $COMPONENT_VERSION to $UPGRADE_VERSION is supported, proceeding with the upgrade"
+    else
+      echo "Upgrade path is not supported"
+      exit 1
+    fi
   fi
 
-  UPGRADE_MANIFEST="./manifest/supported_versions"
-  IFS=$'\r\n' GLOBIGNORE='*' command eval 'SUPPORTED_VERSION=($(cat ${UPGRADE_MANIFEST}))'
-  if $(echo ${SUPPORTED_VERSION[@]} | grep -q "$COMPONENT_VERSION"); then
-    echo "Upgrade path from $COMPONENT_VERSION to $UPGRADE_VERSION is supported, proceeding with the upgrade"
-  else
-    echo "Upgrade path is not supported"
-    exit 1
-  fi
+  echo "Running pre upgrade checks"
+  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config $CONFIG_PATH "./checks" ".sh"
+  exit_on_error false "Failed to upgrade as upgrade checks failed."
 
   stop_service
 
@@ -212,13 +218,17 @@ main() {
 
   check_service_stop_status
 
-  echo "Migrating Configuration"
-  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config
+  echo "Replacing executable to the latest version"
+  \cp -f ${NEW_EXEC_NAME} ${INSTALLED_EXEC_PATH}
+  exit_on_error false "Failed to copy to new executable."
+
+  echo "Migrating Configuration if required"
+  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config $CONFIG_PATH "./config" ".sh"
   exit_on_error false "Failed to upgrade the configuration to the latest."
 
-  echo "Replacing executable to the latest version"
-  cp -f ${NEW_EXEC_NAME} ${INSTALLED_EXEC_PATH}
-  exit_on_error false "Failed to copy to new executable."
+  echo "Migrating Database if required"
+  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config $CONFIG_PATH "./database" ""
+  exit_on_error false "Failed to upgrade the database to the latest."
 
   if [ "$NEW_EXEC_NAME" != "$OLD_EXEC_NAME" ]; then
     echo "Updating component directories and symlinks"

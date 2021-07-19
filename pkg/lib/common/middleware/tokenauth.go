@@ -6,14 +6,14 @@ package middleware
 
 import (
 	"fmt"
-	jwtauth "github.com/intel-secl/intel-secl/v3/pkg/lib/common/jwt"
-	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
-	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	jwtauth "github.com/intel-secl/intel-secl/v4/pkg/lib/common/jwt"
+	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
+	ct "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"net/http"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/context"
-	clog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/context"
+	clog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"strings"
 	"time"
 

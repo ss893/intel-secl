@@ -9,24 +9,24 @@ import (
 	"crypto"
 	"crypto/sha1"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/util"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/util"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/k8s"
-	vsPlugin "github.com/intel-secl/intel-secl/v3/pkg/ihub/attestationPlugin"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/ihub/constants"
-	types "github.com/intel-secl/intel-secl/v3/pkg/ihub/model"
-	model "github.com/intel-secl/intel-secl/v3/pkg/model/k8s"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/k8s"
+	vsPlugin "github.com/intel-secl/intel-secl/v4/pkg/ihub/attestationPlugin"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
+	types "github.com/intel-secl/intel-secl/v4/pkg/ihub/model"
+	model "github.com/intel-secl/intel-secl/v4/pkg/model/k8s"
 
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
-	commonLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	commonLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 
 	"github.com/Waterdrips/jwt-go"
 	"github.com/google/uuid"
@@ -157,7 +157,7 @@ func FilterHostReports(k8sDetails *KubernetesDetails, hostDetails *types.HostDet
 
 	}
 
-	log.Debug("k8splugin/k8s_plugin:FilterHostReports() Setting Values to Host")
+	log.Debugf("k8splugin/k8s_plugin:FilterHostReports() Setting Values for Host: %s", hostDetails.HostID.String())
 
 	overAllTrust, _ := strconv.ParseBool(trustMap["TRUST_OVERALL"])
 	hostDetails.AssetTags = assetTagsMap
@@ -198,6 +198,8 @@ func GetSignedTrustReport(hostList model.Host, k8sDetails *KubernetesDetails, at
 			TcbUpToDate:     hostList.TcbUpToDate,
 			SgxTrustValidTo: *hostList.SgxTrustValidTo,
 		})
+	} else {
+		return "", errors.Errorf("k8splugin/k8s_plugin:GetSignedTrustReport() : AttestationType \"%s\" not supported", attestationType)
 	}
 
 	token.Header["kid"] = sha1Hash
@@ -217,9 +219,9 @@ func UpdateCRD(k8sDetails *KubernetesDetails) error {
 
 	log.Trace("k8splugin/k8s_plugin:UpdateCRD() Entering")
 	defer log.Trace("k8splugin/k8s_plugin:UpdateCRD() Leaving")
-	config := k8sDetails.Config
-	crdName := config.Endpoint.CRDName
-	urlPath := config.Endpoint.URL + constants.KubernetesCRDAPI + crdName
+	k8sConfig := k8sDetails.Config
+	crdName := k8sConfig.Endpoint.CRDName
+	urlPath := k8sConfig.Endpoint.URL + constants.KubernetesCRDAPI + crdName
 
 	parsedUrl, err := url.Parse(urlPath)
 	if err != nil {
@@ -272,7 +274,7 @@ func UpdateCRD(k8sDetails *KubernetesDetails) error {
 		if err != nil {
 			return errors.Wrap(err, "k8splugin/k8s_plugin:UpdateCRD() : Error populating crd")
 		}
-		log.Debug("k8splugin/k8s_plugin:UpdateCRD() Printing the spec hostList : ", crdResponse.Spec.HostList)
+		log.Debugf("k8splugin/k8s_plugin:UpdateCRD() Printing the spec hostList : %v", crdResponse.Spec.HostList)
 		err := PostCRD(k8sDetails, &crdResponse)
 		if err != nil {
 			return errors.Wrap(err, "k8splugin/k8s_plugin:UpdateCRD() : Error in posting CRD")
@@ -333,9 +335,9 @@ func PutCRD(k8sDetails *KubernetesDetails, crd *model.CRD) error {
 	log.Trace("k8splugin/k8s_plugin:PutCRD() Entering")
 	defer log.Trace("k8splugin/k8s_plugin:PutCRD() Leaving")
 
-	config := k8sDetails.Config
-	crdName := config.Endpoint.CRDName
-	urlPath := config.Endpoint.URL + constants.KubernetesCRDAPI + crdName
+	k8sConfig := k8sDetails.Config
+	crdName := k8sConfig.Endpoint.CRDName
+	urlPath := k8sConfig.Endpoint.URL + constants.KubernetesCRDAPI + crdName
 
 	crdJson, err := json.Marshal(crd)
 	if err != nil {
@@ -375,9 +377,9 @@ func PostCRD(k8sDetails *KubernetesDetails, crd *model.CRD) error {
 
 	log.Trace("k8splugin/k8s_plugin:PostCRD() Starting")
 	defer log.Trace("k8splugin/k8s_plugin:PostCRD() Leaving")
-	config := k8sDetails.Config
-	crdName := config.Endpoint.CRDName
-	urlPath := config.Endpoint.URL + constants.KubernetesCRDAPI + crdName
+	k8sConfig := k8sDetails.Config
+	crdName := k8sConfig.Endpoint.CRDName
+	urlPath := k8sConfig.Endpoint.URL + constants.KubernetesCRDAPI + crdName
 
 	crdJSON, err := json.Marshal(crd)
 	if err != nil {
@@ -412,11 +414,13 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 
 	var sgxData types.PlatformDataSGX
 
+	log.Debug("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching hosts from Kubernetes")
 	err := GetHosts(&kubernetes)
 	if err != nil {
 		return errors.Wrap(err, "k8splugin/k8s_plugin:SendDataToEndPoint() Error in getting the Hosts from kubernetes")
 	}
 
+	log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Fetched %d hosts from Kubernetes", len(kubernetes.HostDetailsMap))
 	for key := range kubernetes.HostDetailsMap {
 		hvsFail := true
 		shvsFail := true
@@ -424,9 +428,10 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 		hostDetails := kubernetes.HostDetailsMap[key]
 
 		if kubernetes.Config.AttestationService.HVSBaseURL != "" {
+			log.Debugf("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching TrustReport for host %s from HVS", hostDetails.HostID.String())
 			err := FilterHostReports(&kubernetes, &hostDetails, kubernetes.TrustedCAsStoreDir, kubernetes.SamlCertFilePath)
 			if err != nil {
-				log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Error in Filtering Report for Hosts")
+				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get TrustReport for host %s from HVS", hostDetails.HostID.String())
 			} else {
 				hvsFail = false
 				// mark Trust Agent as running on this host
@@ -434,9 +439,10 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 			}
 		}
 		if kubernetes.Config.AttestationService.SHVSBaseURL != "" {
+			log.Debugf("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching PlatformData for host %s from SHVS", hostDetails.HostName)
 			platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostName, kubernetes.Config, kubernetes.TrustedCAsStoreDir)
 			if err != nil {
-				log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Host %s doesn't exist in SHVS", hostDetails.HostID)
+				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get PlatformData for host %s from SHVS", hostDetails.HostName)
 			} else {
 				shvsFail = false
 				// mark TEE agent as running on this host
@@ -474,10 +480,12 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 	}
 
 	if len(kubernetes.HostDetailsMap) > 0 {
+		log.Debug("Pushing CRDs to Kubernetes")
 		err = UpdateCRD(&kubernetes)
 		if err != nil {
 			return errors.Wrap(err, "k8splugin/k8s_plugin:SendDataToEndPoint() Error in Updating CRDs for Kubernetes")
 		}
+		log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Pushed CRDs to Kubernetes for %d hosts", len(kubernetes.HostDetailsMap))
 	}
 	return nil
 }

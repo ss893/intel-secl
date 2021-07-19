@@ -6,7 +6,7 @@ package model
 
 import (
 	"github.com/google/uuid"
-	hcConstants "github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/constants"
+	hcConstants "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
 )
 
 /**
@@ -18,10 +18,10 @@ import (
 type Meta struct {
 	Schema *Schema `json:"schema,omitempty"`
 	// swagger:strfmt uuid
-	ID          uuid.UUID          `json:"id"`
-	Realm       string             `json:"realm,omitempty"`
-	Description Description        `json:"description,omitempty"`
-	Vendor      hcConstants.Vendor `json:"vendor,omitempty"`
+	ID          uuid.UUID              `json:"id"`
+	Realm       string                 `json:"realm,omitempty"`
+	Description map[string]interface{} `json:"description,omitempty"`
+	Vendor      hcConstants.Vendor     `json:"vendor,omitempty"`
 }
 
 // Schema defines the Uri of the schema

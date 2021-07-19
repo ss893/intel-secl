@@ -5,12 +5,12 @@
 package controllers_test
 
 import (
-	kbsRoutes "github.com/intel-secl/intel-secl/v3/pkg/kbs/router"
+	kbsRoutes "github.com/intel-secl/intel-secl/v4/pkg/kbs/router"
 	"net/http"
 	"net/http/httptest"
 
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/controllers"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/controllers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -33,7 +33,7 @@ var _ = Describe("VersionController", func() {
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(200))
+				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var version string
 				version = string(w.Body.Bytes())

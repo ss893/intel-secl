@@ -10,10 +10,10 @@ package hvs
 
 import (
 	"github.com/google/uuid"
-	constants "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	ta "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	ta "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 )
 
 type TrustReport struct {
@@ -24,42 +24,55 @@ type TrustReport struct {
 }
 
 type RuleResult struct {
-	Rule RuleInfo `json:"rule"`
-	// swagger:strfmt uuid
-	FlavorId *uuid.UUID `json:"flavor_id,omitempty"`
-	Faults   []Fault    `json:"faults,omitempty"`
-	Trusted  bool       `json:"trusted"`
+	Rule          RuleInfo        `json:"rule"`
+	FlavorId      *uuid.UUID      `json:"flavor_id,omitempty"`
+	MismatchField []MismatchField `json:"mismatch_fields,omitempty"`
+	Faults        []Fault         `json:"faults,omitempty"`
+	Trusted       bool            `json:"trusted"`
+}
+
+type MismatchField struct {
+	Name              string              `json:"name"`
+	Description       string              `json:"description"`
+	PcrIndex          *types.PcrIndex     `json:"pcr_index,omitempty"`
+	PcrBank           *types.SHAAlgorithm `json:"pcr_bank,omitempty"`
+	MissingEntries    []types.EventLog    `json:"missing_entries,omitempty"`
+	UnexpectedEntries []types.EventLog    `json:"unexpected_entries,omitempty"`
 }
 
 type RuleInfo struct {
-	Name        string              `json:"rule_name,omitempty"`
-	Markers     []common.FlavorPart `json:"markers,omitempty"`
-	ExpectedPcr *types.Pcr          `json:"expected_pcr,omitempty"`
-	// swagger:strfmt uuid
-	FlavorID              *uuid.UUID             `json:"flavor_id,omitempty"`
-	FlavorName            *string                `json:"flavor_name,omitempty"`
-	ExpectedValue         *string                `json:"expected_value,omitempty"`
-	ExpectedMeasurements  []ta.FlavorMeasurement `json:"expected_measurements,omitempty"`
-	ExpectedEventLogs     []types.EventLog       `json:"expected,omitempty"`
-	ExpectedEventLogEntry *types.EventLogEntry   `json:"expected,omitempty"`
-	ExpectedTag           []byte                 `json:"expected_tag,omitempty"`
-	Tags                  map[string]string      `json:"tags,omitempty"`
+	Name                     string                 `json:"rule_name,omitempty"`
+	Markers                  []common.FlavorPart    `json:"markers,omitempty"`
+	ExpectedPcr              *types.FlavorPcrs      `json:"expected_pcr,omitempty"`
+	PCR                      *types.Pcr             `json:"pcr,omitempty"`
+	Measurement              string                 `json:"measurement,omitempty"` //required
+	PCRMatches               bool                   `json:"pcr_matches,omitempty"`
+	FlavorID                 *uuid.UUID             `json:"flavor_id,omitempty"`
+	FlavorName               *string                `json:"flavor_name,omitempty"`
+	ExpectedValue            *string                `json:"expected_value,omitempty"`
+	ExpectedMeasurements     []ta.FlavorMeasurement `json:"expected_measurements,omitempty"`
+	ExpectedPcrEventLogEntry *types.TpmEventLog     `json:"expected_pcrvalues,omitempty"`
+	Exclude_Tags             []string               `json:"excluding_tag,omitempty"`
+	ExpectedTag              []byte                 `json:"expected_tag,omitempty"`
+	Tags                     map[string]string      `json:"tags,omitempty"`
 }
 
 type Fault struct {
-	Name              string           `json:"fault_name"`
-	Description       string           `json:"description"`
-	PcrIndex          *types.PcrIndex  `json:"pcr_index,omitempty"`
-	ExpectedPcrValue  *string          `json:"expected_value,omitempty"`
-	ActualPcrValue    *string          `json:"actual_value,omitempty"`
-	MissingEntries    []types.EventLog `json:"missing_entries,omitempty"`
-	UnexpectedEntries []types.EventLog `json:"unexpected_entries,omitempty"`
-	// swagger:strfmt uuid
+	Name                   string                 `json:"fault_name"`
+	Description            string                 `json:"description"`
+	PcrIndex               *types.PcrIndex        `json:"pcr_index,omitempty"`
+	PcrBank                *types.SHAAlgorithm    `json:"pcr_bank,omitempty"`
+	ExpectedPcrValue       *string                `json:"expected_pcrvalue,omitempty"`
+	ActualPcrValue         *string                `json:"actual_pcrvalue,omitempty"`
+	MissingEntries         []types.EventLog       `json:"missing_entries,omitempty"`
+	UnexpectedEntries      []types.EventLog       `json:"unexpected_entries,omitempty"`
+	ExcludeTags            []string               `json:"exclude_tags,omitempty"`
 	FlavorId               *uuid.UUID             `json:"flavor_id,omitempty"`
-	UnexpectedMeasurements []ta.FlavorMeasurement `json:"unexpected_entries,omitempty"`
-	MissingMeasurements    []ta.FlavorMeasurement `json:"missing_entries,omitempty"`
-	MismatchMeasurements   []ta.FlavorMeasurement `json:"unexpected_entries,omitempty"`
+	UnexpectedMeasurements []ta.FlavorMeasurement `json:"unexpected_measurements,omitempty"`
+	MissingMeasurements    []ta.FlavorMeasurement `json:"missing_measurements,omitempty"`
+	MismatchMeasurements   []ta.FlavorMeasurement `json:"mismatch_measurements,omitempty"`
 	ExpectedValue          *string                `json:"expected_value,omitempty"`
+	CalculatedValue        *string                `json:"calculated_value,omitempty"`
 	ActualValue            *string                `json:"actual_value,omitempty"`
 	MeasurementId          *string                `json:"measurement_id,omitempty"`
 	FlavorDigestAlg        *string                `json:"flavor_digest_alg,omitempty"`

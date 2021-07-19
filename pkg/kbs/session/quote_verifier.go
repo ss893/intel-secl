@@ -8,16 +8,16 @@ package session
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/kbs"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	"net/http"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/util"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/util"
 	"github.com/pkg/errors"
 
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
-	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"
+	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 )
 
 var defaultLog = log.GetDefaultLogger()

@@ -7,7 +7,7 @@ package cms
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/cms/version"
+	"github.com/intel-secl/intel-secl/v4/pkg/cms/version"
 )
 
 const helpStr = `

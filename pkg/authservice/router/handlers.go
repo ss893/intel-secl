@@ -6,17 +6,17 @@ package router
 
 import (
 	"fmt"
-	consts "github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/auth"
-	comctx "github.com/intel-secl/intel-secl/v3/pkg/lib/common/context"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	ct "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+	consts "github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/auth"
+	comctx "github.com/intel-secl/intel-secl/v4/pkg/lib/common/context"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	ct "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"github.com/pkg/errors"
 	"net/http"
 
 	"github.com/jinzhu/gorm"
 
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 )
 
 // endpointHandler which writes generic response

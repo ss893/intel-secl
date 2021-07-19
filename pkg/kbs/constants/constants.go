@@ -31,7 +31,7 @@ const (
 	TpmIdentityCertsDir       = ConfigDir + "certs/tpm-identity/"
 
 	// defaults
-	DefaultKeyManager         = "Directory"
+	DefaultKeyManager         = "Kmip"
 	DefaultEndpointUrl        = "http://localhost"
 	DefaultTransferPolicy     = "urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization"
 	DefaultConfigFilePath     = ConfigDir + "config.yml"
@@ -66,8 +66,7 @@ const (
 	DefaultKBSListenerPort   = 9443
 
 	// keymanager constants
-	DirectoryKeyManager = "directory"
-	KmipKeyManager      = "kmip"
+	KmipKeyManager = "kmip"
 
 	// algorithm constants
 	CRYPTOALG_AES = "AES"
@@ -75,17 +74,17 @@ const (
 	CRYPTOALG_EC  = "EC"
 
 	// kmip constants
-	KMIP_CRYPTOALG_AES  = 0x03
-	KMIP_CRYPTOALG_RSA  = 0x04
-	KMIP_CRYPTOALG_EC   = 0x06
-	KMIP_CLIENT_SUCCESS = 0x00
+	KMIP_1_4           = "1.4"
+	KMIP_2_0           = "2.0"
+	KMIP_CRYPTOALG_AES = 0x03
+	KMIP_CRYPTOALG_RSA = 0x04
+	KMIP_CRYPTOALG_EC  = 0x06
 
 	NonceLength = 32
 )
 
-///SKC Specific constants
+// SKC Specific constants
 const (
-	DefaultSWLabel          = "SW"
 	DefaultSGXLabel         = "SGX"
 	VerifyQuote             = "/sgx_qv_verify_quote"
 	KeyTransferOpertaion    = "transfer key"
@@ -93,7 +92,6 @@ const (
 	SuccessStatus           = "success"
 	FailureStatus           = "failure"
 	SGXAlgorithmType        = "AES256-GCM"
-	SWAlgorithmType         = "AES256-WRAP"
 	TransferRoleType        = "KeyTransfer"
 	ContextPermissionsRegex = "^(permissions=)(.*)$"
 	TCBLevelOutOfDate       = "OutOfDate"

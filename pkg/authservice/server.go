@@ -10,13 +10,13 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/gorilla/handlers"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/postgres"
-	"github.com/intel-secl/intel-secl/v3/pkg/authservice/router"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	jwtauth "github.com/intel-secl/intel-secl/v3/pkg/lib/common/jwt"
-	commLog "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/postgres"
+	"github.com/intel-secl/intel-secl/v4/pkg/authservice/router"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	jwtauth "github.com/intel-secl/intel-secl/v4/pkg/lib/common/jwt"
+	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	stdlog "log"
@@ -88,7 +88,7 @@ func (a *App) startServer() error {
 	routes.SkipClean(true)
 
 	tlsconfig := &tls.Config{
-		MinVersion: tls.VersionTLS12,
+		MinVersion: tls.VersionTLS13,
 		CipherSuites: []uint16{tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,

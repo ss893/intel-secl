@@ -6,7 +6,7 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"

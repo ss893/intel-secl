@@ -6,7 +6,7 @@
 package util
 
 import (
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

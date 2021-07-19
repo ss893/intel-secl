@@ -50,6 +50,9 @@ const (
 
 	TrustedKeysDir = ConfigDir + "trusted-keys/"
 
+	// NatsCredentials path
+	NatsCredentials = ConfigDir + "credentials/isecl-hvs.creds"
+
 	// saml key and cert
 	SAMLCertFile = TrustedCaCertsDir + "saml-cert.pem"
 	SAMLKeyFile  = TrustedKeysDir + "saml.key"
@@ -174,6 +177,15 @@ const (
 const (
 	MaxNumDaysSearchLimit = 365
 )
+
+//Schema location constants
+const (
+	CommonDefinitionsSchema = "/etc/hvs/schema/common.schema.json"
+	FlavorTemplateSchema    = "/etc/hvs/schema/flavor-template.json"
+)
+
+//Default flavor templates directory
+const DefaultFlavorTemplatesDirectory = "/etc/hvs/templates/"
 
 const (
 	FvsNumberOfVerifiers               = "fvs-number-of-verifiers"

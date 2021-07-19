@@ -6,21 +6,24 @@ package host_connector
 
 import (
 	"crypto"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/vmware"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/slice"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
-	"github.com/pkg/errors"
-	"github.com/vmware/govmomi/vim25/mo"
-	vim25Types "github.com/vmware/govmomi/vim25/types"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/vmware"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	"github.com/pkg/errors"
+	"github.com/vmware/govmomi/vim25/mo"
+	vim25Types "github.com/vmware/govmomi/vim25/types"
 )
 
 type VmwareConnector struct {
@@ -28,8 +31,6 @@ type VmwareConnector struct {
 }
 
 const (
-	EVENT_LOG_DIGEST_SHA1               = "com.intel.mtwilson.core.common.model.MeasurementSha1"
-	EVENT_LOG_DIGEST_SHA256             = "com.intel.mtwilson.core.common.model.MeasurementSha256"
 	TPM_SOFTWARE_COMPONENT_EVENT_TYPE   = "HostTpmSoftwareComponentEvent"
 	TPM_COMMAND_EVENT_TYPE              = "HostTpmCommandEvent"
 	TPM_OPTION_EVENT_TYPE               = "HostTpmOptionEvent"
@@ -40,6 +41,10 @@ const (
 	DETAILS_SUFFIX                      = "Details"
 	BOOT_OPTIONS_PREFIX                 = "bootOptions."
 	BOOT_SECURITY_OPTIONS_PREFIX        = "bootSecurityOption."
+	VIB_NAME_TYPE_ID                    = "0x60000001"
+	COMMANDLINE_TYPE_ID                 = "0x60000002"
+	OPTIONS_FILE_NAME_TYPE_ID           = "0x60000003"
+	BOOT_SECURITY_OPTION_TYPE_ID        = "0x60000004"
 )
 
 func (vc *VmwareConnector) GetHostDetails() (taModel.HostInfo, error) {
@@ -118,8 +123,9 @@ func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationRe
 	defer log.Trace("vmware_host_connector :createPCRManifest() Leaving")
 
 	var pcrManifest types.PcrManifest
-	pcrManifest.Sha256Pcrs = []types.Pcr{}
-	pcrManifest.Sha1Pcrs = []types.Pcr{}
+	pcrManifest.Sha256Pcrs = []types.HostManifestPcrs{}
+	pcrManifest.Sha1Pcrs = []types.HostManifestPcrs{}
+	pcrManifest.Sha384Pcrs = []types.HostManifestPcrs{}
 	var pcrEventLogMap types.PcrEventLogMap
 	cumulativePcrsValue := ""
 
@@ -132,22 +138,25 @@ func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationRe
 		if err != nil {
 			return pcrManifest, "", err
 		}
-		pcrValue := intArrayToHexString(pcrDetails.DigestValue)
-		pcr := types.Pcr{
-			Index:   pcrIndex,
-			Value:   pcrValue,
-			PcrBank: shaAlgorithm,
-		}
-		if pcrList == nil || len(pcrList) == 0 || slice.Contains(pcrList, int(pcrIndex)) {
-			cumulativePcrsValue = cumulativePcrsValue + pcrValue
-		}
 
-		if strings.EqualFold(pcrDetails.DigestMethod, "SHA256") {
-			pcr.DigestType = fmt.Sprintf(constants.PcrClassNamePrefix+"%d", 256)
-			pcrManifest.Sha256Pcrs = append(pcrManifest.Sha256Pcrs, pcr)
-		} else if strings.EqualFold(pcrDetails.DigestMethod, "SHA1") {
-			pcr.DigestType = fmt.Sprintf(constants.PcrClassNamePrefix+"%d", 1)
-			pcrManifest.Sha1Pcrs = append(pcrManifest.Sha1Pcrs, pcr)
+		if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA256) {
+			pcrManifest.Sha256Pcrs = append(pcrManifest.Sha256Pcrs, types.HostManifestPcrs{
+				Index:   pcrIndex,
+				Value:   intArrayToHexString(pcrDetails.DigestValue),
+				PcrBank: shaAlgorithm,
+			})
+		} else if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA1) {
+			pcrManifest.Sha1Pcrs = append(pcrManifest.Sha1Pcrs, types.HostManifestPcrs{
+				Index:   pcrIndex,
+				Value:   intArrayToHexString(pcrDetails.DigestValue),
+				PcrBank: shaAlgorithm,
+			})
+		} else if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA384) {
+			pcrManifest.Sha384Pcrs = append(pcrManifest.Sha384Pcrs, types.HostManifestPcrs{
+				Index:   pcrIndex,
+				Value:   intArrayToHexString(pcrDetails.DigestValue),
+				PcrBank: shaAlgorithm,
+			})
 		} else {
 			log.Warn("vmware_host_connector:createPCRManifest() Result PCR invalid")
 		}
@@ -175,9 +184,9 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 	log.Trace("vmware_host_connector:getPcrEventLog() Entering")
 	defer log.Trace("vmware_host_connector:getPcrEventLog() Leaving")
 
-	var pcrIndex types.PcrIndex
-	eventLogMap.Sha1EventLogs = []types.EventLogEntry{}
-	eventLogMap.Sha256EventLogs = []types.EventLogEntry{}
+	eventLogMap.Sha1EventLogs = []types.TpmEventLog{}
+	eventLogMap.Sha256EventLogs = []types.TpmEventLog{}
+	eventLogMap.Sha384EventLogs = []types.TpmEventLog{}
 
 	for _, eventLogEntry := range hostTpmEventLogEntry {
 		pcrFound := false
@@ -195,33 +204,29 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 		if err != nil {
 			return types.PcrEventLogMap{}, err
 		}
-		pcrIndex, err = types.GetPcrIndexFromString(strconv.Itoa(parsedEventLogEntry.PcrIndex))
-		if err != nil {
-			return types.PcrEventLogMap{}, err
-		}
+
 		//vCenter 6.5 only supports SHA1 digest and hence do not have digest method field. Also if the hash is 0 they
 		//send out 40 0s instead of 20
-		if len(parsedEventLogEntry.EventDetails.DataHash) == 20 || len(parsedEventLogEntry.EventDetails.DataHash) == 40 {
-			parsedEventLogEntry.EventDetails.DataHashMethod = "SHA1"
+		if len(parsedEventLogEntry.EventDetails.DataHash) == sha1.Size || len(parsedEventLogEntry.EventDetails.DataHash) == 40 {
+			parsedEventLogEntry.EventDetails.DataHashMethod = constants.SHA1
 			for _, entry := range eventLogMap.Sha1EventLogs {
-				if entry.PcrIndex == pcrIndex {
+				if entry.Pcr.Index == parsedEventLogEntry.PcrIndex {
 					pcrFound = true
 					break
 				}
 				index++
 			}
 			eventLog := getEventLogInfo(parsedEventLogEntry)
-			eventLog.DigestType = EVENT_LOG_DIGEST_SHA1
 
 			if !pcrFound {
-				eventLogMap.Sha1EventLogs = append(eventLogMap.Sha1EventLogs, types.EventLogEntry{PcrIndex: pcrIndex, PcrBank: parsedEventLogEntry.EventDetails.DataHashMethod, EventLogs: []types.EventLog{eventLog}})
+				eventLogMap.Sha1EventLogs = append(eventLogMap.Sha1EventLogs, types.TpmEventLog{Pcr: types.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []types.EventLog{eventLog}})
 			} else {
-				eventLogMap.Sha1EventLogs[index].EventLogs = append(eventLogMap.Sha1EventLogs[index].EventLogs, eventLog)
+				eventLogMap.Sha1EventLogs[index].TpmEvent = append(eventLogMap.Sha1EventLogs[index].TpmEvent, eventLog)
 			}
-		} else if len(parsedEventLogEntry.EventDetails.DataHash) == 32 {
-			parsedEventLogEntry.EventDetails.DataHashMethod = "SHA256"
+		} else if len(parsedEventLogEntry.EventDetails.DataHash) == sha256.Size {
+			parsedEventLogEntry.EventDetails.DataHashMethod = constants.SHA256
 			for _, entry := range eventLogMap.Sha256EventLogs {
-				if entry.PcrIndex == pcrIndex {
+				if entry.Pcr.Index == parsedEventLogEntry.PcrIndex {
 					pcrFound = true
 					break
 				}
@@ -229,12 +234,30 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 			}
 
 			eventLog := getEventLogInfo(parsedEventLogEntry)
-			eventLog.DigestType = EVENT_LOG_DIGEST_SHA256
 
 			if !pcrFound {
-				eventLogMap.Sha256EventLogs = append(eventLogMap.Sha256EventLogs, types.EventLogEntry{PcrIndex: pcrIndex, PcrBank: parsedEventLogEntry.EventDetails.DataHashMethod, EventLogs: []types.EventLog{eventLog}})
+				eventLogMap.Sha256EventLogs = append(eventLogMap.Sha256EventLogs,
+					types.TpmEventLog{Pcr: types.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []types.EventLog{eventLog}})
 			} else {
-				eventLogMap.Sha256EventLogs[index].EventLogs = append(eventLogMap.Sha256EventLogs[index].EventLogs, eventLog)
+				eventLogMap.Sha256EventLogs[index].TpmEvent = append(eventLogMap.Sha256EventLogs[index].TpmEvent, eventLog)
+			}
+		} else if len(parsedEventLogEntry.EventDetails.DataHash) == sha512.Size384 {
+			parsedEventLogEntry.EventDetails.DataHashMethod = constants.SHA384
+			for _, entry := range eventLogMap.Sha384EventLogs {
+				if entry.Pcr.Index == parsedEventLogEntry.PcrIndex {
+					pcrFound = true
+					break
+				}
+				index++
+			}
+
+			eventLog := getEventLogInfo(parsedEventLogEntry)
+
+			if !pcrFound {
+				eventLogMap.Sha384EventLogs = append(eventLogMap.Sha384EventLogs,
+					types.TpmEventLog{Pcr: types.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []types.EventLog{eventLog}})
+			} else {
+				eventLogMap.Sha384EventLogs[index].TpmEvent = append(eventLogMap.Sha384EventLogs[index].TpmEvent, eventLog)
 			}
 		}
 
@@ -242,11 +265,15 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 	//Sort the event log map so that the PCR indices are in order
 	sort.SliceStable(eventLogMap.Sha1EventLogs[:], func(i, j int) bool {
-		return string(eventLogMap.Sha1EventLogs[i].PcrIndex) < string(eventLogMap.Sha1EventLogs[j].PcrIndex)
+		return string(eventLogMap.Sha1EventLogs[i].Pcr.Index) < string(eventLogMap.Sha1EventLogs[j].Pcr.Index)
 	})
 
 	sort.SliceStable(eventLogMap.Sha256EventLogs[:], func(i, j int) bool {
-		return string(eventLogMap.Sha256EventLogs[i].PcrIndex) < string(eventLogMap.Sha256EventLogs[j].PcrIndex)
+		return string(eventLogMap.Sha256EventLogs[i].Pcr.Index) < string(eventLogMap.Sha256EventLogs[j].Pcr.Index)
+	})
+
+	sort.SliceStable(eventLogMap.Sha384EventLogs[:], func(i, j int) bool {
+		return string(eventLogMap.Sha384EventLogs[i].Pcr.Index) < string(eventLogMap.Sha384EventLogs[j].Pcr.Index)
 	})
 
 	log.Debug("vmware_host_connector:getPcrEventLog() PCR event log created")
@@ -277,51 +304,39 @@ func getEventLogInfo(parsedEventLogEntry types.TpmEvent) types.EventLog {
 
 	log.Trace("vmware_host_connector:getEventLogInfo() Entering")
 	defer log.Trace("vmware_host_connector:getEventLogInfo() Leaving")
-	eventLog := types.EventLog{Value: intArrayToHexString(parsedEventLogEntry.EventDetails.DataHash)}
-	eventLog.Info = make(map[string]string)
+	eventLog := types.EventLog{Measurement: intArrayToHexString(parsedEventLogEntry.EventDetails.DataHash)}
 
 	if parsedEventLogEntry.EventDetails.VibName != nil {
-		eventLog.Label = *parsedEventLogEntry.EventDetails.ComponentName
-		eventLog.Info["EventType"] = TPM_SOFTWARE_COMPONENT_EVENT_TYPE
-		eventLog.Info["ComponentName"] = COMPONENT_PREFIX + *parsedEventLogEntry.EventDetails.ComponentName
-		eventLog.Info["EventName"] = VIM_API_PREFIX + TPM_SOFTWARE_COMPONENT_EVENT_TYPE + DETAILS_SUFFIX
-		if parsedEventLogEntry.EventDetails.VibName != nil {
-			eventLog.Info["PackageName"] = *parsedEventLogEntry.EventDetails.VibName
-		}
-		if parsedEventLogEntry.EventDetails.VibVendor != nil {
-			eventLog.Info["PackageVendor"] = *parsedEventLogEntry.EventDetails.VibVendor
-		}
-		if parsedEventLogEntry.EventDetails.VibVersion != nil {
-			eventLog.Info["PackageVersion"] = *parsedEventLogEntry.EventDetails.VibVersion
-		}
-
-		if parsedEventLogEntry.PcrIndex == 19 {
-			eventLog.Info["FullComponentName"] = "componentName." + (*parsedEventLogEntry.EventDetails.ComponentName)[0:strings.Index(*parsedEventLogEntry.EventDetails.ComponentName, ".")] + "-" +
-				*parsedEventLogEntry.EventDetails.VibName + "-" + *parsedEventLogEntry.EventDetails.VibVersion
+		eventLog.TypeID = VIB_NAME_TYPE_ID
+		eventLog.TypeName = *parsedEventLogEntry.EventDetails.ComponentName
+		eventLog.Tags = append(eventLog.Tags, COMPONENT_PREFIX+*parsedEventLogEntry.EventDetails.ComponentName)
+		if *parsedEventLogEntry.EventDetails.VibName != "" {
+			eventLog.Tags = append(eventLog.Tags, VIM_API_PREFIX+TPM_SOFTWARE_COMPONENT_EVENT_TYPE+DETAILS_SUFFIX+"_"+*parsedEventLogEntry.EventDetails.VibName+"_"+*parsedEventLogEntry.EventDetails.VibVendor)
+		} else {
+			eventLog.Tags = append(eventLog.Tags, VIM_API_PREFIX+TPM_SOFTWARE_COMPONENT_EVENT_TYPE+DETAILS_SUFFIX)
 		}
 	} else if parsedEventLogEntry.EventDetails.CommandLine != nil {
+		eventLog.TypeID = COMMANDLINE_TYPE_ID
 		uuid := getBootUUIDFromCL(*parsedEventLogEntry.EventDetails.CommandLine)
 		if uuid != "" {
-			eventLog.Info["UUID"] = uuid
-			eventLog.Info["ComponentName"] = COMMANDLINE_PREFIX
+			eventLog.Tags = append(eventLog.Tags, COMMANDLINE_PREFIX)
 		} else {
-			eventLog.Info["ComponentName"] = COMMANDLINE_PREFIX + *parsedEventLogEntry.EventDetails.CommandLine
+			eventLog.Tags = append(eventLog.Tags, COMMANDLINE_PREFIX+*parsedEventLogEntry.EventDetails.CommandLine)
 		}
-		eventLog.Label = *parsedEventLogEntry.EventDetails.CommandLine
-		eventLog.Info["EventType"] = TPM_COMMAND_EVENT_TYPE
-		eventLog.Info["EventName"] = VIM_API_PREFIX + TPM_COMMAND_EVENT_TYPE + DETAILS_SUFFIX
+		eventLog.TypeName = *parsedEventLogEntry.EventDetails.CommandLine
+		eventLog.Tags = append(eventLog.Tags, VIM_API_PREFIX+TPM_COMMAND_EVENT_TYPE+DETAILS_SUFFIX)
 
 	} else if parsedEventLogEntry.EventDetails.OptionsFileName != nil {
-		eventLog.Label = *parsedEventLogEntry.EventDetails.OptionsFileName
-		eventLog.Info["EventType"] = TPM_OPTION_EVENT_TYPE
-		eventLog.Info["ComponentName"] = BOOT_OPTIONS_PREFIX + *parsedEventLogEntry.EventDetails.OptionsFileName
-		eventLog.Info["EventName"] = VIM_API_PREFIX + TPM_OPTION_EVENT_TYPE + DETAILS_SUFFIX
+		eventLog.TypeID = OPTIONS_FILE_NAME_TYPE_ID
+		eventLog.TypeName = *parsedEventLogEntry.EventDetails.OptionsFileName
+		eventLog.Tags = append(eventLog.Tags, BOOT_OPTIONS_PREFIX+*parsedEventLogEntry.EventDetails.OptionsFileName)
+		eventLog.Tags = append(eventLog.Tags, VIM_API_PREFIX+TPM_OPTION_EVENT_TYPE+DETAILS_SUFFIX)
 
 	} else if parsedEventLogEntry.EventDetails.BootSecurityOption != nil {
-		eventLog.Label = *parsedEventLogEntry.EventDetails.BootSecurityOption
-		eventLog.Info["EventType"] = TPM_BOOT_SECURITY_OPTION_EVENT_TYPE
-		eventLog.Info["ComponentName"] = BOOT_SECURITY_OPTIONS_PREFIX + *parsedEventLogEntry.EventDetails.BootSecurityOption
-		eventLog.Info["EventName"] = VIM_API_PREFIX + TPM_BOOT_SECURITY_OPTION_EVENT_TYPE + DETAILS_SUFFIX
+		eventLog.TypeID = BOOT_SECURITY_OPTION_TYPE_ID
+		eventLog.TypeName = *parsedEventLogEntry.EventDetails.BootSecurityOption
+		eventLog.Tags = append(eventLog.Tags, BOOT_SECURITY_OPTIONS_PREFIX+*parsedEventLogEntry.EventDetails.BootSecurityOption)
+		eventLog.Tags = append(eventLog.Tags, VIM_API_PREFIX+TPM_BOOT_SECURITY_OPTION_EVENT_TYPE+DETAILS_SUFFIX)
 	} else {
 		log.Warn("Unrecognized event in module event log")
 	}

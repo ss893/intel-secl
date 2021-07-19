@@ -7,7 +7,7 @@ package wlsclient
 import (
 	"bytes"
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v3/pkg/clients/util"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients/util"
 	"net/http"
 	"net/url"
 	"path"

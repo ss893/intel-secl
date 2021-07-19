@@ -7,13 +7,14 @@ package rules
 import (
 	"encoding/json"
 	"encoding/xml"
-	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
-	ta "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/google/uuid"
+	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	ta "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestXmlMeasurementLogEqualsNoFault(t *testing.T) {
@@ -42,6 +43,15 @@ func TestXmlMeasurementLogEqualsNoFault(t *testing.T) {
 	assert.Equal(t, len(result.Faults), 0)
 }
 
+func TestXmlMeasurementLogInvalidData(t *testing.T) {
+
+	var softwareFlavor hvs.Flavor
+	err := json.Unmarshal([]byte(testInvalidSoftwareFlavor), &softwareFlavor)
+	assert.NoError(t, err)
+
+	_, err = NewXmlMeasurementLogEquals(&softwareFlavor)
+	assert.Error(t, err)
+}
 func TestXmlMeasurementLogEqualsMeasurementLogMissingFault(t *testing.T) {
 
 	// create the rule

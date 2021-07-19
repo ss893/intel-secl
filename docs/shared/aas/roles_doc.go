@@ -4,7 +4,7 @@
  */
 package aas
 
-import "github.com/intel-secl/intel-secl/v3/pkg/model/aas"
+import "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 
 // RoleCreateInfo request payload
 // swagger:parameters RoleCreateInfo
@@ -28,7 +28,7 @@ type RolePermission struct {
 type RoleTypeInfo struct {
 	ID string `json:"role_id,omitempty" gorm:"primary_key;type:uuid"`
 	aas.RoleInfo
-	Permissions []RolePermission `json:"permissions,omitempty"gorm:"many2many:role_permissions"`
+	Permissions []RolePermission `json:"permissions,omitempty" gorm:"many2many:role_permissions"`
 }
 
 type RolesResponse []RoleTypeInfo

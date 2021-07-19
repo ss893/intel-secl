@@ -11,15 +11,16 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
-	"github.com/google/uuid"
-	faultsConst "github.com/intel-secl/intel-secl/v3/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/flavor/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v3/pkg/model/hvs"
-	"github.com/pkg/errors"
 	"io"
 	"strings"
+
+	"github.com/google/uuid"
+	faultsConst "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	"github.com/pkg/errors"
 )
 
 func NewXmlMeasurementLogIntegrity(flavorID uuid.UUID, flavorLabel string, expectedCumulativeHash string) (Rule, error) {
@@ -88,33 +89,37 @@ func (rule *xmlMeasurementLogIntegrity) Apply(hostManifest *types.HostManifest) 
 				fault := newXmlMeasurementValueMismatch(rule.expectedCumulativeHash, calculatedHash)
 				result.Faults = append(result.Faults, fault)
 			} else {
-
 				// now check the pcr event logs...
-				pcrEventLogs, err := hostManifest.PcrManifest.GetPcrEventLog(types.SHA256, types.PCR15)
+				pcrNewEventLogs, err := hostManifest.PcrManifest.GetEventLogCriteria(types.SHA256, types.PcrIndex(types.PCR15))
 				if err != nil {
 					// the event log was missing from the manifest...
-					fault := newPcrEventLogMissingFault(types.PCR15)
+					fault := newPcrEventLogMissingFault(types.PCR15, types.SHA256)
 					result.Faults = append(result.Faults, fault)
 				} else {
-					// The pcr event log is present, see if it has a measurement that
+					// If the pcr event log is present, see if it has a measurement that
 					// matches the flavor label.  The event log label will be the concatenation
 					// of the flavor name and the flavor id similar to...
 					// 'ISecL_Default_Application_Flavor_v2.1_TPM2.0-339a7ac6-b8be-4356-ab34-be6e3bdfa1ed'
 					pcrEventLogMeasurement := ""
 					labelToMatch := rule.flavorLabel + "-" + rule.flavorId.String()
-					for _, eventLog := range *pcrEventLogs {
-						if eventLog.Label == labelToMatch {
-							pcrEventLogMeasurement = eventLog.Value
-							break
+
+					for _, eventLog := range pcrNewEventLogs {
+						for _, tag := range eventLog.Tags {
+							if tag == labelToMatch {
+								pcrEventLogMeasurement = eventLog.Measurement
+								break
+							}
 						}
-						if (strings.Contains(rule.flavorLabel, constants.DefaultSoftwareFlavorPrefix) ||
-							strings.Contains(rule.flavorLabel, constants.DefaultWorkloadFlavorPrefix)) &&
-							strings.HasPrefix(eventLog.Label, rule.flavorLabel) {
-							pcrEventLogMeasurement = eventLog.Value
-							break
+						if strings.Contains(rule.flavorLabel, constants.DefaultSoftwareFlavorPrefix) ||
+							strings.Contains(rule.flavorLabel, constants.DefaultWorkloadFlavorPrefix) {
+							for _, tag := range eventLog.Tags {
+								if strings.HasPrefix(tag, rule.flavorLabel) {
+									pcrEventLogMeasurement = eventLog.Measurement
+									break
+								}
+							}
 						}
 					}
-
 					if pcrEventLogMeasurement == "" {
 						// the pcr event did not have a measurement with the flavor label
 						fault := hvs.Fault{
@@ -123,7 +128,6 @@ func (rule *xmlMeasurementLogIntegrity) Apply(hostManifest *types.HostManifest) 
 							ExpectedValue: &pcrEventLogMeasurement,
 							ActualValue:   &calculatedHash,
 						}
-
 						result.Faults = append(result.Faults, fault)
 					} else {
 
@@ -149,7 +153,6 @@ func (rule *xmlMeasurementLogIntegrity) Apply(hostManifest *types.HostManifest) 
 								ExpectedValue: &pcrEventLogMeasurement,
 								ActualValue:   &calculatedSha256String,
 							}
-
 							result.Faults = append(result.Faults, fault)
 						}
 					}
@@ -168,7 +171,7 @@ func (rule *xmlMeasurementLogIntegrity) replay(measurementsXml []byte) (string, 
 	cumulativeHash := make([]byte, sha512.Size384)
 	orderedMeasurements, err := rule.getOrderedMeasurements(measurementsXml)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "Error in getting ordered Measurements values")
 	}
 
 	for _, measurement := range orderedMeasurements {

@@ -15,20 +15,19 @@ import (
 	"encoding/asn1"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v3/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/constants"
-	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/crypt"
-	commErr "github.com/intel-secl/intel-secl/v3/pkg/lib/common/err"
-	commLogMsg "github.com/intel-secl/intel-secl/v3/pkg/lib/common/log/message"
-	libPrivacyca "github.com/intel-secl/intel-secl/v3/pkg/lib/privacyca"
-	taModel "github.com/intel-secl/intel-secl/v3/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	libPrivacyca "github.com/intel-secl/intel-secl/v4/pkg/lib/privacyca"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -121,9 +120,15 @@ func (certifyHostAiksController *CertifyHostAiksController) GetEkCerts(decrypted
 		return nil, nil, nil, errors.Wrapf(err, "controllers/certify_host_aiks_controller:GetEkCerts() Unable to read file %s", ekcertFile)
 	}
 
-	ekx509Cert, err := x509.ParseCertificate(ekCert)
+	ekx509Certs, err := x509.ParseCertificates(ekCert)
 	if err != nil {
 		return nil, nil, nil, errors.Wrap(err, "controllers/certify_host_aiks_controller:GetEkCerts() Unable to parse certificate")
+	}
+	var ekx509Cert *x509.Certificate
+	// since the EK certificate may have multiple levels, we need to extract the leaf
+	ekx509Cert = crypt.GetLeafCert(ekx509Certs)
+	if ekx509Cert == nil {
+		return nil, nil, nil, errors.New("controllers/certify_host_aiks_controller:GetEkCerts() EK leaf cert missing from chain")
 	}
 
 	optionsFile := certifyHostAiksController.AikRequestsDirPath + fileName + ".opt"
@@ -184,23 +189,30 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() unable to get ek cert bytes")
 	}
 
-	ekCert, err := x509.ParseCertificate(ekCertBytes)
+	ekCertChain, err := x509.ParseCertificates(ekCertBytes)
 	if err != nil {
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, err
 	}
 	endorsementCerts := (*certifyHostAiksController.CertStore)[models.CaCertTypesEndorsementCa.String()].Certificates
 
-	defaultLog.Debugf("controllers/certify_host_aiks_controller:getIdentityProofRequest() ekCert Issuer Name :%s", ekCert.Issuer.CommonName)
-	var endorsementCertsToVerify x509.Certificate
-	for _, cert := range endorsementCerts {
-		if cert.Issuer.CommonName == strings.ReplaceAll(ekCert.Issuer.CommonName, "\\x00", "") {
-			endorsementCertsToVerify = cert
-			break
-		}
+	// extract the leaf certificate
+	ekLeafCert := crypt.GetLeafCert(ekCertChain)
+
+	if ekLeafCert == nil {
+		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC chain is missing leaf cert")
+		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is missing")
 	}
-	if !certifyHostAiksController.isEkCertificateVerifiedByAuthority(ekCert, &endorsementCertsToVerify) && !certifyHostAiksController.isEkCertificateVerifiedByAnyAuthority(ekCert, endorsementCerts) && !certifyHostAiksController.isEkCertRegistered(ekCert) {
-		secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted, Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is not registered with hvs")
-		return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
+
+	// check if the certificate is already present in the ECStore
+	if certifyHostAiksController.isEkCertRegistered(ekLeafCert) {
+		secLog.Infof("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is already registered with HVS")
+	} else {
+		// verify the complete certificate chain
+		err = crypt.VerifyEKCertChain(ekCertChain, crypt.GetCertPool(endorsementCerts))
+		if err != nil {
+			secLog.Errorf("controllers/certify_host_aiks_controller:getIdentityProofRequest() EC chain verification failed. Please verify Endorsement Authority certificate is present in EndorsementCA file or ekcert is registered with hvs")
+			return taModel.IdentityProofRequest{}, http.StatusBadRequest, errors.Wrap(err, "controllers/certify_host_aiks_controller:getIdentityProofRequest() EC is not trusted")
+		}
 	}
 
 	identityRequestChallenge, err := crypt.GetRandomBytes(32)
@@ -218,29 +230,13 @@ func (certifyHostAiksController *CertifyHostAiksController) getIdentityProofRequ
 		return taModel.IdentityProofRequest{}, http.StatusBadRequest, err
 	}
 
-	proofReq, err := privacyca.ProcessIdentityRequest(identityChallengePayload.IdentityRequest, ekCert.PublicKey.(*rsa.PublicKey), identityRequestChallenge)
+	proofReq, err := privacyca.ProcessIdentityRequest(identityChallengePayload.IdentityRequest, ekLeafCert.PublicKey.(crypto.PublicKey), identityRequestChallenge)
 	if err != nil {
 		defaultLog.WithError(err).Error("Unable to generate random bytes for identityRequestChallenge")
 		return taModel.IdentityProofRequest{}, http.StatusInternalServerError, err
 	}
 
 	return proofReq, http.StatusOK, nil
-}
-
-func (certifyHostAiksController *CertifyHostAiksController) isEkCertificateVerifiedByAuthority(cert *x509.Certificate, authority *x509.Certificate) bool {
-	defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAuthority() Entering")
-	defer defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAuthority() Leaving")
-	if authority.Raw == nil {
-		return false
-	}
-
-	err := cert.CheckSignatureFrom(authority)
-	if err != nil {
-		defaultLog.Debugf("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAuthority() %v", err)
-		return false
-	}
-
-	return true
 }
 
 func (certifyHostAiksController *CertifyHostAiksController) IdentityRequestSubmitChallengeResponse(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
@@ -382,16 +378,4 @@ func (certifyHostAiksController *CertifyHostAiksController) isEkCertRegistered(c
 		return false
 	}
 	return true
-}
-
-func (certifyHostAiksController *CertifyHostAiksController) isEkCertificateVerifiedByAnyAuthority(cert *x509.Certificate, certs []x509.Certificate) bool {
-	defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAnyAuthority() Entering")
-	defer defaultLog.Trace("controllers/certify_host_aiks_controller:isEkCertificateVerifiedByAnyAuthority() Leaving")
-
-	for _, authority := range certs {
-		if certifyHostAiksController.isEkCertificateVerifiedByAuthority(cert, &authority) {
-			return true
-		}
-	}
-	return false
 }
