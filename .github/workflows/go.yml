@@ -19,7 +19,7 @@ jobs:
         go-version: 1.14
 
     - name: Build-cms
-      run: make cms-installer
+      run: make cms
 
     - name: Build-authservice
       run: make authservice
