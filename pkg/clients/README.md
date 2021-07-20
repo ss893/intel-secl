@@ -5,11 +5,11 @@ This repository is for holding all client codes to micro services.
 Please implement the client code of future services in this repo, \
 and the process of moving existing client into this repo is being carried on.
 
-### Install `go` version >= `go1.12.1` & <= `go1.14.1`
-The `clients` requires Go version 1.12.1 that has support for `go modules`. The build was validated with the latest version 1.14.1 of `go`. It is recommended that you use 1.14.1 version of `go`. More recent versions may introduce compatibility issues. You can use the following to install `go`.
+### Install `go` version 1.14.4
+The `clients` requires Go version 1.14.4 that has support for `go modules`. The build was validated with the latest version 1.14.4 of `go`. It is recommended that you use 1.14.4 version of `go`. More recent versions may introduce compatibility issues. You can use the following to install `go`.
 ```shell
-wget https://dl.google.com/go/go1.14.1.linux-amd64.tar.gz
-tar -xzf go1.14.1.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.14.4.linux-amd64.tar.gz
+tar -xzf go1.14.4.linux-amd64.tar.gz
 sudo mv go /usr/local
 export GOROOT=/usr/local/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
