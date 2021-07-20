@@ -19,7 +19,7 @@
 
 - git
 - makeself
-- `go` version >= `go1.12.1` & <= `go1.14.4`
+- `go` version 1.14.4
 
 # Step By Step Build Instructions
 
@@ -32,7 +32,7 @@ sudo yum install -y git wget makeself
 ```
 
 ### Install `go` version >= `go1.12.2` & <= `go1.14.4`
-The `Workload Policy Manager` requires Go version 1.12.1 that has support for `go modules`. The build was validated with the latest version 1.14.4 of `go`. It is recommended that you use 1.14.4 version of `go`. You can use the following to install `go`.
+The `Workload Policy Manager` requires Go version 1.14.4 that has support for `go modules`. The build was validated with the latest version 1.14.4 of `go`. It is recommended that you use 1.14.4 version of `go`. You can use the following to install `go`.
 ```shell
 wget https://dl.google.com/go/go1.14.4.linux-amd64.tar.gz
 tar -xzf go1.14.4.linux-amd64.tar.gz
